@@ -85,23 +85,17 @@ export default function CadastroPage() {
 
   if (!role) {
     return (
-      
-        
-          🌵
-
-
+      <div className="w-full max-w-md">
+        <div className="text-center mb-8">
+          <div className="text-6xl mb-2">🌵</div>
           <h1 className="text-2xl font-bold text-amber-600 dark:text-amber-400">
             Criar Conta
           </h1>
-          
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
             Qual é o seu perfil?
-          
-
-
-        
-
-
-        
+          </p>
+        </div>
+        <div className="space-y-3">
           {[
             {
               r: 'ALUNO' as Role,
@@ -127,46 +121,34 @@ export default function CadastroPage() {
               onClick={() => setRole(opt.r)}
               className="w-full p-5 rounded-2xl border-2 border-slate-200 dark:border-slate-700 hover:border-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/20 transition-all text-left flex items-center gap-4"
             >
-              {opt.icon}
-              
-                
+              <span className="text-3xl">{opt.icon}</span>
+              <div>
+                <div className="font-semibold text-slate-800 dark:text-slate-100">
                   {opt.label}
-                
-
-
-                
+                </div>
+                <div className="text-xs text-slate-500 dark:text-slate-400">
                   {opt.desc}
-                
-
-
-              
-
-
+                </div>
+              </div>
             </button>
           ))}
-        
-
-
+        </div>
         <button
           onClick={() => router.push('/login')}
           className="w-full mt-6 text-sm text-slate-500 hover:text-amber-600"
         >
           ← Voltar para login
         </button>
-      
-
-
+      </div>
     );
   }
 
   return (
-    
-      
-        
+    <div className="w-full max-w-md">
+      <div className="text-center mb-6">
+        <div className="text-5xl mb-2">
           {role === 'ALUNO' ? '👨‍🎓' : role === 'PROFESSOR' ? '👩‍🏫' : '🔧'}
-        
-
-
+        </div>
         <h1 className="text-xl font-bold text-amber-600 dark:text-amber-400">
           {role === 'ALUNO'
             ? 'Conta de Aluno'
@@ -174,14 +156,12 @@ export default function CadastroPage() {
             ? 'Conta de Professor'
             : 'Conta de Coordenador'}
         </h1>
-      
-
-
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {role === 'ALUNO' && (
-          <>
-            
+          &lt;>
+            <div>
               <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">
                 Sua Turma
               </label>
@@ -197,10 +177,8 @@ export default function CadastroPage() {
                   </option>
                 ))}
               </select>
-            
-
-
-            
+            </div>
+            <div>
               <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">
                 Nome Completo
               </label>
@@ -211,16 +189,14 @@ export default function CadastroPage() {
                 placeholder="Ex: Maria Silva Santos"
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-amber-400 outline-none"
               />
-            
-
-
-            
+            </div>
+            <div className="grid grid-cols-3 gap-3">
               {[
                 { label: 'Meta Bim.', val: metaBim, set: setMetaBim },
                 { label: 'Meta Sem.', val: metaSem, set: setMetaSem },
                 { label: 'Meta Anual', val: metaAnual, set: setMetaAnual },
               ].map((m) => (
-                
+                <div key={m.label}>
                   <label className="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">
                     {m.label}
                   </label>
@@ -231,19 +207,15 @@ export default function CadastroPage() {
                     onChange={(e) => m.set(Number(e.target.value))}
                     className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-amber-400 outline-none text-center font-bold"
                   />
-                
-
-
+                </div>
               ))}
-            
-
-
+            </div>
           </>
         )}
 
         {role === 'PROFESSOR' && (
-          <>
-            
+          &lt;>
+            <div>
               <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">
                 E-mail
               </label>
@@ -254,132 +226,6 @@ export default function CadastroPage() {
                 placeholder="professor@escola.edu"
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-amber-400 outline-none"
               />
-            
-
-
-            
-              <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">
-                Código de Segurança
-              </label>
-              <input
-                type="text"
-                value={codigo}
-                onChange={(e) => setCodigo(e.target.value)}
-                placeholder="SERTAO-PROF-2026"
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-amber-400 outline-none font-mono"
-              />
-            
-
-
-            
-              <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">
-                Turmas que você leciona
-              </label>
-              
-                {turmas.map((t) => (
-                  <label
-                    key={t.id}
-                    className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors ${
-                      turmasSel.includes(t.id)
-                        ? 'bg-amber-50 dark:bg-amber-950/30'
-                        : 'hover:bg-slate-50 dark:hover:bg-slate-800'
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={turmasSel.includes(t.id)}
-                      onChange={() => toggleTurma(t.id)}
-                      className="w-5 h-5 rounded accent-amber-500"
-                    />
-                    
-                      {t.nome} ({t.anoLetivo})
-                    
-                  </label>
-                ))}
-              
-
-
-            
-
-
-          </>
-        )}
-
-        {role === 'COORDENADOR' && (
-          <>
-            
-              <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">
-                E-mail
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="coordenador@escola.edu"
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-amber-400 outline-none"
-              />
-            
-
-
-            
-              <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">
-                Código Master
-              </label>
-              <input
-                type="text"
-                value={codigo}
-                onChange={(e) => setCodigo(e.target.value)}
-                placeholder="SERTAO-COORD-2026"
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-amber-400 outline-none font-mono"
-              />
-            
-
-
-          </>
-        )}
-
-        
-          <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">
-            Criar Senha (6 dígitos)
-          </label>
-          <input
-            type="password"
-            value={pin}
-            onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
-            placeholder="••••••"
-            inputMode="numeric"
-            maxLength={6}
-            className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-amber-400 outline-none tracking-widest text-center text-lg"
-          />
-        
-
-
-
-        {erro && (
-          
-            {erro}
-          
-
-
-        )}
-
-        <button
-          type="submit"
-          disabled={carregando}
-          className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold shadow-lg shadow-amber-500/20 hover:shadow-amber-500/40 transition-all disabled:opacity-50"
-        >
-          {carregando ? 'Criando conta...' : 'Criar Conta 🌵'}
-        </button>
-      </form>
-
-      <button
-        onClick={() => setRole(null)}
-        className="w-full mt-4 text-sm text-slate-500 hover:text-amber-600"
-      >
-        ← Escolher outro perfil
-      </button>
-    
-
-
-  );
-}
+            </div>
+            <div>
+              <label className
