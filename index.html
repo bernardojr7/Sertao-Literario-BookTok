@@ -18,10 +18,10 @@
 
   <style>
     /* =========================================================
-       VARIÁVEIS E DEFINIÇÃO DE TEMAS
+       VARIÁVEIS E DEFINIÇÃO DOS TEMAS
        ========================================================= */
     
-    /* 1. TEMA PADRÃO / MODERNO (DEFAULT) */
+    /* 1. TEMA PADRÃO / MODERNO */
     :root, body[data-theme="default"] {
       --bg: #F8FAFC;
       --surface: #FFFFFF;
@@ -95,6 +95,63 @@
       --shadow: 0 0 12px rgba(6, 182, 212, 0.3);
       --radius: 8px;
       --font-title: 'Special Elite', cursive, serif;
+      --font-body: 'Bitter', serif;
+    }
+
+    /* 4. TEMA LUAR DO SERTÃO */
+    body[data-theme="luar-sertao"] {
+      --bg: #0B132B;
+      --surface: #1C2541;
+      --surface2: #2A365C;
+      --text: #EDF2F4;
+      --muted: #8D99AE;
+      --border: #3A506B;
+      --primary: #5BC0BE;
+      --primary-dark: #3A9392;
+      --green: #10B981;
+      --cyan: #6FFFE9;
+      --danger: #EF4444;
+      --shadow: 0 4px 12px rgba(91, 192, 190, 0.25);
+      --radius: 8px;
+      --font-title: 'Bitter', serif;
+      --font-body: 'Bitter', serif;
+    }
+
+    /* 5. TEMA FLOR DE CACTO */
+    body[data-theme="caatinga-florida"] {
+      --bg: #FDF0ED;
+      --surface: #FFFFFF;
+      --surface2: #F7D6D0;
+      --text: #2D1A17;
+      --muted: #8C5A52;
+      --border: #E63946;
+      --primary: #E63946;
+      --primary-dark: #C1121F;
+      --green: #2A9D8F;
+      --cyan: #E9C46A;
+      --danger: #D62828;
+      --shadow: 3px 3px 0px #E63946;
+      --radius: 10px;
+      --font-title: 'Special Elite', cursive, serif;
+      --font-body: 'Bitter', serif;
+    }
+
+    /* 6. TEMA SOL DOURADO */
+    body[data-theme="sol-dourado"] {
+      --bg: #FFFBEA;
+      --surface: #FFF3C4;
+      --surface2: #FFE89C;
+      --text: #3D2600;
+      --muted: #855B14;
+      --border: #B45309;
+      --primary: #D97706;
+      --primary-dark: #B45309;
+      --green: #059669;
+      --cyan: #F59E0B;
+      --danger: #DC2626;
+      --shadow: 3px 3px 0px #B45309;
+      --radius: 6px;
+      --font-title: 'Bitter', serif;
       --font-body: 'Bitter', serif;
     }
 
@@ -378,11 +435,14 @@
     const COORDINATOR_CODE = "SERTAO-COORD-2026";
     const TURMAS_DISPONIVEIS = ["5º Ano", "6º Ano", "7º Ano", "8º Ano", "9º Ano"];
 
-    // --- TEMAS DISPONÍVEIS ---
+    // --- TEMAS DISPONÍVEIS COMPLETO ---
     const APP_THEMES = [
-      { id: "default", name: "Padrão Moderno", priceCoins: 0, requiredXp: 0, icon: "🎨", desc: "Interface limpa e moderna" },
+      { id: "default", name: "Padrão Moderno", priceCoins: 0, requiredXp: 0, icon: "🎨", desc: "Interface limpa e acessível" },
       { id: "cordel", name: "Cordel & Xilogravura", priceCoins: 150, requiredXp: 100, icon: "🌵", desc: "Papel pardo rústico e tipografia entalhada" },
-      { id: "sertao-cyber", name: "Sertão Cyberpunk", priceCoins: 300, requiredXp: 250, icon: "⚡", desc: "Estilo futurista neon e noites escuras" }
+      { id: "sertao-cyber", name: "Sertão Cyberpunk", priceCoins: 300, requiredXp: 250, icon: "⚡", desc: "Futurismo neon e alta tecnologia" },
+      { id: "luar-sertao", name: "Luar do Sertão", priceCoins: 200, requiredXp: 150, icon: "🌙", desc: "Modo noturno poético e azul profundo" },
+      { id: "caatinga-florida", name: "Flor de Cacto", priceCoins: 250, requiredXp: 200, icon: "🌸", desc: "Visual alegre e vibrante pós-chuva" },
+      { id: "sol-dourado", name: "Sol Dourado", priceCoins: 180, requiredXp: 120, icon: "☀️", desc: "Tons quentes e iluminados de terracota" }
     ];
 
     let currentUser = null;
@@ -452,15 +512,14 @@
       });
     }
 
-    // Checa se o usuário atual tem direito ao tema
     function userHasTheme(themeId) {
       if (!currentProfile) return themeId === "default";
-      if (currentProfile.role !== "student") return true; // Passe Livre para Prof/Coord
+      if (currentProfile.role !== "student") return true; // Passe Livre para Professores/Coordenadores
       const unlocked = currentProfile.unlockedThemes || ["default"];
       return unlocked.includes(themeId);
     }
 
-    // --- SELETOR DE TEMA NO TOPO ---
+    // --- SELETOR DE TEMAS ---
     function openThemeSelectorModal() {
       const isStaff = currentProfile.role !== "student";
       let html = '<div class="cards-grid" style="grid-template-columns:1fr;gap:12px">';
@@ -489,9 +548,9 @@
       html += '</div>';
 
       if (!isStaff) {
-        html += `<p class="muted" style="margin-top:14px;font-size:12px;text-align:center">Adquira novos temas na <strong>Loja Literária</strong> usando suas Cactoscoins!</p>`;
+        html += `<p class="muted" style="margin-top:14px;font-size:12px;text-align:center">Desbloqueie novos temas na <strong>Loja Literária</strong> com suas Cactoscoins!</p>`;
       } else {
-        html += `<p class="muted" style="margin-top:14px;font-size:12px;text-align:center">✨ <strong>Passe Livre:</strong> Professores e Coordenadores têm acesso ilimitado a todos os temas!</p>`;
+        html += `<p class="muted" style="margin-top:14px;font-size:12px;text-align:center">✨ <strong>Passe Livre:</strong> Professores e Coordenadores possuem acesso imediato a todos os temas!</p>`;
       }
 
       openModal("🎨 Seleção de Temas Visuais", html);
@@ -1094,7 +1153,7 @@
         { type: "reward", title: "Vale-Livro Físico", description: "Troque por um livro novo na escola", priceCoins: 300, requiredXp: 300, icon: "📖" }
       ];
 
-      // Adiciona Temas Bloqueados como itens na Loja
+      // Adiciona todos os temas desbloqueáveis na Loja
       APP_THEMES.filter(t => t.id !== "default").forEach(t => {
         storeItems.push({
           type: "theme",
@@ -1133,7 +1192,7 @@
       }).join("");
 
       $("#pageContent").innerHTML =
-        pageTitle("Loja Literária", isStu ? "Troque suas Cactoscoins por itens e novos temas!" : "Recompensas para os alunos.") +
+        pageTitle("Loja Literária", isStu ? "Troque suas Cactoscoins por recompensas e novos temas!" : "Catálogo de recompensas dos alunos.") +
         `<div class="stats-grid" style="margin-bottom:18px">
           ${statCard("🌵","Seu Saldo", coins)}
           ${statCard("⭐","Seu XP", xp)}
