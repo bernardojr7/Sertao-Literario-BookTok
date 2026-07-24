@@ -182,7 +182,7 @@
     .ranking-name { flex: 1; font-weight: 600; }
     .xp-badge { padding: 5px 9px; border-radius: 8px; color: var(--green-dark); background: rgba(34,197,94,0.13); font-size: 12px; font-weight: 700; }
 
-    /* Book Cards & Styles */
+    /* Book & Store Cards */
     .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 18px; }
     .book-card, .card-livro, .post-card, .campaign-card { overflow: hidden; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow); display: flex; flex-direction: column; }
     .book-cover { height: 190px; display: grid; place-items: center; background: linear-gradient(135deg, #f59e0b, #15803d); color: white; font-family: 'Baloo 2', cursive; font-size: 32px; overflow: hidden; position: relative; }
@@ -191,7 +191,7 @@
     .book-content h3, .campaign-content h3, .card-livro .titulo { margin-bottom: 3px; font-family: 'Baloo 2', cursive; font-size: 20px; }
     .book-content p.autor, .card-livro .autor { color: var(--muted); font-size: 13px; font-weight: 600; margin-bottom: 8px; }
     
-    /* Resumo / Sinopse do Livro */
+    /* Resumo / Sinopse */
     .card-livro .resumo {
       color: var(--muted);
       font-size: 12px;
@@ -212,10 +212,7 @@
     .book-meta, .card-livro .acoes { display: flex; align-items: center; justify-content: space-between; margin-top: auto; gap: 8px; flex-wrap: wrap; }
 
     .tag, .status { display: inline-flex; padding: 6px 10px; border-radius: 999px; color: var(--green-dark); background: rgba(34,197,94,0.13); font-size: 11px; font-weight: 700; margin-bottom: 6px; align-self: flex-start; }
-
-    .post-video { height: 220px; display: grid; place-items: center; background: linear-gradient(135deg, #06b6d4, #ec4899); color: white; font-size: 48px; }
-    .post-actions { display: flex; gap: 12px; margin-top: 14px; }
-    .post-actions button { padding: 6px 10px; border-radius: 999px; color: var(--muted); background: var(--surface2); }
+    .tag-theme { background: rgba(6,182,212,0.15); color: #0891b2; }
 
     .student-card {
       display: flex; align-items: center; justify-content: space-between; gap: 12px;
@@ -312,11 +309,13 @@
     const PROFESSOR_CODE = "SERTAO-PROF-2026";
     const COORDINATOR_CODE = "SERTAO-COORD-2026";
     const TURMAS_DISPONIVEIS = ["5º Ano", "6º Ano", "7º Ano", "8º Ano", "9º Ano"];
+    const TEMAS_LOJA = ["Todos", "Cordel & Sertão", "Harry Potter", "Marvel", "Mangá & Animes", "Futebol", "Literatura Brasileira", "Romance"];
 
     let currentUser = null;
     let currentProfile = null;
     let currentPage = "home";
     let selectedTeacherClass = "5º Ano";
+    let selectedStoreTheme = "Todos";
     let currentTheme = localStorage.getItem("st-theme") || "light";
 
     document.body.classList.toggle("dark", currentTheme === "dark");
@@ -378,61 +377,31 @@
     // --- INITIAL SEED DATA ---
     async function seedInitialData() {
       try {
+        // Books Seed
         const booksSnap = await db.collection("books").get();
         if (booksSnap.empty) {
           const initialBooks = [
-            { 
-              title: "O Senhor dos Anéis", 
-              author: "J.R.R. Tolkien", 
-              pages: 1200, 
-              category: "Fantasia", 
-              summary: "Uma épica jornada na Terra-média para destruir o Um Anel e derrotar o Senhor do Escuro, Sauron.",
-              coverUrl: "", 
-              pdfUrl: "", 
-              status: "Disponível", 
-              isActive: true, 
-              createdAt: new Date().toISOString() 
-            },
-            { 
-              title: "O Auto da Compadecida", 
-              author: "Ariano Suassuna", 
-              pages: 208, 
-              category: "Teatro / Sertão", 
-              summary: "As aventuras astutas de João Grilo e Chicó no sertão paraibano, cheias de humor, religiosidade e crítica social.",
-              coverUrl: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=400&q=80", 
-              pdfUrl: "", 
-              status: "Disponível", 
-              isActive: true, 
-              createdAt: new Date().toISOString() 
-            },
-            { 
-              title: "Vidas Secas", 
-              author: "Graciliano Ramos", 
-              pages: 176, 
-              category: "Literatura Sertaneja", 
-              summary: "A emocionante luta da família de Fabiano contra a seca impiedosa no sertão nordestino.",
-              coverUrl: "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=400&q=80", 
-              pdfUrl: "", 
-              status: "Disponível", 
-              isActive: true, 
-              createdAt: new Date().toISOString() 
-            },
-            { 
-              title: "O Pequeno Príncipe", 
-              author: "Antoine de Saint-Exupéry", 
-              pages: 96, 
-              category: "Infanto-Juvenil", 
-              summary: "Uma fábula Poética e filosófica sobre a amizade, o amor e o olhar puro da infância.",
-              coverUrl: "", 
-              pdfUrl: "", 
-              status: "Disponível", 
-              isActive: true, 
-              createdAt: new Date().toISOString() 
-            }
+            { title: "O Senhor dos Anéis", author: "J.R.R. Tolkien", pages: 1200, category: "Fantasia", summary: "Uma épica jornada na Terra-média para destruir o Um Anel.", coverUrl: "", pdfUrl: "", status: "Disponível", isActive: true, createdAt: new Date().toISOString() },
+            { title: "O Auto da Compadecida", author: "Ariano Suassuna", pages: 208, category: "Teatro / Sertão", summary: "As aventuras astutas de João Grilo e Chicó no sertão paraibano.", coverUrl: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=400&q=80", pdfUrl: "", status: "Disponível", isActive: true, createdAt: new Date().toISOString() },
+            { title: "Vidas Secas", author: "Graciliano Ramos", pages: 176, category: "Literatura Sertaneja", summary: "A emocionante luta da família de Fabiano contra a seca impiedosa.", coverUrl: "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=400&q=80", pdfUrl: "", status: "Disponível", isActive: true, createdAt: new Date().toISOString() }
           ];
           for (const b of initialBooks) { await db.collection("books").add(b); }
         }
 
+        // Store Items Seed
+        const storeSnap = await db.collection("storeItems").get();
+        if (storeSnap.empty) {
+          const initialStore = [
+            { title: "Marca-Página de Xilogravura", description: "Design exclusivo em estilo Cordel sertanejo.", priceCoins: 50, requiredXp: 0, theme: "Cordel & Sertão", icon: "🔖", isActive: true, createdAt: new Date().toISOString() },
+            { title: "Botton Chapéu do Seletor", description: "Insígnia de Leitor Bruxo para o perfil.", priceCoins: 100, requiredXp: 50, theme: "Harry Potter", icon: "⚡", isActive: true, createdAt: new Date().toISOString() },
+            { title: "Escudo Heroico Vingadores", description: "Desbloqueie a moldura Marvel de super-leitor.", priceCoins: 120, requiredXp: 100, theme: "Marvel", icon: "🛡️", isActive: true, createdAt: new Date().toISOString() },
+            { title: "Passaporte Otaku Manga", description: "Vale troca por 1 volume físico na biblioteca.", priceCoins: 250, requiredXp: 150, theme: "Mangá & Animes", icon: "⛩️", isActive: true, createdAt: new Date().toISOString() },
+            { title: "Bola Ouro da Leitura", description: "Insígnia de Artilheiro dos Livros.", priceCoins: 80, requiredXp: 30, theme: "Futebol", icon: "⚽", isActive: true, createdAt: new Date().toISOString() }
+          ];
+          for (const item of initialStore) { await db.collection("storeItems").add(item); }
+        }
+
+        // Missions Seed
         const missionsSnap = await db.collection("missions").get();
         if (missionsSnap.empty) {
           const initialMissions = [
@@ -442,6 +411,7 @@
           for (const m of initialMissions) { await db.collection("missions").add(m); }
         }
 
+        // Campaigns Seed
         const campaignsSnap = await db.collection("campaigns").get();
         if (campaignsSnap.empty) {
           const initialCampaigns = [
@@ -670,7 +640,6 @@
         if (!userDoc.exists) return toast("Aluno não encontrado", "error");
         
         const st = userDoc.data();
-        
         const readingsSnap = await db.collection("readings").where("userId", "==", studentId).get();
         const readings = [];
         readingsSnap.forEach(d => readings.push(d.data()));
@@ -713,7 +682,7 @@
     }
     window.viewStudentDetails = viewStudentDetails;
 
-    // --- CAMPAIGNS MODULE ---
+    // --- CAMPAIGNS & MISSIONS MODULES ---
     async function loadCampaigns() {
       try {
         const snap = await db.collection("campaigns").where("isActive","==",true).get();
@@ -787,7 +756,6 @@
     }
     window.deleteCampaign = deleteCampaign;
 
-    // --- MISSIONS MODULE ---
     async function loadMissions() {
       try {
         const snap = await db.collection("missions").where("isActive","==",true).get();
@@ -862,14 +830,11 @@
     }
     window.deleteMission = deleteMission;
 
-    // --- FUNCTION TO EDIT BOOK ---
+    // --- LIBRARY PAGE ---
     async function abrirModalEdicao(id) {
       try {
         const doc = await db.collection("books").doc(String(id)).get();
-        if (!doc.exists) {
-          toast("Livro não encontrado.", "error");
-          return;
-        }
+        if (!doc.exists) return toast("Livro não encontrado.", "error");
         const book = doc.data();
 
         openModal("✏️ Editar Livro", `
@@ -910,7 +875,6 @@
     }
     window.abrirModalEdicao = abrirModalEdicao;
 
-    // --- LIBRARY PAGE ---
     async function renderLibrary() {
       let books = [];
       try {
@@ -928,9 +892,7 @@
 
       let booksHtml = books.length ? "" : '<div class="empty-state">Nenhum livro cadastrado na biblioteca.</div>';
       for (let b of books) {
-        const coverStyle = b.coverUrl 
-          ? `<img src="${b.coverUrl}" alt="Capa" />` 
-          : '📚';
+        const coverStyle = b.coverUrl ? `<img src="${b.coverUrl}" alt="Capa" />` : '📚';
 
         booksHtml += `
           <div class="card-livro book-card" data-id="${b.id}">
@@ -975,10 +937,10 @@
               <label>Categoria <input name="category" value="Literatura Sertaneja" /></label>
               <label>Resumo / Sinopse <textarea name="summary" placeholder="Escreva um breve resumo da obra..."></textarea></label>
               
-              <label>Capa - Escolher Imagem do Dispositivo / Galeria
+              <label>Capa - Escolher Imagem do Dispositivo
                 <input type="file" id="inpCoverFile" accept="image/*" />
               </label>
-              <label>Ou Link/URL da Capa na Web
+              <label>Ou Link/URL da Capa
                 <input name="coverUrl" id="inpCoverUrl" placeholder="https://exemplo.com/capa.jpg" />
               </label>
 
@@ -992,26 +954,15 @@
             const fileInput = $("#inpCoverFile");
 
             let coverUrl = fd.get("coverUrl");
-
             if (fileInput && fileInput.files && fileInput.files[0]) {
-              try {
-                coverUrl = await fileToDataUrl(fileInput.files[0]);
-              } catch(err) {
-                console.error("Erro ao converter arquivo de capa:", err);
-              }
+              try { coverUrl = await fileToDataUrl(fileInput.files[0]); } catch(err) { console.error(err); }
             }
 
             await db.collection("books").add({
-              title: fd.get("title"),
-              author: fd.get("author"),
-              pages: Number(fd.get("pages")),
-              category: fd.get("category"),
-              summary: fd.get("summary") || "",
-              coverUrl: coverUrl || "",
-              pdfUrl: fd.get("pdfUrl") || "",
-              status: "Disponível",
-              isActive: true,
-              createdAt: new Date().toISOString()
+              title: fd.get("title"), author: fd.get("author"), pages: Number(fd.get("pages")),
+              category: fd.get("category"), summary: fd.get("summary") || "",
+              coverUrl: coverUrl || "", pdfUrl: fd.get("pdfUrl") || "",
+              status: "Disponível", isActive: true, createdAt: new Date().toISOString()
             });
 
             closeModal();
@@ -1058,48 +1009,169 @@
       });
     }
 
-    // --- STORE PAGE ---
+    // --- STORE PAGE (WITH THEMES & ITEM MANAGEMENT) ---
     async function renderStore() {
       const isStu = currentProfile.role === "student";
+      const isStaff = !isStu;
       const coins = currentProfile.cactoscoins || 0;
+      const xp = currentProfile.xp || 0;
 
-      const defaultItems = [
-        { title: "Marca-Página Sertão", description: "Design exclusivo sertanejo", priceCoins: 50, requiredXp: 0, icon: "🔖" },
-        { title: "Botton Sertão Literário", description: "Pin colecionável de leitor", priceCoins: 100, requiredXp: 100, icon: "🏅" },
-        { title: "Vale-Livro Físico", description: "Troque por um livro novo na escola", priceCoins: 300, requiredXp: 300, icon: "📖" }
-      ];
+      let items = [];
+      try {
+        const snap = await db.collection("storeItems").where("isActive","==",true).get();
+        snap.forEach(d => items.push({ id: d.id, ...d.data() }));
+      } catch(e) { console.error(e); }
 
-      let itemsHtml = defaultItems.map((it, i) => `
-        <article class="book-card">
-          <div class="book-cover">${it.icon}</div>
-          <div class="book-content">
-            <h3>${it.title}</h3>
-            <p>${it.description}</p>
-            <div class="book-meta">
-              <strong>🌵 ${it.priceCoins} • ⭐ ${it.requiredXp} XP</strong>
-              ${isStu ? `<button class="primary-btn" data-buy="${i}">Comprar</button>` : ''}
+      // Filter by theme
+      const filteredItems = selectedStoreTheme === "Todos" 
+        ? items 
+        : items.filter(it => it.theme === selectedStoreTheme);
+
+      let itemsHtml = filteredItems.length ? "" : '<div class="empty-state">Nenhum item cadastrado neste tema.</div>';
+      
+      for (let it of filteredItems) {
+        itemsHtml += `
+          <article class="book-card">
+            <div class="book-cover">${it.icon || '🎁'}</div>
+            <div class="book-content">
+              <span class="tag tag-theme">${it.theme || 'Geral'}</span>
+              <h3>${it.title}</h3>
+              <p>${it.description || ''}</p>
+              <div class="book-meta">
+                <div><strong>🌵 ${it.priceCoins || 0}</strong> • <span class="muted">${it.requiredXp || 0} XP mín.</span></div>
+                ${isStu ? `<button class="primary-btn" onclick="buyStoreItem('${it.id}', ${it.priceCoins || 0}, ${it.requiredXp || 0})">Comprar</button>` : ''}
+                ${isStaff ? `
+                  <div class="flex" style="margin-top:6px">
+                    <button class="secondary-btn" style="font-size:12px;padding:6px 10px" onclick="showStoreItemModal('${it.id}', '${encodeURIComponent(JSON.stringify(it))}')">✏️ Editar</button>
+                    <button class="danger-btn" style="font-size:12px;padding:6px 10px" onclick="deleteStoreItem('${it.id}')">Excluir</button>
+                  </div>
+                ` : ''}
+              </div>
             </div>
-          </div>
-        </article>`).join("");
+          </article>`;
+      }
 
       $("#pageContent").innerHTML =
-        pageTitle("Loja Literária", isStu ? "Troque suas Cactoscoins por recompensas!" : "Recompensas para os alunos.") +
+        pageTitle("Loja Literária & Recompensas 🛍️", 
+          isStu ? "Troque suas Cactoscoins por recompensas de seus temas favoritos!" : "Cadastre e gerencie os prêmios dos alunos.",
+          isStaff ? '<button class="primary-btn" id="addStoreItemBtn">+ Criar Item / Recompensa</button>' : ""
+        ) +
         `<div class="stats-grid" style="margin-bottom:18px">
-          ${statCard("🌵","Seu Saldo", coins)}
-          ${statCard("⭐","Seu XP", currentProfile.xp || 0)}
+          ${statCard("🌵","Seu Saldo Cactoscoins", coins)}
+          ${statCard("⭐","Seu XP Atual", xp)}
         </div>
-        <div class="cards-grid">${itemsHtml}</div>`;
 
-      if (isStu) {
-        $$("[data-buy]").forEach(btn => {
-          btn.onclick = function() {
-            const item = defaultItems[this.dataset.buy];
-            if (coins < item.priceCoins) return toast("Cactoscoins insuficientes.", "error");
-            toast("Item resgatado com sucesso!", "success");
-          };
-        });
+        <div class="panel section-space">
+          <div class="panel-header">
+            <h2>Navegar por Temas 🎭</h2>
+          </div>
+          <div class="tab-pills">
+            ${TEMAS_LOJA.map(t => `
+              <button class="tab-pill ${t === selectedStoreTheme ? 'active' : ''}" onclick="filterStoreTheme('${t}')">${t}</button>
+            `).join("")}
+          </div>
+          <div class="cards-grid">${itemsHtml}</div>
+        </div>`;
+
+      if (isStaff) {
+        $("#addStoreItemBtn").onclick = () => showStoreItemModal();
       }
     }
+
+    window.filterStoreTheme = function(theme) {
+      selectedStoreTheme = theme;
+      renderStore();
+    };
+
+    function showStoreItemModal(id = null, dataJson = null) {
+      const data = dataJson ? JSON.parse(decodeURIComponent(dataJson)) : {};
+      const themeOptions = TEMAS_LOJA.filter(t => t !== "Todos").map(t => `
+        <option value="${t}" ${data.theme === t ? 'selected' : ''}>${t}</option>
+      `).join("");
+
+      openModal(id ? "Editar Recompensa" : "Nova Recompensa na Loja", `
+        <form id="storeItemForm" class="form-grid">
+          <label>Título do Item <input name="title" value="${data.title || ''}" required placeholder="Ex: Marca-Página do Harry Potter" /></label>
+          <label>Descrição <textarea name="description" required placeholder="Detalhes do item ou instrução de resgate...">${data.description || ''}</textarea></label>
+          <label>Tema / Categoria <select name="theme">${themeOptions}</select></label>
+          <label>Ícone / Emoji <input name="icon" value="${data.icon || '🎁'}" placeholder="Ex: ⚡, 🛡️, 🔖, ⚽" /></label>
+          <label>Preço em Cactoscoins <input name="priceCoins" type="number" min="1" value="${data.priceCoins || 50}" required /></label>
+          <label>XP Mínimo Exigido <input name="requiredXp" type="number" min="0" value="${data.requiredXp || 0}" required /></label>
+          <button class="primary-btn full" type="submit">${id ? 'Salvar Alterações' : 'Adicionar à Loja'}</button>
+        </form>`);
+
+      document.getElementById("storeItemForm").onsubmit = async (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        const payload = {
+          title: fd.get("title"),
+          description: fd.get("description"),
+          theme: fd.get("theme"),
+          icon: fd.get("icon") || "🎁",
+          priceCoins: Number(fd.get("priceCoins")),
+          requiredXp: Number(fd.get("requiredXp")),
+          isActive: true
+        };
+
+        if (id) {
+          await db.collection("storeItems").doc(id).update(payload);
+          toast("Item da loja atualizado!", "success");
+        } else {
+          payload.createdAt = new Date().toISOString();
+          await db.collection("storeItems").add(payload);
+          toast("Item adicionado à loja com sucesso!", "success");
+        }
+        closeModal();
+        renderStore();
+      };
+    }
+    window.showStoreItemModal = showStoreItemModal;
+
+    async function deleteStoreItem(id) {
+      if (confirm("Excluir este item da loja?")) {
+        await db.collection("storeItems").doc(id).delete();
+        toast("Item removido da loja.");
+        renderStore();
+      }
+    }
+    window.deleteStoreItem = deleteStoreItem;
+
+    async function buyStoreItem(itemId, price, minXp) {
+      const userCoins = currentProfile.cactoscoins || 0;
+      const userXp = currentProfile.xp || 0;
+
+      if (userXp < minXp) {
+        return toast(`Você precisa de pelo menos ${minXp} XP para desbloquear este item.`, "error");
+      }
+
+      if (userCoins < price) {
+        return toast(`Cactoscoins insuficientes! Você precisa de ${price} 🌵.`, "error");
+      }
+
+      try {
+        const newCoins = userCoins - price;
+        await db.collection("users").doc(currentUser.uid).update({
+          cactoscoins: newCoins
+        });
+
+        // Registrar compra
+        await db.collection("purchases").add({
+          userId: currentUser.uid,
+          userName: currentProfile.name,
+          itemId: itemId,
+          pricePaid: price,
+          purchasedAt: new Date().toISOString()
+        });
+
+        currentProfile.cactoscoins = newCoins;
+        toast("Compra realizada com sucesso! 🎉 Procure o professor para resgatar.", "success");
+        renderStore();
+      } catch(e) {
+        console.error(e);
+        toast("Erro ao processar compra.", "error");
+      }
+    }
+    window.buyStoreItem = buyStoreItem;
 
     // --- BOOKTOK PAGE ---
     async function renderBookTok() {
@@ -1182,7 +1254,7 @@
               <label>E-mail <input value="${p.email || ""}" disabled /></label>
               <label>URL da Foto de Perfil / Logo <input id="editPhoto" value="${p.photoURL || ""}" placeholder="https://exemplo.com/foto.jpg" /></label>
               
-              <label>Foto de Perfil do Dispositivo / Galeria
+              <label>Foto de Perfil do Dispositivo
                 <input type="file" id="editPhotoFile" accept="image/*" />
               </label>
 
@@ -1210,9 +1282,7 @@
         if (!name) return toast("Informe seu nome.", "error");
 
         if (fileInput && fileInput.files && fileInput.files[0]) {
-          try {
-            photoURL = await fileToDataUrl(fileInput.files[0]);
-          } catch(e) { console.error(e); }
+          try { photoURL = await fileToDataUrl(fileInput.files[0]); } catch(e) { console.error(e); }
         }
 
         await db.collection("users").doc(currentUser.uid).update({ name, photoURL });
@@ -1352,9 +1422,7 @@
           if (!name) return toast("Informe seu nome completo.", "error");
 
           if (fileInput && fileInput.files && fileInput.files[0]) {
-            try {
-              photoURL = await fileToDataUrl(fileInput.files[0]);
-            } catch(err) { console.error(err); }
+            try { photoURL = await fileToDataUrl(fileInput.files[0]); } catch(err) { console.error(err); }
           }
 
           let selectedClasses = [];
