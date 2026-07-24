@@ -888,7 +888,7 @@
     window.viewStudentDetails = viewStudentDetails;
 
     // =========================================================
-    // --- 📊 MÓDULO DE RELATÓRIOS E ANALYTICS (NOVO) ---
+    // --- 📊 MÓDULO DE RELATÓRIOS E ANALYTICS ---
     // =========================================================
     async function renderReports() {
       if (currentProfile.role === "student") {
@@ -986,7 +986,7 @@
         // Buscar leituras registradas
         const studentIds = students.map(s => s.id);
         let categoryMap = { "Literatura Sertaneja": 0, "Poesia & Cordel": 0, "Ficção": 0, "Outros": 0 };
-        let monthlyData = [5, 12, 18, 25, 30, totalLivrosLidos > 30 ? totalLivrosLidos : 35]; // Dados simulados/graduais
+        let monthlyData = [5, 12, 18, 25, 30, totalLivrosLidos > 30 ? totalLivrosLidos : 35];
 
         if (studentIds.length > 0) {
           const readingsSnap = await db.collection("readings").get();
@@ -1071,7 +1071,6 @@
       const cyanColor = getComputedStyle(document.body).getPropertyValue('--cyan').trim() || '#06B6D4';
       const greenColor = getComputedStyle(document.body).getPropertyValue('--green').trim() || '#10B981';
 
-      // Limpar instâncias anteriores se existirem
       if (chartEvolucaoInstance) chartEvolucaoInstance.destroy();
       if (chartCategoriasInstance) chartCategoriasInstance.destroy();
 
@@ -1161,7 +1160,6 @@
       closeModal();
       toast("Gerando PDF, aguarde um instante...", "success");
 
-      // Criar elemento HTML temporário formatado para impressão
       const printElement = document.createElement("div");
       printElement.style.padding = "30px";
       printElement.style.fontFamily = "'Bitter', serif";
@@ -1523,21 +1521,41 @@
     }
     window.abrirModalEdicao = abrirModalEdicao;
 
-    // --- STORE PAGE (LOJA LITERÁRIA) ---
+    // =========================================================
+    // --- 🛍️ STORE PAGE (LOJA LITERÁRIA) ATUALIZADA ---
+    // =========================================================
     async function renderStore() {
       const isStu = currentProfile.role === "student";
+      const isStaff = !isStu;
       const coins = currentProfile.cactoscoins || 0;
       const xp = currentProfile.xp || 0;
       const unlocked = currentProfile.unlockedThemes || ["default"];
 
-      const storeItems = [
-        { type: "reward", title: "Marca-Página Sertão", description: "Design exclusivo de cordel", priceCoins: 50, requiredXp: 0, icon: "🔖" },
-        { type: "reward", title: "Botton Sertão Literário", description: "Pin colecionável de leitor", priceCoins: 100, requiredXp: 100, icon: "🏅" },
-        { type: "reward", title: "Vale-Livro Físico", description: "Troque por um livro novo na escola", priceCoins: 300, requiredXp: 300, icon: "📖" }
-      ];
+      let customItems = [];
+      try {
+        const snap = await db.collection("storeItems").get();
+        snap.forEach(d => {
+          const item = d.data();
+          if (item.isActive !== false) {
+            customItems.push({ id: d.id, ...item, type: "reward" });
+          }
+        });
+      } catch(e) {
+        console.error("Erro ao carregar itens da loja:", e);
+      }
 
+      // Se a coleção estiver vazia no primeiro uso, insere itens padrão
+      if (customItems.length === 0) {
+        customItems = [
+          { id: "default_1", title: "Marca-Página Sertão", description: "Design exclusivo de cordel", priceCoins: 50, requiredXp: 0, icon: "🔖", type: "reward" },
+          { id: "default_2", title: "Botton Sertão Literário", description: "Pin colecionável de leitor", priceCoins: 100, requiredXp: 100, icon: "🏅", type: "reward" },
+          { id: "default_3", title: "Vale-Livro Físico", description: "Troque por um livro novo na escola", priceCoins: 300, requiredXp: 300, icon: "📖", type: "reward" }
+        ];
+      }
+
+      const themeItems = [];
       APP_THEMES.filter(t => t.id !== "default").forEach(t => {
-        storeItems.push({
+        themeItems.push({
           type: "theme",
           themeId: t.id,
           title: `Tema: ${t.name}`,
@@ -1548,39 +1566,117 @@
         });
       });
 
-      let itemsHtml = storeItems.map((it, i) => {
-        const isThemeUnlocked = it.type === "theme" && (unlocked.includes(it.themeId) || !isStu);
-        const isCurrentThemeActive = it.type === "theme" && currentTheme === it.themeId;
+      const allItems = [...customItems, ...themeItems];
+
+      let itemsHtml = allItems.map((it) => {
+        const isTheme = it.type === "theme";
+        const isThemeUnlocked = isTheme && (unlocked.includes(it.themeId) || !isStu);
+        const isCurrentThemeActive = isTheme && currentTheme === it.themeId;
+
+        const encodedData = encodeURIComponent(JSON.stringify(it));
 
         return `
           <article class="book-card">
             <div class="book-cover">${it.icon}</div>
             <div class="book-content">
-              <span class="tag">${it.type === "theme" ? "Tema Visual" : "Recompensa"}</span>
+              <span class="tag">${isTheme ? "Tema Visual" : "Recompensa"}</span>
               <h3>${it.title}</h3>
               <p>${it.description}</p>
               <div class="book-meta">
                 <strong>🌵 ${it.priceCoins} • ⭐ ${it.requiredXp} XP</strong>
-                ${isStu ? (
-                  it.type === "theme" ? (
-                    isCurrentThemeActive ? `<span class="tag" style="background:var(--green);color:#fff">Equipado</span>` :
-                    isThemeUnlocked ? `<button class="secondary-btn" style="font-size:11px;padding:6px 12px" onclick="equipTheme('${it.themeId}')">Equipar</button>` :
-                    `<button class="primary-btn" style="font-size:11px;padding:6px 12px" onclick="buyTheme('${it.themeId}', ${it.priceCoins}, ${it.requiredXp})">Desbloquear</button>`
-                  ) : `<button class="primary-btn" style="font-size:11px;padding:6px 12px" onclick="buyReward(${i})">Resgatar</button>`
-                ) : ''}
+                <div class="flex" style="gap:6px;margin-top:8px">
+                  ${isStu ? (
+                    isTheme ? (
+                      isCurrentThemeActive ? `<span class="tag" style="background:var(--green);color:#fff">Equipado</span>` :
+                      isThemeUnlocked ? `<button class="secondary-btn" style="font-size:11px;padding:6px 12px" onclick="equipTheme('${it.themeId}')">Equipar</button>` :
+                      `<button class="primary-btn" style="font-size:11px;padding:6px 12px" onclick="buyTheme('${it.themeId}', ${it.priceCoins}, ${it.requiredXp})">Desbloquear</button>`
+                    ) : `<button class="primary-btn" style="font-size:11px;padding:6px 12px" onclick="buyReward('${it.id || ''}', ${it.priceCoins}, ${it.requiredXp})">Resgatar</button>`
+                  ) : ''}
+                  ${isStaff && !isTheme ? `
+                    <button class="btn-editar" style="font-size:11px;padding:6px 10px" onclick="showStoreItemModal('${it.id}', '${encodedData}')">✏️ Editar</button>
+                    ${it.id && !it.id.startsWith('default_') ? `<button class="danger-btn" style="font-size:11px;padding:6px 10px" onclick="deleteStoreItem('${it.id}')">🗑️</button>` : ''}
+                  ` : ''}
+                </div>
               </div>
             </div>
           </article>`;
       }).join("");
 
       $("#pageContent").innerHTML =
-        pageTitle("Loja Literária", isStu ? "Troque suas Cactoscoins por recompensas e novos temas!" : "Catálogo de recompensas dos alunos.") +
+        pageTitle(
+          "Loja Literária", 
+          isStu ? "Troque suas Cactoscoins por recompensas e novos temas!" : "Gerencie os itens, preços e temas da loja.",
+          isStaff ? '<button class="primary-btn" id="newStoreItemBtn">+ Novo Item</button>' : ''
+        ) +
         `<div class="stats-grid" style="margin-bottom:18px">
           ${statCard("🌵","Seu Saldo", coins)}
           ${statCard("⭐","Seu XP", xp)}
         </div>
         <div class="cards-grid">${itemsHtml}</div>`;
+
+      if (isStaff && $("#newStoreItemBtn")) {
+        $("#newStoreItemBtn").onclick = () => showStoreItemModal();
+      }
     }
+
+    // Modal para Adicionar ou Editar Item da Loja
+    function showStoreItemModal(id = null, dataJson = null) {
+      const data = dataJson ? JSON.parse(decodeURIComponent(dataJson)) : {};
+      openModal(id && !id.startsWith('default_') ? "✏️ Editar Item da Loja" : "🎁 Novo Item da Loja", `
+        <form id="storeItemForm" class="form-grid">
+          <label>Título do Item <input name="title" value="${data.title || ''}" required placeholder="Ex: Ponto Extra na Prova" /></label>
+          <label>Descrição <textarea name="description" required placeholder="Ex: Garanta meio ponto na próxima nota bimestral...">${data.description || ''}</textarea></label>
+          <label>Preço em Cactoscoins <input name="priceCoins" type="number" min="0" value="${data.priceCoins || 50}" required /></label>
+          <label>XP Mínimo Requerido <input name="requiredXp" type="number" min="0" value="${data.requiredXp || 0}" required /></label>
+          <label>Ícone ou Emoji <input name="icon" value="${data.icon || '🎁'}" placeholder="Ex: 🔖, 🏅, 📝, 🎟️" required /></label>
+          <button class="primary-btn full" type="submit">${id && !id.startsWith('default_') ? 'Salvar Alterações' : 'Adicionar à Loja'}</button>
+        </form>`);
+
+      document.getElementById("storeItemForm").onsubmit = async (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        const payload = {
+          title: fd.get("title"),
+          description: fd.get("description"),
+          priceCoins: Number(fd.get("priceCoins")),
+          requiredXp: Number(fd.get("requiredXp")),
+          icon: fd.get("icon"),
+          isActive: true
+        };
+
+        try {
+          if (id && !id.startsWith('default_')) {
+            await db.collection("storeItems").doc(id).update(payload);
+            toast("Item atualizado na loja!", "success");
+          } else {
+            payload.createdAt = new Date().toISOString();
+            await db.collection("storeItems").add(payload);
+            toast("Novo item adicionado à loja!", "success");
+          }
+          closeModal();
+          renderStore();
+        } catch(err) {
+          console.error(err);
+          toast("Erro ao salvar item na loja.", "error");
+        }
+      };
+    }
+    window.showStoreItemModal = showStoreItemModal;
+
+    async function deleteStoreItem(id) {
+      if (!id || id.startsWith('default_')) return;
+      if (confirm("Deseja realmente remover este item da loja?")) {
+        try {
+          await db.collection("storeItems").doc(id).delete();
+          toast("Item removido da loja.");
+          renderStore();
+        } catch(err) {
+          console.error(err);
+          toast("Erro ao remover o item.", "error");
+        }
+      }
+    }
+    window.deleteStoreItem = deleteStoreItem;
 
     async function buyTheme(themeId, priceCoins, requiredXp) {
       const p = currentProfile;
@@ -1605,8 +1701,27 @@
     }
     window.buyTheme = buyTheme;
 
-    function buyReward(index) {
-      toast("Recompensa resgatada! Apresente na coordenação.", "success");
+    async function buyReward(itemId, priceCoins, requiredXp) {
+      const p = currentProfile;
+      if ((p.cactoscoins || 0) < priceCoins) return toast("Cactoscoins insuficientes!", "error");
+      if ((p.xp || 0) < requiredXp) return toast(`Requer pelo menos ${requiredXp} XP!`, "error");
+
+      if (!confirm(`Deseja resgatar esta recompensa por ${priceCoins} Cactoscoins?`)) return;
+
+      const newCoins = (p.cactoscoins || 0) - priceCoins;
+
+      try {
+        await db.collection("users").doc(currentUser.uid).update({
+          cactoscoins: newCoins
+        });
+
+        currentProfile.cactoscoins = newCoins;
+        toast("Recompensa resgatada! Apresente ao professor na escola.", "success");
+        renderStore();
+      } catch(err) {
+        console.error(err);
+        toast("Erro ao processar resgate.", "error");
+      }
     }
     window.buyReward = buyReward;
 
