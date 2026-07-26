@@ -1924,7 +1924,14 @@
                 </div>
 
                 <div id="codeField" class="hidden"><label>Código de Acesso Institucional <input id="inpCode" type="password" /></label></div>
-                <label>Senha <input id="inpPwd" type="password" minlength="6" required /></label>
+                
+                <div>
+                  <label>Senha <input id="inpPwd" type="password" minlength="6" required /></label>
+                  <div id="forgotPwdWrapper" style="text-align: right; margin-top: 6px;">
+                    <a href="#" id="forgotPwdBtn" style="font-size: 12px; color: var(--primary); font-weight: 700; text-decoration: underline;">Esqueceu a senha?</a>
+                  </div>
+                </div>
+
                 <button class="primary-btn full" type="submit" id="authBtn">Entrar</button>
               </form>
             </div>
@@ -1941,6 +1948,11 @@
         $("#codeField").classList.toggle("hidden", role === "student" || !isRegister);
       };
 
+      $("#forgotPwdBtn").onclick = (e) => {
+        e.preventDefault();
+        openForgotPasswordModal();
+      };
+
       $("#authForm").onsubmit = handleAuth;
       setMode(false);
     }
@@ -1952,6 +1964,7 @@
       $("#nameField").classList.toggle("hidden", !reg);
       $("#roleField").classList.toggle("hidden", !reg);
       $("#photoField").classList.toggle("hidden", !reg);
+      $("#forgotPwdWrapper").classList.toggle("hidden", reg);
 
       const role = $("#inpRole") ? $("#inpRole").value : "student";
       $("#studentClassField").classList.toggle("hidden", !reg || role !== "student");
@@ -1961,6 +1974,38 @@
       $("#authTitle").textContent = reg ? "Crie sua jornada" : "Entrar na jornada";
       $("#authDesc").textContent = reg ? "Escolha seu perfil e faça seu cadastro." : "Acesse seu painel.";
       $("#authBtn").textContent = reg ? "Criar conta" : "Entrar";
+    }
+
+    // Modal para solicitar redefinição de senha
+    function openForgotPasswordModal() {
+      const emailInput = $("#inpEmail") ? $("#inpEmail").value.trim() : "";
+      openModal("🔑 Recuperar Senha", `
+        <form id="forgotPwdForm" class="form-grid">
+          <p class="muted" style="font-size: 13px;">
+            Informe seu e-mail cadastrado para receber o link de redefinição de senha.
+          </p>
+          <label>E-mail <input id="recoveryEmail" type="email" value="${emailInput}" required placeholder="seuemail@exemplo.com" /></label>
+          <button class="primary-btn full" type="submit">Enviar Link de Recuperação</button>
+        </form>
+      `);
+
+      document.getElementById("forgotPwdForm").onsubmit = async (e) => {
+        e.preventDefault();
+        const email = document.getElementById("recoveryEmail").value.trim();
+        if (!email) return toast("Informe seu e-mail.", "error");
+
+        try {
+          await auth.sendPasswordResetEmail(email);
+          closeModal();
+          toast("E-mail de redefinição enviado! Confira sua caixa de entrada.", "success");
+        } catch (err) {
+          console.error(err);
+          let errMsg = "Erro ao solicitar redefinição de senha.";
+          if (err.code === "auth/user-not-found") errMsg = "E-mail não encontrado no sistema.";
+          else if (err.code === "auth/invalid-email") errMsg = "E-mail inválido.";
+          toast(errMsg, "error");
+        }
+      };
     }
 
     async function handleAuth(e) {
