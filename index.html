@@ -170,6 +170,17 @@
       transition: background .25s, color .25s;
     }
 
+    /* Classe para Emojis PNG Personalizados */
+    .emoji-custom {
+      width: 1.25em;
+      height: 1.25em;
+      vertical-align: -0.2em;
+      display: inline-block;
+      object-fit: contain;
+      user-select: none;
+      pointer-events: none;
+    }
+
     h1, h2, h3, h4, .brand, .page-title h1, .stat-value, .book-cover {
       font-family: var(--font-title) !important;
       letter-spacing: 0.5px;
@@ -199,12 +210,6 @@
       background: linear-gradient(135deg, rgba(26,24,23,0.92), rgba(192,92,51,0.85)),
                   url('https://down-br.img.susercontent.com/file/br-11134207-7r98o-lyjxah0w0gmd6a') center/cover;
       border-right: 3px solid var(--border);
-    }
-    .auth-hero::after {
-      <!-- Usando imagem externa -->
-<img src="meu-emoji.png.PNG" alt="Meu emoji personalizado" width="24" height="24">
-; position: absolute; right: 7%; bottom: -30px;
-      font-size: 180px; opacity: 0.25; transform: rotate(-8deg); filter: grayscale(100%) contrast(150%);
     }
     .auth-hero-content { position: relative; z-index: 1; max-width: 620px; margin-top: 18vh; }
     .auth-hero-content h1 { font-size: clamp(42px, 5.5vw, 70px); line-height: 1.05; margin: 20px 0; text-shadow: 2px 2px 0px #1A1817; }
@@ -296,7 +301,7 @@
       border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow);
     }
     .stat-label { color: var(--muted); font-size: 12px; font-weight: 700; text-transform: uppercase; }
-    .stat-value { font-size: 34px; line-height: 1; margin-top: 7px; color: var(--primary); }
+    .stat-value { font-size: 34px; line-height: 1; margin-top: 7px; color: var(--primary); display: flex; align-items: center; gap: 6px; }
     .stat-icon { margin-bottom: 8px; font-size: 26px; }
 
     .panel { border: 2px solid var(--border); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow); padding: 24px; }
@@ -314,7 +319,7 @@
     .ranking-item:hover { transform: translateX(4px); }
     .ranking-pos { width: 26px; color: var(--primary); font-weight: 800; text-align: center; font-family: var(--font-title); }
     .ranking-name { flex: 1; font-weight: 600; }
-    .xp-badge { padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border); color: var(--text); background: var(--cyan); font-size: 12px; font-weight: 700; }
+    .xp-badge { padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border); color: var(--text); background: var(--cyan); font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; }
 
     /* Book Cards & Styles */
     .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 18px; }
@@ -340,7 +345,7 @@
 
     .tag, .status {
       display: inline-flex; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border);
-      color: var(--text); background: var(--cyan); font-size: 11px; font-weight: 700; margin-bottom: 6px; align-self: flex-start; text-transform: uppercase;
+      color: var(--text); background: var(--cyan); font-size: 11px; font-weight: 700; margin-bottom: 6px; align-self: flex-start; text-transform: uppercase; align-items: center; gap: 4px;
     }
 
     .post-video { height: 200px; display: grid; place-items: center; background: var(--surface2); border-bottom: 2px solid var(--border); color: var(--text); font-size: 48px; }
@@ -379,7 +384,7 @@
       transform: translateX(-50%);
     }
     .nav-btn { display: grid; justify-items: center; gap: 3px; padding: 8px 4px; border-radius: 4px; color: var(--muted); background: transparent; font-size: 11px; font-weight: 700; }
-    .nav-btn span:first-child { font-size: 20px; }
+    .nav-btn span:first-child { font-size: 20px; display: inline-flex; justify-content: center; align-items: center; }
     .nav-btn.active { color: var(--text); background: var(--cyan); border: 1px solid var(--border); box-shadow: var(--shadow); }
 
     /* ESTILOS DO MÓDULO DE RELATÓRIOS E ANALYTICS */
@@ -458,14 +463,39 @@
     const COORDINATOR_CODE = "SERTAO-COORD-2026";
     const TURMAS_DISPONIVEIS = ["5º Ano", "6º Ano", "7º Ano", "8º Ano", "9º Ano"];
 
+    // ========================================================
+    // --- HELPER DE EMOJIS PERSONALIADOS (PNG) ---
+    // ========================================================
+    const EMOJI_ASSETS = {
+      cactocoin: 'assets/emojis/cactocoin.PNG',
+      sol:        'assets/emojis/sol-xp.PNG',
+      cordel:     'assets/emojis/cordel.PNG',
+      sanfona:    'assets/emojis/sanfona.PNG',
+      chapeu:     'assets/emojis/chapeu.png',
+      booktok:    'assets/emojis/booktok.PNG',
+      relatorio:  'assets/emojis/relatorio.PNG',
+      semente:    'assets/emojis/semente.PNG',
+      brotinho:   'assets/emojis/brotinho.PNG',
+      asa_branca: 'assets/emojis/asa-branca.PNG'
+    };
+
+    /**
+     * Retorna a tag <img> estilizada do emoji PNG ou o próprio texto caso não encontre
+     */
+    function emoji(key, alt = '') {
+      const src = EMOJI_ASSETS[key];
+      if (!src) return key;
+      return `<img src="${src}" class="emoji-custom" alt="${alt || key}" loading="lazy">`;
+    }
+
     // --- TEMAS DISPONÍVEIS COMPLETO ---
     const APP_THEMES = [
       { id: "default", name: "Padrão Moderno", priceCoins: 0, requiredXp: 0, icon: "🎨", desc: "Interface limpa e acessível" },
-      { id: "cordel", name: "Cordel & Xilogravura", priceCoins: 150, requiredXp: 100, icon: "🌵", desc: "Papel pardo rústico e tipografia entalhada" },
+      { id: "cordel", name: "Cordel & Xilogravura", priceCoins: 150, requiredXp: 100, icon: emoji('cordel'), desc: "Papel pardo rústico e tipografia entalhada" },
       { id: "sertao-cyber", name: "Sertão Cyberpunk", priceCoins: 300, requiredXp: 250, icon: "⚡", desc: "Futurismo neon e alta tecnologia" },
       { id: "luar-sertao", name: "Luar do Sertão", priceCoins: 200, requiredXp: 150, icon: "🌙", desc: "Modo noturno poético e azul profundo" },
       { id: "caatinga-florida", name: "Flor de Cacto", priceCoins: 250, requiredXp: 200, icon: "🌸", desc: "Visual alegre e vibrante pós-chuva" },
-      { id: "sol-dourado", name: "Sol Dourado", priceCoins: 180, requiredXp: 120, icon: "☀️", desc: "Tons quentes e iluminados de terracota" }
+      { id: "sol-dourado", name: "Sol Dourado", priceCoins: 180, requiredXp: 120, icon: emoji('sol'), desc: "Tons quentes e iluminados de terracota" }
     ];
 
     let currentUser = null;
@@ -609,7 +639,7 @@
       const p = currentProfile;
       const isStaff = p && p.role !== "student";
 
-      const icons = ["🏠","📚","🛍️","🎬","👤"];
+      const icons = ["🏠", emoji('cordel'), "🛍️", emoji('booktok'), "👤"];
       const labels = ["Home","Biblioteca","Loja","BookTok","Perfil"];
       const pages = ["home","library","store","booktok","profile"];
 
@@ -623,11 +653,11 @@
         <div class="app-shell">
           <header class="topbar">
             <div class="brand" onclick="navigateTo('home')">
-              <div class="brand-mark">${p.photoURL ? `<img src="${p.photoURL}"/>` : '🌵'}</div>
+              <div class="brand-mark">${p.photoURL ? `<img src="${p.photoURL}"/>` : emoji('cactocoin')}</div>
               <span>Sertão Literário</span>
             </div>
             <div class="top-actions">
-              ${isStaff ? `<button id="reportsTopBtn" class="primary-btn" style="font-size:12px;padding:6px 14px">📊 Relatórios</button>` : ''}
+              ${isStaff ? `<button id="reportsTopBtn" class="primary-btn" style="font-size:12px;padding:6px 14px">${emoji('relatorio')} Relatórios</button>` : ''}
               <button id="themePickerBtn" class="icon-btn" title="Trocar Tema Visual">🎨</button>
               <button id="darkToggleBtn" class="icon-btn" title="Modo Claro/Escuro">${isDarkMode ? "☀" : "☾"}</button>
               <div class="user-pill">
@@ -718,7 +748,7 @@
                 <div class="ranking-pos">${i+1}</div>
                 ${renderAvatar(u.photoURL, u.name)}
                 <div class="ranking-name">${u.name}</div>
-                <span class="xp-badge">${u.xp || 0} XP</span>
+                <span class="xp-badge">${emoji('sol')} ${u.xp || 0} XP</span>
               </div>
             `).join("");
           } else {
@@ -732,7 +762,7 @@
         
         (isStaff ? `
         <div class="highlight-box">
-          <span style="font-size:36px">📊</span>
+          <span style="font-size:36px">${emoji('relatorio')}</span>
           <div style="flex:1">
             <strong>Relatórios & Analytics para Reuniões e Feiras</strong>
             <p class="muted" style="font-size:13px">Gere gráficos, verifique o engajamento e exporte relatórios em PDF oficiais da turma.</p>
@@ -741,10 +771,10 @@
         </div>` : '') +
 
         `<div class="stats-grid">
-          ${isStu ? statCard("🌵","Cactoscoins",coins) : statCard("👥","Suas Turmas", userClasses.length)}
-          ${isStu ? statCard("⭐","XP Total",xp) : statCard("📖","Turma Atual", selectedTeacherClass)}
-          ${isStu ? statCard("🏅","Nível",level) : statCard("🎯","Missões Ativas","Disponíveis")}
-          ${isStu ? statCard("📚","Livros Lidos",booksRead) : statCard("🌵","Sertão Literário","2026")}
+          ${isStu ? statCard(emoji('cactocoin'),"Cactoscoins",coins) : statCard("👥","Suas Turmas", userClasses.length)}
+          ${isStu ? statCard(emoji('sol'),"XP Total",xp) : statCard(emoji('cordel'),"Turma Atual", selectedTeacherClass)}
+          ${isStu ? statCard(emoji('chapeu'),"Nível",level) : statCard(emoji('sanfona'),"Missões Ativas","Disponíveis")}
+          ${isStu ? statCard(emoji('cordel'),"Livros Lidos",booksRead) : statCard(emoji('cactocoin'),"Sertão Literário","2026")}
         </div>
 
         ${isStaff ? `
@@ -786,7 +816,7 @@
 
         <section class="panel section-space">
           <div class="panel-header">
-            <h2>Missões & Desafios 🎯</h2>
+            <h2>${emoji('sanfona')} Missões & Desafios</h2>
             ${isStaff ? '<button class="primary-btn" id="newMissionBtn">+ Criar Desafio</button>' : ''}
           </div>
           <div id="missionsContainer"><div class="empty-state">Carregando missões...</div></div>
@@ -830,10 +860,10 @@
                 ${renderAvatar(st.photoURL, st.name)}
                 <div>
                   <strong>${st.name}</strong>
-                  <div class="muted" style="font-size:12px">📚 ${st.booksRead || 0} lidos • ⭐ ${st.xp || 0} XP</div>
+                  <div class="muted" style="font-size:12px">${emoji('cordel')} ${st.booksRead || 0} lidos • ${emoji('sol')} ${st.xp || 0} XP</div>
                 </div>
               </div>
-              <span class="xp-badge">🌵 ${st.cactoscoins || 0}</span>
+              <span class="xp-badge">${emoji('cactocoin')} ${st.cactoscoins || 0}</span>
             </div>`;
         });
         container.innerHTML = html;
@@ -856,7 +886,7 @@
 
         let readingsHtml = readings.length ? readings.map(r => `
           <div class="ranking-item" style="cursor:default">
-            <span>📖</span>
+            <span>${emoji('cordel')}</span>
             <div class="ranking-name">
               <strong>${r.bookTitle}</strong>
               <div class="muted" style="font-size:11px">${r.pagesRead} páginas • Data: ${r.readingDate || 'N/I'}</div>
@@ -874,9 +904,9 @@
             </div>
           </div>
           <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px">
-            <div class="stat-card" style="padding:14px"><div class="stat-label">Cactoscoins</div><div class="stat-value" style="font-size:24px">🌵 ${st.cactoscoins || 0}</div></div>
-            <div class="stat-card" style="padding:14px"><div class="stat-label">XP Total</div><div class="stat-value" style="font-size:24px">⭐ ${st.xp || 0}</div></div>
-            <div class="stat-card" style="padding:14px"><div class="stat-label">Livros Lidos</div><div class="stat-value" style="font-size:24px">📚 ${st.booksRead || 0}</div></div>
+            <div class="stat-card" style="padding:14px"><div class="stat-label">Cactoscoins</div><div class="stat-value" style="font-size:24px">${emoji('cactocoin')} ${st.cactoscoins || 0}</div></div>
+            <div class="stat-card" style="padding:14px"><div class="stat-label">XP Total</div><div class="stat-value" style="font-size:24px">${emoji('sol')} ${st.xp || 0}</div></div>
+            <div class="stat-card" style="padding:14px"><div class="stat-label">Livros Lidos</div><div class="stat-value" style="font-size:24px">${emoji('cordel')} ${st.booksRead || 0}</div></div>
           </div>
           <h4 style="margin-bottom:12px">Histórico de Leituras</h4>
           <div class="progress-list">${readingsHtml}</div>`;
@@ -908,7 +938,7 @@
       $("#pageContent").innerHTML = `
         <div id="reportContainer">
           ${pageTitle(
-            "📊 Relatórios & Analytics", 
+            `${emoji('relatorio')} Relatórios & Analytics`, 
             "Acompanhe o engajamento, estatísticas e exporte relatórios para reuniões e feiras.",
             `<div class="flex">
               <button class="secondary-btn" id="presentationBtn">🖥️ Modo Apresentação</button>
@@ -1006,7 +1036,7 @@
         // Renderização dos KPIs e Banners de Destaque
         container.innerHTML = `
           <div class="highlight-box" style="background:var(--surface);border-style:solid">
-            <span style="font-size:42px">🏆</span>
+            <span style="font-size:42px">${emoji('chapeu')}</span>
             <div>
               <h3 style="margin-bottom:4px">Destaque de Desempenho (${selectedTeacherClass})</h3>
               <p style="font-size:14px;color:var(--text)">
@@ -1016,7 +1046,7 @@
           </div>
 
           <div class="stats-grid">
-            ${statCard("📖", "Total de Livros Lidos", totalLivrosLidos)}
+            ${statCard(emoji('cordel'), "Total de Livros Lidos", totalLivrosLidos)}
             ${statCard("📄", "Páginas Lidas", totalPaginasLidas)}
             ${statCard("🔥", "Engajamento da Turma", taxaEngajamento + "%")}
             ${statCard("📊", "Média por Aluno", mediaLivros)}
@@ -1048,10 +1078,10 @@
                   ${renderAvatar(st.photoURL, st.name)}
                   <div class="ranking-name">
                     <strong>${st.name}</strong>
-                    <div class="muted" style="font-size:11px">XP: ${st.xp || 0} • Cactoscoins: 🌵 ${st.cactoscoins || 0}</div>
+                    <div class="muted" style="font-size:11px">XP: ${st.xp || 0} • Cactoscoins: ${emoji('cactocoin')} ${st.cactoscoins || 0}</div>
                   </div>
                   <div style="text-align:right">
-                    <span class="xp-badge" style="background:var(--primary);color:#fff">📚 ${st.booksRead || 0} livros</span>
+                    <span class="xp-badge" style="background:var(--primary);color:#fff">${emoji('cordel')} ${st.booksRead || 0} livros</span>
                   </div>
                 </div>
               `).join("") : '<div class="empty-state">Nenhum aluno cadastrado nesta turma.</div>'}
@@ -1171,7 +1201,7 @@
       printElement.innerHTML = `
         <div style="border-bottom:3px solid #C05C33;padding-bottom:15px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center">
           <div>
-            <h1 style="color:#C05C33;margin:0;font-size:26px">🌵 Sertão Literário</h1>
+            <h1 style="color:#C05C33;margin:0;font-size:26px">${emoji('cactocoin')} Sertão Literário</h1>
             <p style="margin:4px 0 0 0;color:#555;font-size:14px">Relatório Pedagógico de Engajamento Leitor</p>
           </div>
           <div style="text-align:right;font-size:12px;color:#555">
@@ -1229,7 +1259,7 @@
           const c = { id: d.id, ...d.data() };
           html += `
             <article class="campaign-card">
-              <div class="book-cover">${c.banner || '🏜️'}</div>
+              <div class="book-cover">${c.banner || emoji('cordel')}</div>
               <div class="campaign-content">
                 <span class="tag">Campanha Literária</span>
                 <h3>${c.title}</h3>
@@ -1301,8 +1331,8 @@
           html += `
             <div class="panel" style="padding:18px;margin-bottom:10px">
               <div class="flex-between">
-                <strong>${m.title}</strong>
-                <span class="reward" style="color:var(--primary);font-weight:800">+${m.coins || 0} 🌵</span>
+                <strong>${emoji('sanfona')} ${m.title}</strong>
+                <span class="reward" style="color:var(--primary);font-weight:800">+${m.coins || 0} ${emoji('cactocoin')}</span>
               </div>
               <p class="muted" style="margin-top:6px">${m.description || ""}</p>
               <div class="flex" style="margin-top:10px">
@@ -1376,7 +1406,7 @@
       let booksHtml = books.length ? "" : '<div class="empty-state">Nenhum livro cadastrado na biblioteca.</div>';
 
       for (let b of books) {
-        const coverStyle = b.coverUrl ? `<img src="${b.coverUrl}" alt="Capa" />` : '📚';
+        const coverStyle = b.coverUrl ? `<img src="${b.coverUrl}" alt="Capa" />` : emoji('cordel');
 
         booksHtml += `
           <div class="card-livro book-card" data-id="${b.id}">
@@ -1546,12 +1576,11 @@
         console.error("Erro ao carregar itens da loja:", e);
       }
 
-      // Se a coleção estiver vazia no primeiro uso, insere itens padrão
       if (customItems.length === 0) {
         customItems = [
           { id: "default_1", title: "Marca-Página Sertão", description: "Design exclusivo de cordel", priceCoins: 50, requiredXp: 0, icon: "🔖", type: "reward" },
-          { id: "default_2", title: "Botton Sertão Literário", description: "Pin colecionável de leitor", priceCoins: 100, requiredXp: 100, icon: "🏅", type: "reward" },
-          { id: "default_3", title: "Vale-Livro Físico", description: "Troque por um livro novo na escola", priceCoins: 300, requiredXp: 300, icon: "📖", type: "reward" }
+          { id: "default_2", title: "Botton Sertão Literário", description: "Pin colecionável de leitor", priceCoins: 100, requiredXp: 100, icon: emoji('chapeu'), type: "reward" },
+          { id: "default_3", title: "Vale-Livro Físico", description: "Troque por um livro novo na escola", priceCoins: 300, requiredXp: 300, icon: emoji('cordel'), type: "reward" }
         ];
       }
 
@@ -1585,7 +1614,7 @@
               <h3>${it.title}</h3>
               <p>${it.description}</p>
               <div class="book-meta">
-                <strong>🌵 ${it.priceCoins} • ⭐ ${it.requiredXp} XP</strong>
+                <strong>${emoji('cactocoin')} ${it.priceCoins} • ${emoji('sol')} ${it.requiredXp} XP</strong>
                 <div class="flex" style="gap:6px;margin-top:8px">
                   ${isStu ? (
                     isTheme ? (
@@ -1611,8 +1640,8 @@
           isStaff ? '<button class="primary-btn" id="newStoreItemBtn">+ Novo Item</button>' : ''
         ) +
         `<div class="stats-grid" style="margin-bottom:18px">
-          ${statCard("🌵","Seu Saldo", coins)}
-          ${statCard("⭐","Seu XP", xp)}
+          ${statCard(emoji('cactocoin'),"Seu Saldo", coins)}
+          ${statCard(emoji('sol'),"Seu XP", xp)}
         </div>
         <div class="cards-grid">${itemsHtml}</div>`;
 
@@ -1740,7 +1769,7 @@
       for (let p of posts) {
         postsHtml += `
           <article class="post-card">
-            <div class="post-video">${p.videoUrl ? "▶" : "🎬"}</div>
+            <div class="post-video">${p.videoUrl ? "▶" : emoji('booktok')}</div>
             <div class="post-content">
               <span class="tag">@${(p.userName || "usuario").toLowerCase().replace(/\s/g,"")}</span>
               <h3>${p.title}</h3>
@@ -1754,7 +1783,7 @@
       }
 
       $("#pageContent").innerHTML =
-        pageTitle("BookTok Sertanejo", "Compartilhe suas resenhas literárias em vídeo.", '<button class="primary-btn" id="newPostBtn">+ Nova Resenha</button>') +
+        pageTitle(`BookTok Sertanejo ${emoji('booktok')}`, "Compartilhe suas resenhas literárias em vídeo.", '<button class="primary-btn" id="newPostBtn">+ Nova Resenha</button>') +
         `<div class="cards-grid">${postsHtml}</div>`;
 
       $("#newPostBtn").onclick = () => {
@@ -1814,10 +1843,10 @@
           <div class="panel">
             <h2 style="margin-bottom:20px">Sua Conquista</h2>
             <div class="progress-list">
-              <div class="ranking-item"><span>📚</span><span class="ranking-name">Livros Lidos</span><strong>${p.booksRead || 0}</strong></div>
-              <div class="ranking-item"><span>⭐</span><span class="ranking-name">Experiência (XP)</span><strong>${p.xp || 0}</strong></div>
-              <div class="ranking-item"><span>🏅</span><span class="ranking-name">Nível Atual</span><strong>${p.level || 1}</strong></div>
-              <div class="ranking-item"><span>🌵</span><span class="ranking-name">Cactoscoins</span><strong>${p.cactoscoins || 0}</strong></div>
+              <div class="ranking-item"><span>${emoji('cordel')}</span><span class="ranking-name">Livros Lidos</span><strong>${p.booksRead || 0}</strong></div>
+              <div class="ranking-item"><span>${emoji('sol')}</span><span class="ranking-name">Experiência (XP)</span><strong>${p.xp || 0}</strong></div>
+              <div class="ranking-item"><span>${emoji('chapeu')}</span><span class="ranking-name">Nível Atual</span><strong>${p.level || 1}</strong></div>
+              <div class="ranking-item"><span>${emoji('cactocoin')}</span><span class="ranking-name">Cactoscoins</span><strong>${p.cactoscoins || 0}</strong></div>
             </div>
           </div>
         </div>`;
@@ -1854,7 +1883,7 @@
       $("#app").innerHTML = `
         <div class="auth-layout">
           <div class="auth-hero">
-            <div class="brand"><div class="brand-mark">🌵</div><span>Sertão Literário</span></div>
+            <div class="brand"><div class="brand-mark">${emoji('cactocoin')}</div><span>Sertão Literário</span></div>
             <div class="auth-hero-content">
               <h1>A leitura virou jornada.</h1>
               <p>Uma experiência literária gamificada do 5º ao 9º ano. Leia, conquiste e ganhe novos temas visuais!</p>
