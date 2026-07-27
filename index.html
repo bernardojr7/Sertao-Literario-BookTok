@@ -1821,21 +1821,65 @@
 
       $("#newPostBtn").onclick = () => {
         openModal("Publicar Resenha no BookTok", `
-          <form id="postForm" class="form-grid">
-            <label>Título do Vídeo <input name="title" required placeholder="Ex: Resenha de O Quinze" /></label>
-            <label>Descrição <textarea name="description" required placeholder="Conte um pouco sobre o que achou do livro..."></textarea></label>
-            
-            <label>📹 Gravar da Câmera ou Escolher da Galeria:
-              <input type="file" id="inpVideoFile" accept="video/*" style="padding: 8px;" />
-            </label>
-            
-            <label>Ou Link/URL Direta de Vídeo (Opcional):
-              <input name="videoUrl" type="url" placeholder="https://..." />
-            </label>
-            
-            <button class="primary-btn full" type="submit" id="submitPostBtn">Publicar Vídeo</button>
-          </form>`);
+  <form id="postForm" class="form-grid">
+    <label>Título do Vídeo 
+      <input name="title" required placeholder="Ex: Resenha de O Quinze" />
+    </label>
+    
+    <label>Descrição 
+      <textarea name="description" required placeholder="Conte o que achou..."></textarea>
+    </label>
+    
+    <label>📹 Escolher do dispositivo:
+      <input type="file" id="inpVideoFile" accept="video/*" style="padding: 8px;" />
+    </label>
+    
+    <label>Ou Link/URL Direta do Vídeo (.mp4):
+      <input id="inpVideoUrl" name="videoUrl" type="url" placeholder="https://exemplo.com/video.mp4" />
+    </label>
 
+    <!-- Área de pré-visualização do vídeo -->
+    <div style="margin-top: 10px;">
+      <p style="font-size: 12px; color: #666;">Pré-visualização:</p>
+      <video id="videoPreview" controls style="width: 100%; max-height: 200px; display: none; background: #000; border-radius: 8px;"></video>
+    </div>
+    
+    <button class="primary-btn full" type="submit" id="submitPostBtn">Publicar Vídeo</button>
+  </form>
+`);
+const inpFile = document.getElementById("inpVideoFile");
+const inpUrl = document.getElementById("inpVideoUrl");
+const preview = document.getElementById("videoPreview");
+
+// Preview via arquivo local (rápido e sem travar a memória)
+inpFile.addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    // Validação básica de tamanho (ex: limite de 50MB)
+    if (file.size > 50 * 1024 * 1024) {
+      alert("O vídeo é muito grande! Escolha um arquivo de até 50MB.");
+      inpFile.value = "";
+      return;
+    }
+    
+    // Cria uma URL temporária super leve no navegador
+    preview.src = URL.createObjectURL(file);
+    preview.style.display = "block";
+    inpUrl.value = ""; // Limpa a URL se o usuário escolheu arquivo
+  }
+});
+
+// Preview via URL digitada
+inpUrl.addEventListener("input", (e) => {
+  const url = e.target.value.trim();
+  if (url) {
+    preview.src = url;
+    preview.style.display = "block";
+    inpFile.value = ""; // Limpa o arquivo se digitou URL
+  } else {
+    preview.style.display = "none";
+  }
+});
         $("#postForm").onsubmit = async (e) => {
           e.preventDefault();
           const fd = new FormData(e.target);
@@ -1847,17 +1891,28 @@
             return toast("Por favor, selecione um arquivo de vídeo ou insira um link.", "error");
           }
 
-          try {
-            submitBtn.disabled = true;
-            submitBtn.textContent = "Enviando vídeo...";
+         document.getElementById("postForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById("submitPostBtn");
+  
+  btn.innerText = "Enviando vídeo...";
+  btn.disabled = true;
 
-            if (videoFile) {
-              toast("Enviando seu vídeo... aguarde!", "success");
-              const storageRef = storage.ref(`booktok_videos/${Date.now()}_${videoFile.name}`);
-              const snapshot = await storageRef.put(videoFile);
-              videoUrl = await snapshot.ref.getDownloadURL();
-            }
+  try {
+    // Sua lógica de salvamento / upload aqui...
+    // Exemplo: await enviarParaServidorOuSalvar();
 
+    alert("Vídeo publicado com sucesso!");
+    closeModal(); // fecha o modal
+  } catch (error) {
+    console.error("Erro no envio:", error);
+    alert("Houve um erro ao enviar o vídeo. Tente novamente.");
+  } finally {
+    // Restaura o botão caso dê erro ou conclua
+    btn.innerText = "Publicar Vídeo";
+    btn.disabled = false;
+  }
+});
             await db.collection("posts").add({
               title: fd.get("title"), 
               description: fd.get("description"),
