@@ -1792,8 +1792,7 @@
       } catch(e) { console.error(e); }
 
       let postsHtml = posts.length ? "" : '<div class="empty-state">Nenhum vídeo publicado ainda. Seja o primeiro a gravar uma resenha!</div>';
-      const isStaff = currentProfile.role !== "student";
-
+      
       for (let p of posts) {
         let videoMedia = emoji('booktok');
         
@@ -1801,30 +1800,17 @@
           videoMedia = `<video src="${p.videoUrl}" controls playsinline preload="metadata" style="width:100%; height:100%; object-fit:cover;"></video>`;
         }
 
-        const isOwner = p.userId === currentUser.uid;
-        const encodedData = encodeURIComponent(JSON.stringify(p));
-
         postsHtml += `
           <article class="post-card">
             <div class="post-video">${videoMedia}</div>
             <div class="post-content">
-              ${p.isRepost ? `<span class="tag" style="background:var(--cyan);color:var(--text)">🔁 Repostado de @${(p.originalAuthor || 'colega').toLowerCase().replace(/\s/g,'')}</span>` : ''}
               <span class="tag">@${(p.userName || "usuario").toLowerCase().replace(/\s/g,"")}</span>
               <h3>${p.title}</h3>
               <p>${p.description || ""}</p>
-              
               <div class="post-actions">
                 <button class="like-btn" data-id="${p.id}">❤️ ${p.likesCount || 0}</button>
                 <button>💬 ${p.commentsCount || 0}</button>
-                <button class="repost-btn" onclick="repostBookTokPost('${p.id}', '${encodedData}')">🔁 ${p.repostsCount || 0} Repost</button>
               </div>
-
-              ${(isOwner || isStaff) ? `
-                <div class="flex" style="gap:6px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border)">
-                  <button class="btn-editar" style="font-size:11px;padding:6px 10px" onclick="editBookTokPost('${p.id}', '${encodedData}')">✏️ Editar</button>
-                  <button class="danger-btn" style="font-size:11px;padding:6px 10px" onclick="deleteBookTokPost('${p.id}')">🗑️ Excluir</button>
-                </div>
-              ` : ''}
             </div>
           </article>`;
       }
@@ -1880,7 +1866,6 @@
               userName: currentProfile.name, 
               likesCount: 0, 
               commentsCount: 0, 
-              repostsCount: 0,
               status: "active",
               createdAt: new Date().toISOString()
             });
