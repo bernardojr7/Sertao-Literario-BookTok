@@ -348,7 +348,8 @@
       color: var(--text); background: var(--cyan); font-size: 11px; font-weight: 700; margin-bottom: 6px; align-self: flex-start; text-transform: uppercase; align-items: center; gap: 4px;
     }
 
-    .post-video { height: 200px; display: grid; place-items: center; background: var(--surface2); border-bottom: 2px solid var(--border); color: var(--text); font-size: 48px; }
+    .post-video { height: 260px; display: grid; place-items: center; background: #000; border-bottom: 2px solid var(--border); color: #fff; overflow: hidden; position: relative; }
+    .post-video video { width: 100%; height: 100%; object-fit: cover; }
     .post-actions { display: flex; gap: 12px; margin-top: 14px; }
     .post-actions button { padding: 6px 12px; border-radius: var(--radius); border: 2px solid var(--border); color: var(--text); background: var(--bg); font-weight: 700; }
 
@@ -458,6 +459,7 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
+    const storage = firebase.storage();
 
     const PROFESSOR_CODE = "SERTAO-PROF-2026";
     const COORDINATOR_CODE = "SERTAO-COORD-2026";
@@ -479,9 +481,6 @@
       asa_branca: 'assets/emojis/asa-branca.PNG'
     };
 
-    /**
-     * Retorna a tag <img> estilizada do emoji PNG ou o próprio texto caso não encontre
-     */
     function emoji(key, alt = '') {
       const src = EMOJI_ASSETS[key];
       if (!src) return key;
@@ -506,7 +505,6 @@
     let currentTheme = localStorage.getItem("st-active-theme") || "default";
     let isDarkMode = localStorage.getItem("st-dark-mode") === "true";
 
-    // Variáveis de Gráficos Globais para controle do Chart.js
     let chartEvolucaoInstance = null;
     let chartCategoriasInstance = null;
 
@@ -995,7 +993,6 @@
       if (!container) return;
 
       try {
-        // Buscar Alunos da Turma
         const studentsSnap = await db.collection("users")
           .where("role", "==", "student")
           .where("className", "==", selectedTeacherClass)
@@ -1015,7 +1012,6 @@
           if (books > 0) alunosAtivos++;
         });
 
-        // Buscar leituras registradas
         const studentIds = students.map(s => s.id);
         let categoryMap = { "Literatura Sertaneja": 0, "Poesia & Cordel": 0, "Ficção": 0, "Outros": 0 };
         let monthlyData = [5, 12, 18, 25, 30, totalLivrosLidos > 30 ? totalLivrosLidos : 35];
@@ -1033,7 +1029,6 @@
         const taxaEngajamento = totalAlunos > 0 ? Math.round((alunosAtivos / totalAlunos) * 100) : 0;
         const mediaLivros = totalAlunos > 0 ? (totalLivrosLidos / totalAlunos).toFixed(1) : 0;
 
-        // Renderização dos KPIs e Banners de Destaque
         container.innerHTML = `
           <div class="highlight-box" style="background:var(--surface);border-style:solid">
             <span style="font-size:42px">${emoji('chapeu')}</span>
@@ -1089,7 +1084,6 @@
           </section>
         `;
 
-        // Renderizar Gráficos com Chart.js
         renderCharts(monthlyData, categoryMap);
 
       } catch(e) {
@@ -1553,9 +1547,7 @@
     }
     window.abrirModalEdicao = abrirModalEdicao;
 
-    // =========================================================
-    // --- 🛍️ STORE PAGE (LOJA LITERÁRIA) ATUALIZADA ---
-    // =========================================================
+    // --- STORE ---
     async function renderStore() {
       const isStu = currentProfile.role === "student";
       const isStaff = !isStu;
@@ -1650,7 +1642,6 @@
       }
     }
 
-    // Modal para Adicionar ou Editar Item da Loja
     function showStoreItemModal(id = null, dataJson = null) {
       const data = dataJson ? JSON.parse(decodeURIComponent(dataJson)) : {};
       openModal(id && !id.startsWith('default_') ? "✏️ Editar Item da Loja" : "🎁 Novo Item da Loja", `
@@ -1756,7 +1747,9 @@
     }
     window.buyReward = buyReward;
 
-    // --- BOOKTOK ---
+    // =========================================================
+    // --- 📹 BOOKTOK PAGE (COM SUPORTE A GALERIA E CÂMERA) ---
+    // =========================================================
     async function renderBookTok() {
       let posts = [];
       try {
@@ -1765,11 +1758,18 @@
         posts.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
       } catch(e) { console.error(e); }
 
-      let postsHtml = posts.length ? "" : '<div class="empty-state">Nenhum vídeo publicado ainda. Seja o primeiro!</div>';
+      let postsHtml = posts.length ? "" : '<div class="empty-state">Nenhum vídeo publicado ainda. Seja o primeiro a gravar uma resenha!</div>';
+      
       for (let p of posts) {
+        let videoMedia = emoji('booktok');
+        
+        if (p.videoUrl) {
+          videoMedia = `<video src="${p.videoUrl}" controls playsinline preload="metadata" style="width:100%; height:100%; object-fit:cover;"></video>`;
+        }
+
         postsHtml += `
           <article class="post-card">
-            <div class="post-video">${p.videoUrl ? "▶" : emoji('booktok')}</div>
+            <div class="post-video">${videoMedia}</div>
             <div class="post-content">
               <span class="tag">@${(p.userName || "usuario").toLowerCase().replace(/\s/g,"")}</span>
               <h3>${p.title}</h3>
@@ -1783,30 +1783,69 @@
       }
 
       $("#pageContent").innerHTML =
-        pageTitle(`BookTok Sertanejo ${emoji('booktok')}`, "Compartilhe suas resenhas literárias em vídeo.", '<button class="primary-btn" id="newPostBtn">+ Nova Resenha</button>') +
+        pageTitle(`BookTok Sertanejo ${emoji('booktok')}`, "Grave da câmera ou escolha da galeria para compartilhar suas resenhas literárias em vídeo.", '<button class="primary-btn" id="newPostBtn">+ Nova Resenha</button>') +
         `<div class="cards-grid">${postsHtml}</div>`;
 
       $("#newPostBtn").onclick = () => {
         openModal("Publicar Resenha no BookTok", `
           <form id="postForm" class="form-grid">
-            <label>Título do Vídeo <input name="title" required /></label>
-            <label>Descrição <textarea name="description" required></textarea></label>
-            <label>Link do Vídeo (YouTube/TikTok) <input name="videoUrl" type="url" placeholder="https://..." /></label>
-            <button class="primary-btn full" type="submit">Publicar</button>
+            <label>Título do Vídeo <input name="title" required placeholder="Ex: Resenha de O Quinze" /></label>
+            <label>Descrição <textarea name="description" required placeholder="Conte um pouco sobre o que achou do livro..."></textarea></label>
+            
+            <label>📹 Gravar da Câmera ou Escolher da Galeria:
+              <input type="file" id="inpVideoFile" accept="video/*" capture="environment" style="padding: 8px;" />
+            </label>
+            
+            <label>Ou Link/URL Direta de Vídeo (Opcional):
+              <input name="videoUrl" type="url" placeholder="https://..." />
+            </label>
+            
+            <button class="primary-btn full" type="submit" id="submitPostBtn">Publicar Vídeo</button>
           </form>`);
 
         $("#postForm").onsubmit = async (e) => {
           e.preventDefault();
           const fd = new FormData(e.target);
-          await db.collection("posts").add({
-            title: fd.get("title"), description: fd.get("description"),
-            videoUrl: fd.get("videoUrl"), userId: currentUser.uid,
-            userName: currentProfile.name, likesCount: 0, commentsCount: 0, status: "active",
-            createdAt: new Date().toISOString()
-          });
-          closeModal();
-          toast("Resenha publicada!", "success");
-          renderBookTok();
+          const videoFile = $("#inpVideoFile").files[0];
+          let videoUrl = fd.get("videoUrl");
+          const submitBtn = $("#submitPostBtn");
+
+          if (!videoFile && !videoUrl) {
+            return toast("Por favor, selecione um arquivo de vídeo ou insira um link.", "error");
+          }
+
+          try {
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Enviando vídeo...";
+
+            if (videoFile) {
+              toast("Enviando seu vídeo... aguarde!", "success");
+              const storageRef = storage.ref(`booktok_videos/${Date.now()}_${videoFile.name}`);
+              const snapshot = await storageRef.put(videoFile);
+              videoUrl = await snapshot.ref.getDownloadURL();
+            }
+
+            await db.collection("posts").add({
+              title: fd.get("title"), 
+              description: fd.get("description"),
+              videoUrl: videoUrl || "", 
+              userId: currentUser.uid,
+              userName: currentProfile.name, 
+              likesCount: 0, 
+              commentsCount: 0, 
+              status: "active",
+              createdAt: new Date().toISOString()
+            });
+
+            closeModal();
+            toast("Resenha em vídeo publicada com sucesso!", "success");
+            renderBookTok();
+          } catch(err) {
+            console.error(err);
+            toast("Erro ao enviar o vídeo. Tente novamente.", "error");
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Publicar Vídeo";
+          }
         };
       };
 
@@ -1976,7 +2015,6 @@
       $("#authBtn").textContent = reg ? "Criar conta" : "Entrar";
     }
 
-    // Modal para solicitar redefinição de senha
     function openForgotPasswordModal() {
       const emailInput = $("#inpEmail") ? $("#inpEmail").value.trim() : "";
       openModal("🔑 Recuperar Senha", `
