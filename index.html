@@ -1481,7 +1481,15 @@
             let coverUrl = fd.get("coverUrl");
 
             if (fileInput && fileInput.files && fileInput.files[0]) {
-              try { coverUrl = await fileToDataUrl(fileInput.files[0]); } catch(err) { console.error(err); }
+              try {
+                const coverFile = fileInput.files[0];
+                const storageRef = storage.ref(`book_covers/${Date.now()}_${coverFile.name}`);
+                const uploadTask = await storageRef.put(coverFile);
+                coverUrl = await uploadTask.ref.getDownloadURL();
+              } catch(err) {
+                console.error(err);
+                try { coverUrl = await fileToDataUrl(fileInput.files[0]); } catch(e2) {}
+              }
             }
 
             await db.collection("books").add({
@@ -1772,7 +1780,7 @@
     window.buyReward = buyReward;
 
     // =========================================================
-    // --- 📹 BOOKTOK PAGE (COM SUPORTE A FOTO E VÍDEO) ---
+    // --- 📹 BOOKTOK PAGE (COM SUPORTE A FOTO E VÍDEO NO CLOUD FIRESTORE / STORAGE) ---
     // =========================================================
     async function renderBookTok() {
       let posts = [];
@@ -1832,7 +1840,7 @@
             
             <label>Tipo de Mídia:
               <select id="mediaTypeSelect">
-                <option value="photo">📸 Foto / Imagem (Rápido e Recomendado)</option>
+                <option value="photo">📸 Foto / Imagem</option>
                 <option value="video">📹 Vídeo</option>
               </select>
             </label>
@@ -1851,7 +1859,7 @@
 
             <div id="uploadProgressContainer" class="hidden" style="margin-top: 10px;">
               <div class="progress-info">
-                <span>Enviando mídia...</span>
+                <span>Enviando arquivo...</span>
                 <strong id="uploadProgressText">0%</strong>
               </div>
               <div class="progress">
@@ -1895,27 +1903,47 @@
               }
 
               progressContainer.classList.remove("hidden");
-              progressBar.style.width = "50%";
-              progressText.textContent = "50%";
 
-              const imageUrl = await fileToDataUrl(photoFile);
+              // 1. Upload do arquivo de Foto para o Firebase Storage
+              const storageRef = storage.ref(`booktok_photos/${Date.now()}_${photoFile.name}`);
+              const uploadTask = storageRef.put(photoFile);
 
-              await db.collection("posts").add({
-                title: fd.get("title"),
-                description: fd.get("description"),
-                imageUrl: imageUrl,
-                userId: currentUser.uid,
-                userName: currentProfile.name,
-                likesCount: 0,
-                commentsCount: 0,
-                repostsCount: 0,
-                status: "active",
-                createdAt: new Date().toISOString()
-              });
+              uploadTask.on('state_changed',
+                (snapshot) => {
+                  const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+                  progressBar.style.width = progress + "%";
+                  progressText.textContent = progress + "%";
+                },
+                (error) => {
+                  console.error("Erro no upload da foto:", error);
+                  toast("Erro ao enviar a foto. Tente novamente.", "error");
+                  submitBtn.disabled = false;
+                  submitBtn.textContent = "Publicar Resenha";
+                  progressContainer.classList.add("hidden");
+                },
+                async () => {
+                  // 2. Obter URL do arquivo enviado e salvar o documento no Cloud Firestore
+                  const imageUrl = await uploadTask.snapshot.ref.getDownloadURL();
+                  
+                  await db.collection("posts").add({
+                    title: fd.get("title"),
+                    description: fd.get("description"),
+                    imageUrl: imageUrl,
+                    userId: currentUser.uid,
+                    userName: currentProfile.name,
+                    likesCount: 0,
+                    commentsCount: 0,
+                    repostsCount: 0,
+                    status: "active",
+                    createdAt: new Date().toISOString()
+                  });
 
-              closeModal();
-              toast("Foto de resenha publicada com sucesso!", "success");
-              renderBookTok();
+                  closeModal();
+                  toast("Foto de resenha publicada com sucesso no Firestore!", "success");
+                  renderBookTok();
+                }
+              );
+
             } else {
               const videoFile = $("#inpVideoFile").files[0];
               if (!videoFile) {
@@ -1935,7 +1963,7 @@
                   progressText.textContent = progress + "%";
                 },
                 (error) => {
-                  console.error(error);
+                  console.error("Erro no upload do vídeo:", error);
                   toast("Erro ao enviar o vídeo. Tente novamente.", "error");
                   submitBtn.disabled = false;
                   submitBtn.textContent = "Publicar Resenha";
@@ -2104,7 +2132,15 @@
         if (!name) return toast("Informe seu nome.", "error");
 
         if (fileInput && fileInput.files && fileInput.files[0]) {
-          try { photoURL = await fileToDataUrl(fileInput.files[0]); } catch(e) { console.error(e); }
+          try {
+            const file = fileInput.files[0];
+            const ref = storage.ref(`profiles/${currentUser.uid}_${Date.now()}_${file.name}`);
+            const task = await ref.put(file);
+            photoURL = await task.ref.getDownloadURL();
+          } catch(e) {
+            console.error(e);
+            try { photoURL = await fileToDataUrl(fileInput.files[0]); } catch(err) {}
+          }
         }
 
         await db.collection("users").doc(currentUser.uid).update({ name, photoURL });
@@ -2270,7 +2306,14 @@
           if (!name) return toast("Informe seu nome completo.", "error");
 
           if (fileInput && fileInput.files && fileInput.files[0]) {
-            try { photoURL = await fileToDataUrl(fileInput.files[0]); } catch(err) { console.error(err); }
+            try {
+              const photoFile = fileInput.files[0];
+              const tempRef = storage.ref(`profiles/temp_${Date.now()}_${photoFile.name}`);
+              const task = await tempRef.put(photoFile);
+              photoURL = await task.ref.getDownloadURL();
+            } catch(err) {
+              try { photoURL = await fileToDataUrl(fileInput.files[0]); } catch(e2) {}
+            }
           }
 
           let selectedClasses = [];
