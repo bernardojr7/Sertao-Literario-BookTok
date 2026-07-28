@@ -321,7 +321,7 @@
     .progress-list { display: grid; gap: 16px; }
     .progress-info { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 13px; font-weight: 600; }
     .progress { height: 12px; border-radius: var(--radius); background: var(--bg); border: 2px solid var(--border); overflow: hidden; }
-    .progress > div { height: 100%; background: var(--primary); }
+    .progress > div { height: 100%; background: var(--primary); transition: width 0.2s ease; }
 
     .ranking { display: grid; gap: 10px; }
     .ranking-item { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: var(--radius); border: 2px solid var(--border); background: var(--bg); cursor: pointer; transition: transform .15s; }
@@ -1779,7 +1779,7 @@
     window.buyReward = buyReward;
 
     // =========================================================
-    // --- 📹 BOOKTOK PAGE (COM EDITAR, EXCLUIR E REPOSTAR) ---
+    // --- 📹 BOOKTOK PAGE (COM BARRA DE PROGRESSO DE UPLOAD) ---
     // =========================================================
     async function renderBookTok() {
       let posts = [];
@@ -1835,61 +1835,84 @@
             <label>Título do Vídeo <input name="title" required placeholder="Ex: Resenha de O Quinze" /></label>
             <label>Descrição <textarea name="description" required placeholder="Conte um pouco sobre o que achou do livro..."></textarea></label>
             
-            <label>📹 Gravar da Câmera ou Escolher da Galeria:
-              <input type="file" id="inpVideoFile" accept="video/*" style="padding: 8px;" />
+            <label>📹 Selecionar Vídeo (Câmera ou Galeria):
+              <input type="file" id="inpVideoFile" accept="video/*" required style="padding: 8px;" />
             </label>
-            
-            <label>Ou Link/URL Direta de Vídeo (Opcional):
-              <input name="videoUrl" type="url" placeholder="https://..." />
-            </label>
+
+            <div id="uploadProgressContainer" class="hidden" style="margin-top: 10px;">
+              <div class="progress-info">
+                <span>Enviando vídeo...</span>
+                <strong id="uploadProgressText">0%</strong>
+              </div>
+              <div class="progress">
+                <div id="uploadProgressBar" style="width: 0%;"></div>
+              </div>
+            </div>
             
             <button class="primary-btn full" type="submit" id="submitPostBtn">Publicar Vídeo</button>
           </form>`);
 
-        $("#postForm").onsubmit = async (e) => {
+        $("#postForm").onsubmit = function (e) {
           e.preventDefault();
           const fd = new FormData(e.target);
           const videoFile = $("#inpVideoFile").files[0];
-          let videoUrl = fd.get("videoUrl");
           const submitBtn = $("#submitPostBtn");
+          const progressContainer = $("#uploadProgressContainer");
+          const progressBar = $("#uploadProgressBar");
+          const progressText = $("#uploadProgressText");
 
-          if (!videoFile && !videoUrl) {
-            return toast("Por favor, selecione um arquivo de vídeo ou insira um link.", "error");
+          if (!videoFile) {
+            return toast("Por favor, selecione um arquivo de vídeo.", "error");
           }
 
-          try {
-            submitBtn.disabled = true;
-            submitBtn.textContent = "Enviando vídeo...";
+          submitBtn.disabled = true;
+          submitBtn.textContent = "Enviando vídeo...";
+          progressContainer.classList.remove("hidden");
 
-            if (videoFile) {
-              toast("Enviando seu vídeo... aguarde!", "success");
-              const storageRef = storage.ref(`booktok_videos/${Date.now()}_${videoFile.name}`);
-              const snapshot = await storageRef.put(videoFile);
-              videoUrl = await snapshot.ref.getDownloadURL();
+          const storageRef = storage.ref(`booktok_videos/${Date.now()}_${videoFile.name}`);
+          const uploadTask = storageRef.put(videoFile);
+
+          uploadTask.on('state_changed',
+            (snapshot) => {
+              const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+              progressBar.style.width = progress + "%";
+              progressText.textContent = progress + "%";
+            },
+            (error) => {
+              console.error(error);
+              toast("Erro ao enviar o vídeo. Tente novamente.", "error");
+              submitBtn.disabled = false;
+              submitBtn.textContent = "Publicar Vídeo";
+              progressContainer.classList.add("hidden");
+            },
+            async () => {
+              try {
+                const videoUrl = await uploadTask.snapshot.ref.getDownloadURL();
+                await db.collection("posts").add({
+                  title: fd.get("title"),
+                  description: fd.get("description"),
+                  videoUrl: videoUrl,
+                  userId: currentUser.uid,
+                  userName: currentProfile.name,
+                  likesCount: 0,
+                  commentsCount: 0,
+                  repostsCount: 0,
+                  status: "active",
+                  createdAt: new Date().toISOString()
+                });
+
+                closeModal();
+                toast("Resenha em vídeo publicada com sucesso!", "success");
+                renderBookTok();
+              } catch (err) {
+                console.error(err);
+                toast("Erro ao salvar publicação.", "error");
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Publicar Vídeo";
+                progressContainer.classList.add("hidden");
+              }
             }
-
-            await db.collection("posts").add({
-              title: fd.get("title"), 
-              description: fd.get("description"),
-              videoUrl: videoUrl || "", 
-              userId: currentUser.uid,
-              userName: currentProfile.name, 
-              likesCount: 0, 
-              commentsCount: 0, 
-              repostsCount: 0,
-              status: "active",
-              createdAt: new Date().toISOString()
-            });
-
-            closeModal();
-            toast("Resenha em vídeo publicada com sucesso!", "success");
-            renderBookTok();
-          } catch(err) {
-            console.error(err);
-            toast("Erro ao enviar o vídeo. Tente novamente.", "error");
-            submitBtn.disabled = false;
-            submitBtn.textContent = "Publicar Vídeo";
-          }
+          );
         };
       };
 
@@ -1911,7 +1934,6 @@
         <form id="editPostForm" class="form-grid">
           <label>Título do Vídeo <input name="title" value="${p.title || ''}" required /></label>
           <label>Descrição <textarea name="description" required>${p.description || ''}</textarea></label>
-          <label>URL do Vídeo <input name="videoUrl" value="${p.videoUrl || ''}" placeholder="https://..." /></label>
           <button class="primary-btn full" type="submit">Salvar Alterações</button>
         </form>
       `);
@@ -1922,8 +1944,7 @@
         try {
           await db.collection("posts").doc(id).update({
             title: fd.get("title"),
-            description: fd.get("description"),
-            videoUrl: fd.get("videoUrl")
+            description: fd.get("description")
           });
           closeModal();
           toast("Resenha atualizada com sucesso!", "success");
