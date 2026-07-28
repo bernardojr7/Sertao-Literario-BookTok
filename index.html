@@ -475,15 +475,17 @@
   <div id="toast" class="toast"></div>
 
   <script>
-    // --- FIREBASE CONFIGURATION ---
-    const firebaseConfig = {
-      apiKey: "AIzaSyA-xVOI6qXkEndKXkSp6-zRLY01qNkQH4E",
-      authDomain: "sertao-literario-booktok.firebaseapp.com",
-      projectId: "sertao-literario-booktok",
-      storageBucket: "sertao-literario-booktok.firebasestorage.app",
-      messagingSenderId: "291651799720",
-      appId: "1:291651799720:web:b5c79954511f09b8ddd09d"
-    };
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyA51SRWKQ8RzUWYpoghSV9EmE4CyJW_27U",
+  authDomain: "sertao-literario.firebaseapp.com",
+  databaseURL: "https://sertao-literario-default-rtdb.firebaseio.com",
+  projectId: "sertao-literario",
+  storageBucket: "sertao-literario.firebasestorage.app",
+  messagingSenderId: "224540310548",
+  appId: "1:224540310548:web:e10c4e7599fe1a32f1bb01",
+  measurementId: "G-C74Q519BKC"
+};
 
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
