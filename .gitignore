@@ -1,0 +1,7 @@
+# Arquivo de variáveis de ambiente (onde ficam suas senhas)
+.env
+
+# Pastas de dependências ou builds (dependendo do seu projeto)
+node_modules/
+dist/
+build/
