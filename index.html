@@ -14,7 +14,6 @@
   <script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-storage-compat.js"></script>
 
   <!-- Chart.js para Gráficos Interativos -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -488,7 +487,44 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
-    const storage = firebase.storage();
+
+    // --- CLOUDINARY CONFIGURATION ---
+    const CLOUDINARY_CLOUD_NAME = "SEU_CLOUD_NAME_AQUI"; // Insira seu Cloud Name
+    const CLOUDINARY_UPLOAD_PRESET = "SEU_UPLOAD_PRESET_AQUI"; // Insira seu Preset Unsigned
+
+    async function uploadToCloudinary(file, onProgress = null) {
+      if (!file) return null;
+      const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`;
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", url);
+
+        if (onProgress && xhr.upload) {
+          xhr.upload.onprogress = (e) => {
+            if (e.lengthComputable) {
+              const percent = Math.round((e.loaded / e.total) * 100);
+              onProgress(percent);
+            }
+          };
+        }
+
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            const res = JSON.parse(xhr.responseText);
+            resolve(res.secure_url);
+          } else {
+            reject(new Error("Erro ao enviar imagem/vídeo para o Cloudinary"));
+          }
+        };
+
+        xhr.onerror = () => reject(new Error("Erro de conexão com o Cloudinary"));
+        xhr.send(formData);
+      });
+    }
 
     const PROFESSOR_CODE = "SERTAO-PROF-2026";
     const COORDINATOR_CODE = "SERTAO-COORD-2026";
@@ -585,15 +621,6 @@
         return `<div class="avatar"><img src="${photoURL}" alt="Perfil" /></div>`;
       }
       return `<div class="avatar">${initials(name)}</div>`;
-    }
-
-    function fileToDataUrl(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = e => resolve(e.target.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
     }
 
     function userHasTheme(themeId) {
@@ -1481,7 +1508,13 @@
             let coverUrl = fd.get("coverUrl");
 
             if (fileInput && fileInput.files && fileInput.files[0]) {
-              try { coverUrl = await fileToDataUrl(fileInput.files[0]); } catch(err) { console.error(err); }
+              try {
+                toast("Enviando imagem da capa para o Cloudinary...", "success");
+                coverUrl = await uploadToCloudinary(fileInput.files[0]);
+              } catch(err) {
+                console.error(err);
+                return toast("Erro ao enviar imagem da capa para o Cloudinary.", "error");
+              }
             }
 
             await db.collection("books").add({
@@ -1772,7 +1805,7 @@
     window.buyReward = buyReward;
 
     // =========================================================
-    // --- 📹 BOOKTOK PAGE (COM SUPORTE A FOTO E VÍDEO) ---
+    // --- 📹 BOOKTOK PAGE (COM SUPORTE CLOUDINARY A FOTO E VÍDEO) ---
     // =========================================================
     async function renderBookTok() {
       let posts = [];
@@ -1832,8 +1865,8 @@
             
             <label>Tipo de Mídia:
               <select id="mediaTypeSelect">
-                <option value="photo">📸 Foto / Imagem (Rápido e Recomendado)</option>
-                <option value="video">📹 Vídeo</option>
+                <option value="photo">📸 Foto / Imagem (Cloudinary CDN)</option>
+                <option value="video">📹 Vídeo (Cloudinary CDN)</option>
               </select>
             </label>
 
@@ -1851,7 +1884,7 @@
 
             <div id="uploadProgressContainer" class="hidden" style="margin-top: 10px;">
               <div class="progress-info">
-                <span>Enviando mídia...</span>
+                <span>Enviando mídia para o Cloudinary...</span>
                 <strong id="uploadProgressText">0%</strong>
               </div>
               <div class="progress">
@@ -1895,10 +1928,11 @@
               }
 
               progressContainer.classList.remove("hidden");
-              progressBar.style.width = "50%";
-              progressText.textContent = "50%";
 
-              const imageUrl = await fileToDataUrl(photoFile);
+              const imageUrl = await uploadToCloudinary(photoFile, (percent) => {
+                progressBar.style.width = percent + "%";
+                progressText.textContent = percent + "%";
+              });
 
               await db.collection("posts").add({
                 title: fd.get("title"),
@@ -1925,46 +1959,32 @@
               }
 
               progressContainer.classList.remove("hidden");
-              const storageRef = storage.ref(`booktok_videos/${Date.now()}_${videoFile.name}`);
-              const uploadTask = storageRef.put(videoFile);
 
-              uploadTask.on('state_changed',
-                (snapshot) => {
-                  const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-                  progressBar.style.width = progress + "%";
-                  progressText.textContent = progress + "%";
-                },
-                (error) => {
-                  console.error(error);
-                  toast("Erro ao enviar o vídeo. Tente novamente.", "error");
-                  submitBtn.disabled = false;
-                  submitBtn.textContent = "Publicar Resenha";
-                  progressContainer.classList.add("hidden");
-                },
-                async () => {
-                  const videoUrl = await uploadTask.snapshot.ref.getDownloadURL();
-                  await db.collection("posts").add({
-                    title: fd.get("title"),
-                    description: fd.get("description"),
-                    videoUrl: videoUrl,
-                    userId: currentUser.uid,
-                    userName: currentProfile.name,
-                    likesCount: 0,
-                    commentsCount: 0,
-                    repostsCount: 0,
-                    status: "active",
-                    createdAt: new Date().toISOString()
-                  });
+              const videoUrl = await uploadToCloudinary(videoFile, (percent) => {
+                progressBar.style.width = percent + "%";
+                progressText.textContent = percent + "%";
+              });
 
-                  closeModal();
-                  toast("Resenha em vídeo publicada com sucesso!", "success");
-                  renderBookTok();
-                }
-              );
+              await db.collection("posts").add({
+                title: fd.get("title"),
+                description: fd.get("description"),
+                videoUrl: videoUrl,
+                userId: currentUser.uid,
+                userName: currentProfile.name,
+                likesCount: 0,
+                commentsCount: 0,
+                repostsCount: 0,
+                status: "active",
+                createdAt: new Date().toISOString()
+              });
+
+              closeModal();
+              toast("Resenha em vídeo publicada com sucesso!", "success");
+              renderBookTok();
             }
           } catch (err) {
             console.error(err);
-            toast("Erro ao processar publicação.", "error");
+            toast("Erro ao processar publicação no Cloudinary.", "error");
             submitBtn.disabled = false;
             submitBtn.textContent = "Publicar Resenha";
             progressContainer.classList.add("hidden");
@@ -2104,7 +2124,13 @@
         if (!name) return toast("Informe seu nome.", "error");
 
         if (fileInput && fileInput.files && fileInput.files[0]) {
-          try { photoURL = await fileToDataUrl(fileInput.files[0]); } catch(e) { console.error(e); }
+          try { 
+            toast("Enviando foto de perfil...", "success");
+            photoURL = await uploadToCloudinary(fileInput.files[0]); 
+          } catch(e) { 
+            console.error(e);
+            return toast("Erro ao enviar foto para o Cloudinary.", "error");
+          }
         }
 
         await db.collection("users").doc(currentUser.uid).update({ name, photoURL });
@@ -2270,7 +2296,13 @@
           if (!name) return toast("Informe seu nome completo.", "error");
 
           if (fileInput && fileInput.files && fileInput.files[0]) {
-            try { photoURL = await fileToDataUrl(fileInput.files[0]); } catch(err) { console.error(err); }
+            try { 
+              toast("Enviando foto de perfil...", "success");
+              photoURL = await uploadToCloudinary(fileInput.files[0]); 
+            } catch(err) { 
+              console.error(err);
+              return toast("Erro ao enviar foto para o Cloudinary.", "error");
+            }
           }
 
           let selectedClasses = [];
