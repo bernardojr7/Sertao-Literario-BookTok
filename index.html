@@ -805,7 +805,7 @@
           } else {
             studentRankingHtml = '<div class="empty-state">Sem alunos cadastrados nesta turma.</div>';
           }
-        } catch(e) { console.error(e); }
+        } catch(error) { console.log(error); }
       }
 
       $("#pageContent").innerHTML =
@@ -918,8 +918,8 @@
             </div>`;
         });
         container.innerHTML = html;
-      } catch(e) {
-        console.error(e);
+      } catch(error) {
+        console.log(error);
         container.innerHTML = `<div class="empty-state">Erro ao carregar alunos.</div>`;
       }
     }
@@ -963,8 +963,8 @@
           <div class="progress-list">${readingsHtml}</div>`;
 
         openModal(`Detalhes do Aluno`, body);
-      } catch(e) {
-        console.error(e);
+      } catch(error) {
+        console.log(error);
         toast("Erro ao carregar detalhes.", "error");
       }
     }
@@ -1137,8 +1137,8 @@
 
         renderCharts(monthlyData, categoryMap);
 
-      } catch(e) {
-        console.error(e);
+      } catch(error) {
+        console.log(error);
         container.innerHTML = `<div class="empty-state">Erro ao carregar estatísticas do relatório.</div>`;
       }
     }
@@ -1318,7 +1318,7 @@
             </article>`;
         });
         el.innerHTML = html;
-      } catch(e) { console.error(e); }
+      } catch(error) { console.log(error); }
     }
 
     function showCampaignModal(id = null, dataJson = null) {
@@ -1390,7 +1390,7 @@
             </div>`;
         });
         el.innerHTML = html;
-      } catch(e) { console.error(e); }
+      } catch(error) { console.log(error); }
     }
 
     function showMissionModal(id = null, dataJson = null) {
@@ -1445,7 +1445,7 @@
           if (b.isActive !== false) books.push({ id: d.id, ...b });
         });
         books.sort((a,b) => (a.title || "").localeCompare(b.title || ""));
-      } catch(e) { console.error(e); }
+      } catch(error) { console.log(error); }
 
       const isStaff = currentProfile.role !== "student";
       let booksHtml = books.length ? "" : '<div class="empty-state">Nenhum livro cadastrado na biblioteca.</div>';
@@ -1511,8 +1511,8 @@
               try {
                 toast("Enviando imagem da capa para o Cloudinary...", "success");
                 coverUrl = await uploadToCloudinary(fileInput.files[0]);
-              } catch(err) {
-                console.error(err);
+              } catch(error) {
+                console.log(error);
                 return toast("Erro ao enviar imagem da capa para o Cloudinary.", "error");
               }
             }
@@ -1600,7 +1600,7 @@
           toast("Livro atualizado!", "success");
           renderLibrary();
         };
-      } catch(err) { console.error(err); }
+      } catch(error) { console.log(error); }
     }
     window.abrirModalEdicao = abrirModalEdicao;
 
@@ -1621,8 +1621,8 @@
             customItems.push({ id: d.id, ...item, type: "reward" });
           }
         });
-      } catch(e) {
-        console.error("Erro ao carregar itens da loja:", e);
+      } catch(error) {
+        console.log(error);
       }
 
       if (customItems.length === 0) {
@@ -1734,8 +1734,8 @@
           }
           closeModal();
           renderStore();
-        } catch(err) {
-          console.error(err);
+        } catch(error) {
+          console.log(error);
           toast("Erro ao salvar item na loja.", "error");
         }
       };
@@ -1749,8 +1749,8 @@
           await db.collection("storeItems").doc(id).delete();
           toast("Item removido da loja.");
           renderStore();
-        } catch(err) {
-          console.error(err);
+        } catch(error) {
+          console.log(error);
           toast("Erro ao remover o item.", "error");
         }
       }
@@ -1797,8 +1797,8 @@
         currentProfile.cactoscoins = newCoins;
         toast("Recompensa resgatada! Apresente ao professor na escola.", "success");
         renderStore();
-      } catch(err) {
-        console.error(err);
+      } catch(error) {
+        console.log(error);
         toast("Erro ao processar resgate.", "error");
       }
     }
@@ -1813,7 +1813,7 @@
         const snap = await db.collection("posts").where("status","==","active").get();
         snap.forEach(d => posts.push({ id: d.id, ...d.data() }));
         posts.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
-      } catch(e) { console.error(e); }
+      } catch(error) { console.log(error); }
 
       let postsHtml = posts.length ? "" : '<div class="empty-state">Nenhuma resenha publicada ainda. Seja o primeiro a compartilhar uma foto ou vídeo!</div>';
       
@@ -1982,8 +1982,8 @@
               toast("Resenha em vídeo publicada com sucesso!", "success");
               renderBookTok();
             }
-          } catch (err) {
-            console.error(err);
+          } catch (error) {
+            console.log(error);
             toast("Erro ao processar publicação no Cloudinary.", "error");
             submitBtn.disabled = false;
             submitBtn.textContent = "Publicar Resenha";
@@ -2025,8 +2025,8 @@
           closeModal();
           toast("Resenha atualizada com sucesso!", "success");
           renderBookTok();
-        } catch(err) {
-          console.error(err);
+        } catch(error) {
+          console.log(error);
           toast("Erro ao atualizar a publicação.", "error");
         }
       };
@@ -2039,8 +2039,8 @@
           await db.collection("posts").doc(id).delete();
           toast("Publicação removida com sucesso.");
           renderBookTok();
-        } catch(err) {
-          console.error(err);
+        } catch(error) {
+          console.log(error);
           toast("Erro ao remover a publicação.", "error");
         }
       }
@@ -2079,8 +2079,8 @@
 
         toast("Resenha repostada com sucesso no seu feed!", "success");
         renderBookTok();
-      } catch(err) {
-        console.error(err);
+      } catch(error) {
+        console.log(error);
         toast("Erro ao repostar a publicação.", "error");
       }
     }
@@ -2127,8 +2127,8 @@
           try { 
             toast("Enviando foto de perfil...", "success");
             photoURL = await uploadToCloudinary(fileInput.files[0]); 
-          } catch(e) { 
-            console.error(e);
+          } catch(error) { 
+            console.log(error);
             return toast("Erro ao enviar foto para o Cloudinary.", "error");
           }
         }
@@ -2268,11 +2268,11 @@
           await auth.sendPasswordResetEmail(email);
           closeModal();
           toast("E-mail de redefinição enviado! Confira sua caixa de entrada.", "success");
-        } catch (err) {
-          console.error(err);
+        } catch (error) {
+          console.log(error);
           let errMsg = "Erro ao solicitar redefinição de senha.";
-          if (err.code === "auth/user-not-found") errMsg = "E-mail não encontrado no sistema.";
-          else if (err.code === "auth/invalid-email") errMsg = "E-mail inválido.";
+          if (error.code === "auth/user-not-found") errMsg = "E-mail não encontrado no sistema.";
+          else if (error.code === "auth/invalid-email") errMsg = "E-mail inválido.";
           toast(errMsg, "error");
         }
       };
@@ -2299,8 +2299,8 @@
             try { 
               toast("Enviando foto de perfil...", "success");
               photoURL = await uploadToCloudinary(fileInput.files[0]); 
-            } catch(err) { 
-              console.error(err);
+            } catch(error) { 
+              console.log(error);
               return toast("Erro ao enviar foto para o Cloudinary.", "error");
             }
           }
@@ -2334,8 +2334,9 @@
         } else {
           await auth.signInWithEmailAndPassword(email, pwd);
         }
-      } catch(err) {
-        toast("Erro ao autenticar: " + err.message, "error");
+      } catch(error) {
+        console.log(error);
+        toast("Erro ao autenticar: " + error.message, "error");
       }
     }
 
@@ -2361,8 +2362,8 @@
         } else {
           renderAuth();
         }
-      } catch(err) {
-        console.error(err);
+      } catch(error) {
+        console.log(error);
         renderAuth();
       }
     });
