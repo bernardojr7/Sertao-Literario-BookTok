@@ -805,9 +805,11 @@
               </select>
             </label>
 
-            <label>📷 Foto para Comprovação (Câmera ou Galeria)
-              <input type="file" id="inpReadingPhoto" accept="image/*" capture="environment" required style="padding:8px" />
-            </label>
+            <div id="photoInputContainer">
+              <label>📸 Selecionar Foto:
+                <input type="file" id="inpPhotoFile" accept="image/*" style="padding: 8px;" />
+              </label>
+            </div>
 
             <label>👨‍🏫 Professor para Aprovação
               <select name="teacherId">
