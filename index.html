@@ -489,8 +489,8 @@
     const db = firebase.firestore();
 
     // --- CLOUDINARY CONFIGURATION ---
-    const CLOUDINARY_CLOUD_NAME = "w0pi8vpn"; // Insira seu Cloud Name
-    const CLOUDINARY_UPLOAD_PRESET = "sertão literário"; // Insira seu Preset Unsigned
+    const CLOUDINARY_CLOUD_NAME = "w0pi8vpn"; // Cloud Name
+    const CLOUDINARY_UPLOAD_PRESET = "sertão literário"; // Preset Unsigned
 
     async function uploadToCloudinary(file, onProgress = null) {
       if (!file) return null;
@@ -768,6 +768,248 @@
       }
     }
 
+    // =========================================================
+    // --- 📖 REGISTRO DE LEITURA DO ALUNO & APROVAÇÃO ---
+    // =========================================================
+    async function openRegisterReadingModal(prefilledTitle = "") {
+      openModal("📖 Registrar Leitura", '<div class="empty-state">Carregando formulário...</div>');
+      try {
+        let teachersOptions = '<option value="">Qualquer Professor (Aprovação Aberta)</option>';
+        const teachersSnap = await db.collection("users").where("role", "in", ["teacher", "coordinator"]).get();
+        teachersSnap.forEach(doc => {
+          const t = doc.data();
+          teachersOptions += `<option value="${doc.id}">${t.name} (${roleLabel(t.role)})</option>`;
+        });
+
+        const todayStr = new Date().toISOString().split('T')[0];
+
+        const body = `
+          <form id="readingRegisterForm" class="form-grid">
+            <label>Nome do Livro
+              <input name="bookTitle" required value="${prefilledTitle}" placeholder="Ex: O Cortiço / Vidas Secas" />
+            </label>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <label>Páginas Lidas
+                <input name="pagesRead" type="number" min="1" required placeholder="Ex: 25" />
+              </label>
+              <label>Data da Leitura
+                <input name="readingDate" type="date" required value="${todayStr}" />
+              </label>
+            </div>
+
+            <label>Etapa do Livro
+              <select name="readingType" required>
+                <option value="continuation">🔄 Continuação do Livro</option>
+                <option value="conclusion">🏆 Conclusão do Livro (Bônus de XP & Coins!)</option>
+              </select>
+            </label>
+
+            <label>📷 Foto para Comprovação (Câmera ou Galeria)
+              <input type="file" id="inpReadingPhoto" accept="image/*" capture="environment" required style="padding:8px" />
+            </label>
+
+            <label>👨‍🏫 Professor para Aprovação
+              <select name="teacherId">
+                ${teachersOptions}
+              </select>
+            </label>
+
+            <div id="uploadReadingProgress" class="hidden" style="margin-top:10px">
+              <div class="progress-info">
+                <span>Enviando foto de comprovação...</span>
+                <strong id="uploadReadingPercent">0%</strong>
+              </div>
+              <div class="progress"><div id="uploadReadingBar" style="width:0%"></div></div>
+            </div>
+
+            <button class="primary-btn full" type="submit" id="submitReadingBtn" style="margin-top:10px">
+              Enviar para Autorização
+            </button>
+          </form>
+        `;
+
+        openModal("📖 Registrar Leitura", body);
+
+        $("#readingRegisterForm").onsubmit = async (e) => {
+          e.preventDefault();
+          const fd = new FormData(e.target);
+          const photoFile = $("#inpReadingPhoto").files[0];
+
+          if (!photoFile) return toast("Por favor, tire uma foto ou selecione da galeria para comprovar.", "error");
+
+          const submitBtn = $("#submitReadingBtn");
+          const progressContainer = $("#uploadReadingProgress");
+          const progressBar = $("#uploadReadingBar");
+          const progressPercent = $("#uploadReadingPercent");
+
+          submitBtn.disabled = true;
+          submitBtn.textContent = "Processando Registro...";
+          progressContainer.classList.remove("hidden");
+
+          try {
+            const proofUrl = await uploadToCloudinary(photoFile, (percent) => {
+              progressBar.style.width = percent + "%";
+              progressPercent.textContent = percent + "%";
+            });
+
+            const pagesRead = Number(fd.get("pagesRead"));
+            const readingType = fd.get("readingType"); // continuation | conclusion
+
+            // Recompensa calculada (2 XP por página, 1 Cactoscoin a cada 5 págs + Bônus de Conclusão)
+            const basePages = Math.max(1, pagesRead);
+            const xpEarned = (basePages * 2) + (readingType === "conclusion" ? 50 : 0);
+            const coinsEarned = Math.max(1, Math.floor(basePages / 5)) + (readingType === "conclusion" ? 10 : 0);
+
+            const selectedTeacherId = fd.get("teacherId") || null;
+
+            await db.collection("readings").add({
+              userId: currentUser.uid,
+              userName: currentProfile.name,
+              userClass: currentProfile.className || "5º Ano",
+              bookTitle: fd.get("bookTitle"),
+              pagesRead: pagesRead,
+              readingType: readingType,
+              readingDate: fd.get("readingDate"),
+              proofUrl: proofUrl,
+              teacherId: selectedTeacherId,
+              xpEarned: xpEarned,
+              coinsEarned: coinsEarned,
+              status: "pending",
+              createdAt: new Date().toISOString()
+            });
+
+            closeModal();
+            toast(`Leitura registrada! Ao ser autorizada você ganhará +${xpEarned} XP e +${coinsEarned} Cactoscoins!`, "success");
+            renderHome();
+          } catch (err) {
+            console.error(err);
+            toast("Erro ao registrar leitura. Tente novamente.", "error");
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Enviar para Autorização";
+            progressContainer.classList.add("hidden");
+          }
+        };
+
+      } catch(err) {
+        console.error(err);
+        toast("Erro ao abrir formulário de leitura.", "error");
+      }
+    }
+    window.openRegisterReadingModal = openRegisterReadingModal;
+
+    async function loadPendingReadings() {
+      const container = $("#pendingReadingsContainer");
+      if (!container) return;
+
+      try {
+        const snap = await db.collection("readings").where("status", "==", "pending").get();
+        const readings = [];
+
+        snap.forEach(doc => {
+          const data = doc.data();
+          if (!data.teacherId || data.teacherId === currentUser.uid || currentProfile.role === "coordinator") {
+            readings.push({ id: doc.id, ...data });
+          }
+        });
+
+        if (readings.length === 0) {
+          container.innerHTML = '<div class="empty-state">Nenhuma leitura pendente de autorização no momento.</div>';
+          return;
+        }
+
+        let html = "";
+        readings.forEach(r => {
+          const typeLabel = r.readingType === "conclusion" ? "🏆 Conclusão" : "🔄 Continuação";
+          html += `
+            <div class="panel" style="margin-bottom:12px;padding:16px;background:var(--surface2)">
+              <div class="flex-between" style="margin-bottom:8px">
+                <div>
+                  <strong>${r.userName}</strong> <span class="tag">${r.userClass || 'Turma'}</span>
+                </div>
+                <span class="tag" style="background:var(--primary);color:#fff">${typeLabel}</span>
+              </div>
+              <div style="font-size:14px;margin-bottom:8px">
+                <strong>Livro:</strong> ${r.bookTitle} • <strong>Páginas:</strong> ${r.pagesRead} • <strong>Data:</strong> ${r.readingDate || 'Hoje'}
+              </div>
+              <div style="font-size:12px;margin-bottom:12px;color:var(--muted)">
+                Recompensa estimada: <strong>+${r.xpEarned || 0} XP</strong> • <strong>+${r.coinsEarned || 0} Cactoscoins</strong>
+              </div>
+              ${r.proofUrl ? `
+                <div style="margin-bottom:12px">
+                  <a href="${r.proofUrl}" target="_blank" style="font-size:12px;color:var(--primary);font-weight:700;display:inline-flex;align-items:center;gap:4px">
+                    🖼️ Ver Foto de Comprovação
+                  </a>
+                </div>
+              ` : ''}
+              <div class="flex" style="gap:10px">
+                <button class="primary-btn" style="padding:6px 14px;font-size:12px" onclick="approveReading('${r.id}')">✅ Autorizar Leitura</button>
+                <button class="danger-btn" style="padding:6px 14px;font-size:12px" onclick="rejectReading('${r.id}')">❌ Recusar</button>
+              </div>
+            </div>
+          `;
+        });
+
+        container.innerHTML = html;
+
+      } catch(err) {
+        console.error(err);
+        container.innerHTML = '<div class="empty-state">Erro ao carregar leituras pendentes.</div>';
+      }
+    }
+
+    async function approveReading(readingId) {
+      try {
+        const docRef = db.collection("readings").doc(readingId);
+        const doc = await docRef.get();
+        if (!doc.exists) return toast("Registro não encontrado.", "error");
+
+        const r = doc.data();
+
+        await docRef.update({
+          status: "approved",
+          approvedBy: currentUser.uid,
+          approvedAt: new Date().toISOString()
+        });
+
+        const studentRef = db.collection("users").doc(r.userId);
+        const updates = {
+          xp: firebase.firestore.FieldValue.increment(r.xpEarned || 0),
+          cactoscoins: firebase.firestore.FieldValue.increment(r.coinsEarned || 0)
+        };
+
+        if (r.readingType === "conclusion") {
+          updates.booksRead = firebase.firestore.FieldValue.increment(1);
+        }
+
+        await studentRef.update(updates);
+
+        toast("Leitura autorizada! Os pontos foram concedidos ao aluno.", "success");
+        renderHome();
+      } catch(err) {
+        console.error(err);
+        toast("Erro ao autorizar leitura.", "error");
+      }
+    }
+    window.approveReading = approveReading;
+
+    async function rejectReading(readingId) {
+      if (!confirm("Deseja realmente recusar esta leitura?")) return;
+      try {
+        await db.collection("readings").doc(readingId).update({
+          status: "rejected",
+          rejectedBy: currentUser.uid,
+          rejectedAt: new Date().toISOString()
+        });
+        toast("Leitura recusada.", "info");
+        renderHome();
+      } catch(err) {
+        console.error(err);
+        toast("Erro ao recusar leitura.", "error");
+      }
+    }
+    window.rejectReading = rejectReading;
+
     // --- HOME PAGE & DASHBOARD ---
     async function renderHome() {
       const p = currentProfile;
@@ -809,7 +1051,11 @@
       }
 
       $("#pageContent").innerHTML =
-        pageTitle(`Olá, ${(p.name || "").split(" ")[0]}!`, isStu ? `Turma: ${p.className}` : `Painel do ${roleLabel(p.role)}`) +
+        pageTitle(
+          `Olá, ${(p.name || "").split(" ")[0]}!`, 
+          isStu ? `Turma: ${p.className}` : `Painel do ${roleLabel(p.role)}`,
+          isStu ? `<button class="primary-btn" id="btnRegisterReadingHome" style="font-size:13px;padding:10px 16px">📖 Registrar Leitura</button>` : ''
+        ) +
         
         (isStaff ? `
         <div class="highlight-box">
@@ -829,6 +1075,13 @@
         </div>
 
         ${isStaff ? `
+        <section class="panel section-space">
+          <div class="panel-header">
+            <h2>📑 Leituras Pendentes de Aprovação</h2>
+          </div>
+          <div id="pendingReadingsContainer">Carregando leituras pendentes...</div>
+        </section>
+
         <section class="panel section-space">
           <div class="panel-header">
             <h2>Alunos por Turma</h2>
@@ -873,10 +1126,15 @@
           <div id="missionsContainer"><div class="empty-state">Carregando missões...</div></div>
         </section>`;
 
+      if (isStu && $("#btnRegisterReadingHome")) {
+        $("#btnRegisterReadingHome").onclick = () => openRegisterReadingModal();
+      }
+
       if (isStaff) {
         $("#newCampaignBtn").onclick = () => showCampaignModal();
         $("#newMissionBtn").onclick = () => showMissionModal();
         loadStudentsByClass(selectedTeacherClass);
+        loadPendingReadings();
       }
 
       loadCampaigns();
@@ -1465,7 +1723,7 @@
                 ${b.pdfUrl ? `<a class="secondary-btn" href="${b.pdfUrl}" target="_blank" style="font-size:11px;padding:6px 10px">📄 PDF</a>` : ''}
                 <button class="btn-editar" style="font-size:11px;padding:6px 10px" onclick="abrirModalEdicao('${b.id}')">✏️ Editar</button>
                 ${isStaff ? `<button class="danger-btn" style="font-size:11px;padding:6px 10px" data-del="${b.id}">Excluir</button>` : ''}
-                ${!isStaff ? `<button class="primary-btn" style="font-size:11px;padding:6px 10px" data-read="${b.title.replace(/"/g,"&quot;")}">Registrar Leitura</button>` : ''}
+                ${!isStaff ? `<button class="primary-btn" style="font-size:11px;padding:6px 10px" onclick="openRegisterReadingModal('${b.title.replace(/'/g,"\\'")}')">Registrar Leitura</button>` : ''}
               </div>
             </div>
           </div>`;
@@ -1539,32 +1797,6 @@
             toast("Livro removido.");
             renderLibrary();
           }
-        };
-      });
-
-      $$("[data-read]").forEach(btn => {
-        btn.onclick = function() {
-          const title = this.dataset.read;
-          openModal("Registrar Leitura", `
-            <form id="readForm" class="form-grid">
-              <label>Livro <input name="bookTitle" value="${title}" readonly /></label>
-              <label>Páginas Lidas <input name="pages" type="number" min="1" required /></label>
-              <label>Data <input name="date" type="date" required value="${new Date().toISOString().split('T')[0]}" /></label>
-              <button class="primary-btn full" type="submit">Enviar Registro</button>
-            </form>`);
-
-          $("#readForm").onsubmit = async (e) => {
-            e.preventDefault();
-            const fd = new FormData(e.target);
-            await db.collection("readings").add({
-              userId: currentUser.uid, userName: currentProfile.name,
-              bookTitle: fd.get("bookTitle"), pagesRead: Number(fd.get("pages")),
-              readingDate: fd.get("date"), status: "pending",
-              createdAt: new Date().toISOString()
-            });
-            closeModal();
-            toast("Registro de leitura enviado!", "success");
-          };
         };
       });
     }
