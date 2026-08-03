@@ -2072,11 +2072,18 @@
         let mediaContent = emoji('booktok');
         
         if (p.imageUrl) {
-          mediaContent = `<img src="${p.imageUrl}" alt="Foto da resenha" style="width:100%; height:100%; object-fit:cover;" />`;
-        } else if (p.videoUrl) {
-          mediaContent = `<video src="${p.videoUrl}" controls playsinline preload="metadata" style="width:100%; height:100%; object-fit:cover;"></video>`;
-        }
-
+  mediaContent = `<img src="${p.imageUrl}" alt="Foto da resenha" />`;
+} else if (p.videoUrl) {
+  mediaContent = `
+    <video 
+      src="${p.videoUrl}" 
+      controls 
+      controlsList="nodownload" 
+      playsinline 
+      preload="metadata" 
+      controls>
+    </video>`;
+}
         const isAuthor = currentUser && p.userId === currentUser.uid;
         const isStaff = currentProfile && currentProfile.role !== "student";
         const encodedPost = encodeURIComponent(JSON.stringify(p));
