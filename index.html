@@ -355,16 +355,34 @@
       color: var(--text); background: var(--cyan); font-size: 10px; font-weight: 700; margin-bottom: 6px; align-self: flex-start; text-transform: uppercase; align-items: center; gap: 4px;
     }
 
-    .post-video { height: 240px; display: grid; place-items: center; background: #000; border-bottom: 2px solid var(--border); color: #fff; overflow: hidden; position: relative; }
-    .post-video video, .post-video img { width: 100%; height: 100%; object-fit: cover; }
-    .post-actions { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
-    .post-actions button { padding: 6px 10px; border-radius: var(--radius); border: 2px solid var(--border); color: var(--text); background: var(--bg); font-weight: 700; font-size: 11px; }
+    /* --- AJUSTE DE VÍDEO DO BOOKTOK (TELA E PROPORÇÃO) --- */
+.post-video {
+  width: 100%;
+  aspect-ratio: 9 / 16; /* Proporção vertical padrão do TikTok / Reels */
+  max-height: 520px;    /* Limite máximo para telas maiores/desktop */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #000000;
+  border-bottom: 2px solid var(--border);
+  color: #fff;
+  overflow: hidden;
+  position: relative;
+  margin: 0 auto;
+}
 
-    .student-card {
-      display: flex; align-items: center; justify-content: space-between; gap: 12px;
-      padding: 12px 14px; border: 2px solid var(--border); border-radius: var(--radius); background: var(--surface2);
-      cursor: pointer; transition: transform .15s, box-shadow .15s;
-    }
+.post-video video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* Exibe o vídeo inteiro sem cortar, mantendo a proporção original */
+  background: #000;
+}
+
+.post-video img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
     .student-card:hover { transform: translate(-2px, -2px); box-shadow: var(--shadow); }
 
     .tab-pills { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 16px; -webkit-overflow-scrolling: touch; }
