@@ -2055,87 +2055,185 @@
     }
     window.buyReward = buyReward;
 
-    // =========================================================
     // --- 📹 BOOKTOK PAGE ---
-    // =========================================================
-    async function renderBookTok() {
-      let posts = [];
+async function renderBookTok() {
+  let posts = [];
+  try {
+    const snap = await db.collection("posts").where("status","==","active").get();
+    snap.forEach(d => posts.push({ id: d.id, ...d.data() }));
+    posts.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+  } catch(error) { console.log(error); }
+
+  let postsHtml = posts.length ? "" : '<div class="empty-state">Nenhuma resenha publicada ainda. Seja o primeiro a compartilhar uma foto ou vídeo!</div>';
+  
+  for (let p of posts) {
+    let mediaContent = emoji('booktok');
+    
+    if (p.imageUrl) {
+      mediaContent = `<img src="${p.imageUrl}" alt="Foto da resenha" />`;
+    } else if (p.videoUrl) {
+      mediaContent = `
+        <video 
+          src="${p.videoUrl}" 
+          controls 
+          controlsList="nodownload" 
+          playsinline 
+          preload="metadata">
+        </video>`;
+    }
+    const isAuthor = currentUser && p.userId === currentUser.uid;
+    const isStaff = currentProfile && currentProfile.role !== "student";
+    const encodedPost = encodeURIComponent(JSON.stringify(p));
+
+    // Verifica se o usuário atual já curtiu o post
+    const isLiked = p.likedBy && Array.isArray(p.likedBy) && p.likedBy.includes(currentUser ? currentUser.uid : "");
+
+    postsHtml += `
+      <article class="post-card">
+        <div class="post-video">${mediaContent}</div>
+        <div class="post-content">
+          <div class="flex-between">
+            <span class="tag">@${(p.userName || "usuario").toLowerCase().replace(/\s/g,"")}</span>
+            ${p.isRepost ? `<span class="tag" style="background:var(--cyan);color:var(--text)">Repostado de @${p.originalAuthor}</span>` : ''}
+          </div>
+          <h3>${p.title}</h3>
+          <p>${p.description || ""}</p>
+          <div class="post-actions">
+            <button class="like-btn" data-id="${p.id}" data-liked="${isLiked}">
+              ${isLiked ? '❤️' : '🤍'} ${p.likesCount || 0}
+            </button>
+            <button onclick="openCommentsModal('${p.id}')">💬 ${p.commentsCount || 0}</button>
+            <button onclick="repostBookTokPost('${p.id}', '${encodedPost}')">🔁 ${p.repostsCount || 0}</button>
+            ${isAuthor || isStaff ? `
+              <button class="btn-editar" style="font-size:10px;padding:4px 8px" onclick="editBookTokPost('${p.id}', '${encodedPost}')">✏️</button>
+              <button class="danger-btn" style="font-size:10px;padding:4px 8px" onclick="deleteBookTokPost('${p.id}')">🗑️</button>
+            ` : ''}
+          </div>
+        </div>
+      </article>`;
+  }
+
+  $("#pageContent").innerHTML =
+    pageTitle(`BookTok Sertanejo ${emoji('booktok')}`, "Envie uma foto ou grave um vídeo para compartilhar suas resenhas literárias.", '<button class="primary-btn" id="newPostBtn">+ Nova Resenha</button>') +
+    `<div class="cards-grid">${postsHtml}</div>`;
+
+  const newPostBtn = $("#newPostBtn");
+  if (newPostBtn) {
+    newPostBtn.onclick = () => showBookTokPostModal();
+  }
+
+  // Lógica de Curtir / Descurtir
+  $$(".like-btn").forEach(btn => {
+    btn.onclick = async function() {
+      const postId = this.dataset.id;
+      const isLiked = this.dataset.liked === "true";
+
+      if (!currentUser) return toast("Você precisa estar logado.", "error");
+
       try {
-        const snap = await db.collection("posts").where("status","==","active").get();
-        snap.forEach(d => posts.push({ id: d.id, ...d.data() }));
-        posts.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
-      } catch(error) { console.log(error); }
-
-      let postsHtml = posts.length ? "" : '<div class="empty-state">Nenhuma resenha publicada ainda. Seja o primeiro a compartilhar uma foto ou vídeo!</div>';
-      
-      for (let p of posts) {
-        let mediaContent = emoji('booktok');
-        
-        if (p.imageUrl) {
-  mediaContent = `<img src="${p.imageUrl}" alt="Foto da resenha" />`;
-} else if (p.videoUrl) {
-  mediaContent = `
-    <video 
-      src="${p.videoUrl}" 
-      controls 
-      controlsList="nodownload" 
-      playsinline 
-      preload="metadata" 
-      controls>
-    </video>`;
+        if (isLiked) {
+          // Descurtir
+          await db.collection("posts").doc(postId).update({
+            likesCount: firebase.firestore.FieldValue.increment(-1),
+            likedBy: firebase.firestore.FieldValue.arrayRemove(currentUser.uid)
+          });
+          toast("Você descurtiu esta resenha.", "info");
+        } else {
+          // Curtir
+          await db.collection("posts").doc(postId).update({
+            likesCount: firebase.firestore.FieldValue.increment(1),
+            likedBy: firebase.firestore.FieldValue.arrayUnion(currentUser.uid)
+          });
+          toast("Você curtiu esta resenha!", "success");
+        }
+        renderBookTok();
+      } catch(err) {
+        console.error(err);
+        toast("Erro ao processar curtida.", "error");
+      }
+    };
+  });
 }
-        const isAuthor = currentUser && p.userId === currentUser.uid;
-        const isStaff = currentProfile && currentProfile.role !== "student";
-        const encodedPost = encodeURIComponent(JSON.stringify(p));
+    // --- 💬 MODAL E SISTEMA DE COMENTÁRIOS DO BOOKTOK ---
+async function openCommentsModal(postId) {
+  openModal("💬 Comentários", '<div class="empty-state">Carregando comentários...</div>');
 
-        postsHtml += `
-          <article class="post-card">
-            <div class="post-video">${mediaContent}</div>
-            <div class="post-content">
-              <div class="flex-between">
-                <span class="tag">@${(p.userName || "usuario").toLowerCase().replace(/\s/g,"")}</span>
-                ${p.isRepost ? `<span class="tag" style="background:var(--cyan);color:var(--text)">Repostado de @${p.originalAuthor}</span>` : ''}
-              </div>
-              <h3>${p.title}</h3>
-              <p>${p.description || ""}</p>
-              <div class="post-actions">
-                <button class="like-btn" data-id="${p.id}">❤️ ${p.likesCount || 0}</button>
-                <button>💬 ${p.commentsCount || 0}</button>
-                <button onclick="repostBookTokPost('${p.id}', '${encodedPost}')">🔁 ${p.repostsCount || 0}</button>
-                ${isAuthor || isStaff ? `
-                  <button class="btn-editar" style="font-size:10px;padding:4px 8px" onclick="editBookTokPost('${p.id}', '${encodedPost}')">✏️</button>
-                  <button class="danger-btn" style="font-size:10px;padding:4px 8px" onclick="deleteBookTokPost('${p.id}')">🗑️</button>
-                ` : ''}
-              </div>
+  try {
+    const commentsSnap = await db.collection("posts").doc(postId).collection("comments").orderBy("createdAt", "asc").get();
+    let commentsListHtml = "";
+
+    if (commentsSnap.empty) {
+      commentsListHtml = '<div class="empty-state">Nenhum comentário ainda. Seja o primeiro a comentar!</div>';
+    } else {
+      commentsSnap.forEach(doc => {
+        const c = doc.data();
+        const dateStr = c.createdAt ? new Date(c.createdAt).toLocaleDateString("pt-BR", { hour: '2-digit', minute: '2-digit' }) : "";
+        commentsListHtml += `
+          <div class="ranking-item" style="cursor:default; margin-bottom:10px; align-items:flex-start;">
+            <div>
+              <strong>@${(c.userName || "usuario").toLowerCase().replace(/\s/g, "")}</strong>
+              <span class="muted" style="font-size:11px; margin-left:8px;">${dateStr}</span>
+              <p style="margin-top:4px; font-size:13px; color:var(--text);">${c.text}</p>
             </div>
-          </article>`;
-      }
-
-      $("#pageContent").innerHTML =
-        pageTitle(`BookTok Sertanejo ${emoji('booktok')}`, "Envie uma foto ou grave um vídeo para compartilhar suas resenhas literárias.", '<button class="primary-btn" id="newPostBtn">+ Nova Resenha</button>') +
-        `<div class="cards-grid">${postsHtml}</div>`;
-
-      const newPostBtn = $("#newPostBtn");
-      if (newPostBtn) {
-        newPostBtn.onclick = () => showBookTokPostModal();
-      }
-
-      $$(".like-btn").forEach(btn => {
-        btn.onclick = async function() {
-          const postId = this.dataset.id;
-          try {
-            await db.collection("posts").doc(postId).update({
-              likesCount: firebase.firestore.FieldValue.increment(1)
-            });
-            toast("Você curtiu esta resenha!", "success");
-            renderBookTok();
-          } catch(err) {
-            console.error(err);
-            toast("Erro ao curtir a resenha.", "error");
-          }
-        };
+          </div>
+        `;
       });
     }
+
+    const modalBody = `
+      <div style="max-height: 280px; overflow-y: auto; margin-bottom: 16px; padding-right: 4px;">
+        ${commentsListHtml}
+      </div>
+      <form id="commentForm" class="form-grid">
+        <label>Escreva seu comentário:
+          <textarea id="commentText" name="text" placeholder="Digite aqui o que achou..." required style="min-height:70px;"></textarea>
+        </label>
+        <button class="primary-btn full" type="submit" id="submitCommentBtn">Enviar Comentário</button>
+      </form>
+    `;
+
+    openModal("💬 Comentários", modalBody);
+
+    $("#commentForm").onsubmit = async (e) => {
+      e.preventDefault();
+      const text = $("#commentText").value.trim();
+      if (!text) return;
+
+      const submitBtn = $("#submitCommentBtn");
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Enviando...";
+
+      try {
+        // Adiciona o comentário na subcoleção
+        await db.collection("posts").doc(postId).collection("comments").add({
+          userId: currentUser.uid,
+          userName: currentProfile.name || "Usuário",
+          text: text,
+          createdAt: new Date().toISOString()
+        });
+
+        // Incrementa o contador de comentários do post
+        await db.collection("posts").doc(postId).update({
+          commentsCount: firebase.firestore.FieldValue.increment(1)
+        });
+
+        toast("Comentário enviado!", "success");
+        openCommentsModal(postId); // Recarrega o modal para mostrar o novo comentário
+        renderBookTok(); // Atualiza a contagem no card ao fundo
+      } catch(err) {
+        console.error(err);
+        toast("Erro ao enviar comentário.", "error");
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Enviar Comentário";
+      }
+    };
+
+  } catch(err) {
+    console.error(err);
+    toast("Erro ao carregar comentários.", "error");
+  }
+}
+window.openCommentsModal = openCommentsModal;
 
     function showBookTokPostModal(id = null, dataJson = null) {
       const data = dataJson ? JSON.parse(decodeURIComponent(dataJson)) : {};
