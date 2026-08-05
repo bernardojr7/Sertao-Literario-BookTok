@@ -1717,7 +1717,30 @@
       }
     }
     window.deleteMission = deleteMission;
+function canStudentAccessBook(book, userProfile) {
+  if (!userProfile) return true;
+  if (userProfile.role !== 'student') return true;
 
+  const userClass = userProfile.className;
+  const category = (book.category || "").toLowerCase();
+
+  // Bloqueio por exclusividade de turma
+  if (book.isExclusive && book.targetClass) {
+    return book.targetClass === userClass;
+  }
+
+  // Regra do gênero Terror
+  if (category.includes("terror") && ["5º Ano", "6º Ano", "7º Ano"].includes(userClass)) {
+    return false;
+  }
+
+  // Regra do gênero Crônicas
+  if ((category.includes("crônica") || category.includes("cronica")) && !["8º Ano", "9º Ano"].includes(userClass)) {
+    return false;
+  }
+
+  return true;
+}
     // --- LIBRARY ---
     async function renderLibrary() {
       let books = [];
@@ -1860,6 +1883,31 @@
       } catch(error) { console.log(error); }
     }
     window.abrirModalEdicao = abrirModalEdicao;
+    // Filtra o array de livros com base nas permissões do aluno logado
+const availableBooks = books.filter(b => canStudentAccessBook(b, currentProfile));
+    <label>Categoria / Gênero
+  <select name="category">
+    <option value="Livre">Livre (Todos os anos)</option>
+    <option value="Terror">Terror (Bloqueado 5º ao 7º ano)</option>
+    <option value="Crônicas">Crônicas (Apenas 8º e 9º ano)</option>
+  </select>
+</label>
+
+<label>Direcionar para Turma Específica (Opcional)
+  <select name="targetClass">
+    <option value="">Nenhuma (Disponível pelas regras normais)</option>
+    <option value="5º Ano">5º Ano</option>
+    <option value="6º Ano">6º Ano</option>
+    <option value="7º Ano">7º Ano</option>
+    <option value="8º Ano">8º Ano</option>
+    <option value="9º Ano">9º Ano</option>
+  </select>
+</label>
+
+<label class="checkbox-item" style="margin-top:8px">
+  <input type="checkbox" name="isExclusive" value="true" />
+  🔒 **Manter leitura EXCLUSIVA para a turma selecionada**
+</label>
 
     // --- STORE ---
     async function renderStore() {
