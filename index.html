@@ -355,34 +355,16 @@
       color: var(--text); background: var(--cyan); font-size: 10px; font-weight: 700; margin-bottom: 6px; align-self: flex-start; text-transform: uppercase; align-items: center; gap: 4px;
     }
 
-    /* --- AJUSTE DE VÍDEO DO BOOKTOK (TELA E PROPORÇÃO) --- */
-.post-video {
-  width: 100%;
-  aspect-ratio: 9 / 16; /* Proporção vertical padrão do TikTok / Reels */
-  max-height: 520px;    /* Limite máximo para telas maiores/desktop */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: #000000;
-  border-bottom: 2px solid var(--border);
-  color: #fff;
-  overflow: hidden;
-  position: relative;
-  margin: 0 auto;
-}
+    .post-video { height: 240px; display: grid; place-items: center; background: #000; border-bottom: 2px solid var(--border); color: #fff; overflow: hidden; position: relative; }
+    .post-video video, .post-video img { width: 100%; height: 100%; object-fit: cover; }
+    .post-actions { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+    .post-actions button { padding: 6px 10px; border-radius: var(--radius); border: 2px solid var(--border); color: var(--text); background: var(--bg); font-weight: 700; font-size: 11px; }
 
-.post-video video {
-  width: 100%;
-  height: 100%;
-  object-fit: contain; /* Exibe o vídeo inteiro sem cortar, mantendo a proporção original */
-  background: #000;
-}
-
-.post-video img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
+    .student-card {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 12px 14px; border: 2px solid var(--border); border-radius: var(--radius); background: var(--surface2);
+      cursor: pointer; transition: transform .15s, box-shadow .15s;
+    }
     .student-card:hover { transform: translate(-2px, -2px); box-shadow: var(--shadow); }
 
     .tab-pills { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 16px; -webkit-overflow-scrolling: touch; }
@@ -507,8 +489,8 @@
     const db = firebase.firestore();
 
     // --- CLOUDINARY CONFIGURATION ---
-    const CLOUDINARY_CLOUD_NAME = "w0pi8vpn"; // Cloud Name
-    const CLOUDINARY_UPLOAD_PRESET = "sertão literário"; // Preset Unsigned
+    const CLOUDINARY_CLOUD_NAME = "w0pi8vpn"; // Insira seu Cloud Name
+    const CLOUDINARY_UPLOAD_PRESET = "sertão literário"; // Insira seu Preset Unsigned
 
     async function uploadToCloudinary(file, onProgress = null) {
       if (!file) return null;
@@ -786,249 +768,6 @@
       }
     }
 
-    // =========================================================
-    // --- 📖 REGISTRO DE LEITURA DO ALUNO & APROVAÇÃO ---
-    // =========================================================
-    async function openRegisterReadingModal(prefilledTitle = "") {
-      openModal("📖 Registrar Leitura", '<div class="empty-state">Carregando formulário...</div>');
-      try {
-        let teachersOptions = '<option value="">Qualquer Professor (Aprovação Aberta)</option>';
-        const teachersSnap = await db.collection("users").where("role", "in", ["teacher", "coordinator"]).get();
-        teachersSnap.forEach(doc => {
-          const t = doc.data();
-          teachersOptions += `<option value="${doc.id}">${t.name} (${roleLabel(t.role)})</option>`;
-        });
-
-        const todayStr = new Date().toISOString().split('T')[0];
-
-        const body = `
-          <form id="readingRegisterForm" class="form-grid">
-            <label>Nome do Livro
-              <input name="bookTitle" required value="${prefilledTitle}" placeholder="Ex: O Cortiço / Vidas Secas" />
-            </label>
-
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-              <label>Páginas Lidas
-                <input name="pagesRead" type="number" min="1" required placeholder="Ex: 25" />
-              </label>
-              <label>Data da Leitura
-                <input name="readingDate" type="date" required value="${todayStr}" />
-              </label>
-            </div>
-
-            <label>Etapa do Livro
-              <select name="readingType" required>
-                <option value="continuation">🔄 Continuação do Livro</option>
-                <option value="conclusion">🏆 Conclusão do Livro (Bônus de XP & Coins!)</option>
-              </select>
-            </label>
-
-            <div id="photoInputContainer">
-              <label>📸 Selecionar Foto:
-                <input type="file" id="inpReadingPhoto" accept="image/*" style="padding: 8px;" />
-              </label>
-            </div>
-
-            <label>👨‍🏫 Professor para Aprovação
-              <select name="teacherId">
-                ${teachersOptions}
-              </select>
-            </label>
-
-            <div id="uploadReadingProgress" class="hidden" style="margin-top:10px">
-              <div class="progress-info">
-                <span>Enviando foto de comprovação...</span>
-                <strong id="uploadReadingPercent">0%</strong>
-              </div>
-              <div class="progress"><div id="uploadReadingBar" style="width:0%"></div></div>
-            </div>
-
-            <button class="primary-btn full" type="submit" id="submitReadingBtn" style="margin-top:10px">
-              Enviar para Autorização
-            </button>
-          </form>
-        `;
-
-        openModal("📖 Registrar Leitura", body);
-
-        $("#readingRegisterForm").onsubmit = async (e) => {
-          e.preventDefault();
-          const fd = new FormData(e.target);
-          const photoFile = $("#inpReadingPhoto").files[0];
-
-          if (!photoFile) return toast("Por favor, tire uma foto ou selecione da galeria para comprovar.", "error");
-
-          const submitBtn = $("#submitReadingBtn");
-          const progressContainer = $("#uploadReadingProgress");
-          const progressBar = $("#uploadReadingBar");
-          const progressPercent = $("#uploadReadingPercent");
-
-          submitBtn.disabled = true;
-          submitBtn.textContent = "Processando Registro...";
-          progressContainer.classList.remove("hidden");
-
-          try {
-            const proofUrl = await uploadToCloudinary(photoFile, (percent) => {
-              progressBar.style.width = percent + "%";
-              progressPercent.textContent = percent + "%";
-            });
-
-            const pagesRead = Number(fd.get("pagesRead"));
-            const readingType = fd.get("readingType");
-
-            const basePages = Math.max(1, pagesRead);
-            const xpEarned = (basePages * 2) + (readingType === "conclusion" ? 50 : 0);
-            const coinsEarned = Math.max(1, Math.floor(basePages / 5)) + (readingType === "conclusion" ? 10 : 0);
-
-            const selectedTeacherId = fd.get("teacherId") || null;
-
-            await db.collection("readings").add({
-              userId: currentUser.uid,
-              userName: currentProfile.name,
-              userClass: currentProfile.className || "5º Ano",
-              bookTitle: fd.get("bookTitle"),
-              pagesRead: pagesRead,
-              readingType: readingType,
-              readingDate: fd.get("readingDate"),
-              proofUrl: proofUrl,
-              teacherId: selectedTeacherId,
-              xpEarned: xpEarned,
-              coinsEarned: coinsEarned,
-              status: "pending",
-              createdAt: new Date().toISOString()
-            });
-
-            closeModal();
-            toast(`Leitura registrada! Ao ser autorizada você ganhará +${xpEarned} XP e +${coinsEarned} Cactoscoins!`, "success");
-            renderHome();
-          } catch (err) {
-            console.error(err);
-            toast("Erro ao registrar leitura. Tente novamente.", "error");
-            submitBtn.disabled = false;
-            submitBtn.textContent = "Enviar para Autorização";
-            progressContainer.classList.add("hidden");
-          }
-        };
-
-      } catch(err) {
-        console.error(err);
-        toast("Erro ao abrir formulário de leitura.", "error");
-      }
-    }
-    window.openRegisterReadingModal = openRegisterReadingModal;
-
-    async function loadPendingReadings() {
-      const container = $("#pendingReadingsContainer");
-      if (!container) return;
-
-      try {
-        const snap = await db.collection("readings").where("status", "==", "pending").get();
-        const readings = [];
-
-        snap.forEach(doc => {
-          const data = doc.data();
-          if (!data.teacherId || data.teacherId === currentUser.uid || currentProfile.role === "coordinator") {
-            readings.push({ id: doc.id, ...data });
-          }
-        });
-
-        if (readings.length === 0) {
-          container.innerHTML = '<div class="empty-state">Nenhuma leitura pendente de autorização no momento.</div>';
-          return;
-        }
-
-        let html = "";
-        readings.forEach(r => {
-          const typeLabel = r.readingType === "conclusion" ? "🏆 Conclusão" : "🔄 Continuação";
-          html += `
-            <div class="panel" style="margin-bottom:12px;padding:16px;background:var(--surface2)">
-              <div class="flex-between" style="margin-bottom:8px">
-                <div>
-                  <strong>${r.userName}</strong> <span class="tag">${r.userClass || 'Turma'}</span>
-                </div>
-                <span class="tag" style="background:var(--primary);color:#fff">${typeLabel}</span>
-              </div>
-              <div style="font-size:14px;margin-bottom:8px">
-                <strong>Livro:</strong> ${r.bookTitle} • <strong>Páginas:</strong> ${r.pagesRead} • <strong>Data:</strong> ${r.readingDate || 'Hoje'}
-              </div>
-              <div style="font-size:12px;margin-bottom:12px;color:var(--muted)">
-                Recompensa estimada: <strong>+${r.xpEarned || 0} XP</strong> • <strong>+${r.coinsEarned || 0} Cactoscoins</strong>
-              </div>
-              ${r.proofUrl ? `
-                <div style="margin-bottom:12px">
-                  <a href="${r.proofUrl}" target="_blank" style="font-size:12px;color:var(--primary);font-weight:700;display:inline-flex;align-items:center;gap:4px">
-                    🖼️ Ver Foto de Comprovação
-                  </a>
-                </div>
-              ` : ''}
-              <div class="flex" style="gap:10px">
-                <button class="primary-btn" style="padding:6px 14px;font-size:12px" onclick="approveReading('${r.id}')">✅ Autorizar Leitura</button>
-                <button class="danger-btn" style="padding:6px 14px;font-size:12px" onclick="rejectReading('${r.id}')">❌ Recusar</button>
-              </div>
-            </div>
-          `;
-        });
-
-        container.innerHTML = html;
-
-      } catch(err) {
-        console.error(err);
-        container.innerHTML = '<div class="empty-state">Erro ao carregar leituras pendentes.</div>';
-      }
-    }
-
-    async function approveReading(readingId) {
-      try {
-        const docRef = db.collection("readings").doc(readingId);
-        const doc = await docRef.get();
-        if (!doc.exists) return toast("Registro não encontrado.", "error");
-
-        const r = doc.data();
-
-        await docRef.update({
-          status: "approved",
-          approvedBy: currentUser.uid,
-          approvedAt: new Date().toISOString()
-        });
-
-        const studentRef = db.collection("users").doc(r.userId);
-        const updates = {
-          xp: firebase.firestore.FieldValue.increment(r.xpEarned || 0),
-          cactoscoins: firebase.firestore.FieldValue.increment(r.coinsEarned || 0)
-        };
-
-        if (r.readingType === "conclusion") {
-          updates.booksRead = firebase.firestore.FieldValue.increment(1);
-        }
-
-        await studentRef.update(updates);
-
-        toast("Leitura autorizada! Os pontos foram concedidos ao aluno.", "success");
-        renderHome();
-      } catch(err) {
-        console.error(err);
-        toast("Erro ao autorizar leitura.", "error");
-      }
-    }
-    window.approveReading = approveReading;
-
-    async function rejectReading(readingId) {
-      if (!confirm("Deseja realmente recusar esta leitura?")) return;
-      try {
-        await db.collection("readings").doc(readingId).update({
-          status: "rejected",
-          rejectedBy: currentUser.uid,
-          rejectedAt: new Date().toISOString()
-        });
-        toast("Leitura recusada.", "info");
-        renderHome();
-      } catch(err) {
-        console.error(err);
-        toast("Erro ao recusar leitura.", "error");
-      }
-    }
-    window.rejectReading = rejectReading;
-
     // --- HOME PAGE & DASHBOARD ---
     async function renderHome() {
       const p = currentProfile;
@@ -1070,11 +809,7 @@
       }
 
       $("#pageContent").innerHTML =
-        pageTitle(
-          `Olá, ${(p.name || "").split(" ")[0]}!`, 
-          isStu ? `Turma: ${p.className}` : `Painel do ${roleLabel(p.role)}`,
-          isStu ? `<button class="primary-btn" id="btnRegisterReadingHome" style="font-size:13px;padding:10px 16px">📖 Registrar Leitura</button>` : ''
-        ) +
+        pageTitle(`Olá, ${(p.name || "").split(" ")[0]}!`, isStu ? `Turma: ${p.className}` : `Painel do ${roleLabel(p.role)}`) +
         
         (isStaff ? `
         <div class="highlight-box">
@@ -1094,13 +829,6 @@
         </div>
 
         ${isStaff ? `
-        <section class="panel section-space">
-          <div class="panel-header">
-            <h2>📑 Leituras Pendentes de Aprovação</h2>
-          </div>
-          <div id="pendingReadingsContainer">Carregando leituras pendentes...</div>
-        </section>
-
         <section class="panel section-space">
           <div class="panel-header">
             <h2>Alunos por Turma</h2>
@@ -1145,15 +873,10 @@
           <div id="missionsContainer"><div class="empty-state">Carregando missões...</div></div>
         </section>`;
 
-      if (isStu && $("#btnRegisterReadingHome")) {
-        $("#btnRegisterReadingHome").onclick = () => openRegisterReadingModal();
-      }
-
       if (isStaff) {
         $("#newCampaignBtn").onclick = () => showCampaignModal();
         $("#newMissionBtn").onclick = () => showMissionModal();
         loadStudentsByClass(selectedTeacherClass);
-        loadPendingReadings();
       }
 
       loadCampaigns();
@@ -1175,7 +898,7 @@
           .get();
 
         if (snap.empty) {
-          container.innerHTML = `<div class="empty-state">Nenum aluno cadastrado na turma ${className}.</div>`;
+          container.innerHTML = `<div class="empty-state">Nenhum aluno cadastrado na turma ${className}.</div>`;
           return;
         }
 
@@ -1742,7 +1465,7 @@
                 ${b.pdfUrl ? `<a class="secondary-btn" href="${b.pdfUrl}" target="_blank" style="font-size:11px;padding:6px 10px">📄 PDF</a>` : ''}
                 <button class="btn-editar" style="font-size:11px;padding:6px 10px" onclick="abrirModalEdicao('${b.id}')">✏️ Editar</button>
                 ${isStaff ? `<button class="danger-btn" style="font-size:11px;padding:6px 10px" data-del="${b.id}">Excluir</button>` : ''}
-                ${!isStaff ? `<button class="primary-btn" style="font-size:11px;padding:6px 10px" onclick="openRegisterReadingModal('${b.title.replace(/'/g,"\\'")}')">Registrar Leitura</button>` : ''}
+                ${!isStaff ? `<button class="primary-btn" style="font-size:11px;padding:6px 10px" data-read="${b.title.replace(/"/g,"&quot;")}">Registrar Leitura</button>` : ''}
               </div>
             </div>
           </div>`;
@@ -1816,6 +1539,32 @@
             toast("Livro removido.");
             renderLibrary();
           }
+        };
+      });
+
+      $$("[data-read]").forEach(btn => {
+        btn.onclick = function() {
+          const title = this.dataset.read;
+          openModal("Registrar Leitura", `
+            <form id="readForm" class="form-grid">
+              <label>Livro <input name="bookTitle" value="${title}" readonly /></label>
+              <label>Páginas Lidas <input name="pages" type="number" min="1" required /></label>
+              <label>Data <input name="date" type="date" required value="${new Date().toISOString().split('T')[0]}" /></label>
+              <button class="primary-btn full" type="submit">Enviar Registro</button>
+            </form>`);
+
+          $("#readForm").onsubmit = async (e) => {
+            e.preventDefault();
+            const fd = new FormData(e.target);
+            await db.collection("readings").add({
+              userId: currentUser.uid, userName: currentProfile.name,
+              bookTitle: fd.get("bookTitle"), pagesRead: Number(fd.get("pages")),
+              readingDate: fd.get("date"), status: "pending",
+              createdAt: new Date().toISOString()
+            });
+            closeModal();
+            toast("Registro de leitura enviado!", "success");
+          };
         };
       });
     }
@@ -2055,704 +1804,572 @@
     }
     window.buyReward = buyReward;
 
-    // --- 📹 BOOKTOK PAGE ---
-async function renderBookTok() {
-  let posts = [];
-  try {
-    const snap = await db.collection("posts").where("status","==","active").get();
-    snap.forEach(d => posts.push({ id: d.id, ...d.data() }));
-    posts.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
-  } catch(error) { console.log(error); }
-
-  let postsHtml = posts.length ? "" : '<div class="empty-state">Nenhuma resenha publicada ainda. Seja o primeiro a compartilhar uma foto ou vídeo!</div>';
-  
-  for (let p of posts) {
-    let mediaContent = emoji('booktok');
-    
-    if (p.imageUrl) {
-      mediaContent = `<img src="${p.imageUrl}" alt="Foto da resenha" />`;
-    } else if (p.videoUrl) {
-      mediaContent = `
-        <video 
-          src="${p.videoUrl}" 
-          controls 
-          controlsList="nodownload" 
-          playsinline 
-          preload="metadata">
-        </video>`;
-    }
-    const isAuthor = currentUser && p.userId === currentUser.uid;
-    const isStaff = currentProfile && currentProfile.role !== "student";
-    const encodedPost = encodeURIComponent(JSON.stringify(p));
-
-    // Verifica se o usuário atual já curtiu o post
-    const isLiked = p.likedBy && Array.isArray(p.likedBy) && p.likedBy.includes(currentUser ? currentUser.uid : "");
-
-    postsHtml += `
-      <article class="post-card">
-        <div class="post-video">${mediaContent}</div>
-        <div class="post-content">
-          <div class="flex-between">
-            <span class="tag">@${(p.userName || "usuario").toLowerCase().replace(/\s/g,"")}</span>
-            ${p.isRepost ? `<span class="tag" style="background:var(--cyan);color:var(--text)">Repostado de @${p.originalAuthor}</span>` : ''}
-          </div>
-          <h3>${p.title}</h3>
-          <p>${p.description || ""}</p>
-          <div class="post-actions">
-            <button class="like-btn" data-id="${p.id}" data-liked="${isLiked}">
-              ${isLiked ? '❤️' : '🤍'} ${p.likesCount || 0}
-            </button>
-            <button onclick="openCommentsModal('${p.id}')">💬 ${p.commentsCount || 0}</button>
-            <button onclick="repostBookTokPost('${p.id}', '${encodedPost}')">🔁 ${p.repostsCount || 0}</button>
-            ${isAuthor || isStaff ? `
-              <button class="btn-editar" style="font-size:10px;padding:4px 8px" onclick="editBookTokPost('${p.id}', '${encodedPost}')">✏️</button>
-              <button class="danger-btn" style="font-size:10px;padding:4px 8px" onclick="deleteBookTokPost('${p.id}')">🗑️</button>
-            ` : ''}
-          </div>
-        </div>
-      </article>`;
-  }
-
-  $("#pageContent").innerHTML =
-    pageTitle(`BookTok Sertanejo ${emoji('booktok')}`, "Envie uma foto ou grave um vídeo para compartilhar suas resenhas literárias.", '<button class="primary-btn" id="newPostBtn">+ Nova Resenha</button>') +
-    `<div class="cards-grid">${postsHtml}</div>`;
-
-  const newPostBtn = $("#newPostBtn");
-  if (newPostBtn) {
-    newPostBtn.onclick = () => showBookTokPostModal();
-  }
-
-  // Lógica de Curtir / Descurtir
-  $$(".like-btn").forEach(btn => {
-    btn.onclick = async function() {
-      const postId = this.dataset.id;
-      const isLiked = this.dataset.liked === "true";
-
-      if (!currentUser) return toast("Você precisa estar logado.", "error");
-
+    // =========================================================
+    // --- 📹 BOOKTOK PAGE (COM SUPORTE CLOUDINARY A FOTO E VÍDEO) ---
+    // =========================================================
+    async function renderBookTok() {
+      let posts = [];
       try {
-        if (isLiked) {
-          // Descurtir
-          await db.collection("posts").doc(postId).update({
-            likesCount: firebase.firestore.FieldValue.increment(-1),
-            likedBy: firebase.firestore.FieldValue.arrayRemove(currentUser.uid)
-          });
-          toast("Você descurtiu esta resenha.", "info");
-        } else {
-          // Curtir
-          await db.collection("posts").doc(postId).update({
-            likesCount: firebase.firestore.FieldValue.increment(1),
-            likedBy: firebase.firestore.FieldValue.arrayUnion(currentUser.uid)
-          });
-          toast("Você curtiu esta resenha!", "success");
+        const snap = await db.collection("posts").where("status","==","active").get();
+        snap.forEach(d => posts.push({ id: d.id, ...d.data() }));
+        posts.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+      } catch(error) { console.log(error); }
+
+      let postsHtml = posts.length ? "" : '<div class="empty-state">Nenhuma resenha publicada ainda. Seja o primeiro a compartilhar uma foto ou vídeo!</div>';
+      
+      for (let p of posts) {
+        let mediaContent = emoji('booktok');
+        
+        if (p.imageUrl) {
+          mediaContent = `<img src="${p.imageUrl}" alt="Foto da resenha" style="width:100%; height:100%; object-fit:cover;" />`;
+        } else if (p.videoUrl) {
+          mediaContent = `<video src="${p.videoUrl}" controls playsinline preload="metadata" style="width:100%; height:100%; object-fit:cover;"></video>`;
         }
-        renderBookTok();
-      } catch(err) {
-        console.error(err);
-        toast("Erro ao processar curtida.", "error");
-      }
-    };
-  });
-}
-    // --- 💬 MODAL E SISTEMA DE COMENTÁRIOS DO BOOKTOK ---
-async function openCommentsModal(postId) {
-  openModal("💬 Comentários", '<div class="empty-state">Carregando comentários...</div>');
 
-  try {
-    const commentsSnap = await db.collection("posts").doc(postId).collection("comments").orderBy("createdAt", "asc").get();
-    let commentsListHtml = "";
+        const isAuthor = currentUser && p.userId === currentUser.uid;
+        const isStaff = currentProfile && currentProfile.role !== "student";
+        const encodedPost = encodeURIComponent(JSON.stringify(p));
 
-    if (commentsSnap.empty) {
-      commentsListHtml = '<div class="empty-state">Nenhum comentário ainda. Seja o primeiro a comentar!</div>';
-    } else {
-      commentsSnap.forEach(doc => {
-        const c = doc.data();
-        const dateStr = c.createdAt ? new Date(c.createdAt).toLocaleDateString("pt-BR", { hour: '2-digit', minute: '2-digit' }) : "";
-        commentsListHtml += `
-          <div class="ranking-item" style="cursor:default; margin-bottom:10px; align-items:flex-start;">
-            <div>
-              <strong>@${(c.userName || "usuario").toLowerCase().replace(/\s/g, "")}</strong>
-              <span class="muted" style="font-size:11px; margin-left:8px;">${dateStr}</span>
-              <p style="margin-top:4px; font-size:13px; color:var(--text);">${c.text}</p>
+        postsHtml += `
+          <article class="post-card">
+            <div class="post-video">${mediaContent}</div>
+            <div class="post-content">
+              <div class="flex-between">
+                <span class="tag">@${(p.userName || "usuario").toLowerCase().replace(/\s/g,"")}</span>
+                ${p.isRepost ? `<span class="tag" style="background:var(--cyan);color:var(--text)">Repostado de @${p.originalAuthor}</span>` : ''}
+              </div>
+              <h3>${p.title}</h3>
+              <p>${p.description || ""}</p>
+              <div class="post-actions">
+                <button class="like-btn" data-id="${p.id}">❤️ ${p.likesCount || 0}</button>
+                <button>💬 ${p.commentsCount || 0}</button>
+                <button onclick="repostBookTokPost('${p.id}', '${encodedPost}')">🔁 ${p.repostsCount || 0}</button>
+                ${isAuthor || isStaff ? `
+                  <button class="btn-editar" style="font-size:10px;padding:4px 8px" onclick="editBookTokPost('${p.id}', '${encodedPost}')">✏️</button>
+                  <button class="danger-btn" style="font-size:10px;padding:4px 8px" onclick="deleteBookTokPost('${p.id}')">🗑️</button>
+                ` : ''}
+              </div>
             </div>
-          </div>
-        `;
+          </article>`;
+      }
+
+      $("#pageContent").innerHTML =
+        pageTitle(`BookTok Sertanejo ${emoji('booktok')}`, "Envie uma foto ou grave um vídeo para compartilhar suas resenhas literárias.", '<button class="primary-btn" id="newPostBtn">+ Nova Resenha</button>') +
+        `<div class="cards-grid">${postsHtml}</div>`;
+
+      $("#newPostBtn").onclick = () => {
+        openModal("Publicar Resenha no BookTok", `
+          <form id="postForm" class="form-grid">
+            <label>Título da Resenha <input name="title" required placeholder="Ex: Resenha de O Quinze" /></label>
+            <label>Descrição <textarea name="description" required placeholder="Conte um pouco sobre o que achou do livro..."></textarea></label>
+            
+            <label>Tipo de Mídia:
+              <select id="mediaTypeSelect">
+                <option value="photo">📸 Foto / Imagem (Cloudinary CDN)</option>
+                <option value="video">📹 Vídeo (Cloudinary CDN)</option>
+              </select>
+            </label>
+
+            <div id="photoInputContainer">
+              <label>📸 Selecionar Foto:
+                <input type="file" id="inpPhotoFile" accept="image/*" style="padding: 8px;" />
+              </label>
+            </div>
+
+            <div id="videoInputContainer" class="hidden">
+              <label>📹 Selecionar Vídeo:
+                <input type="file" id="inpVideoFile" accept="video/*" style="padding: 8px;" />
+              </label>
+            </div>
+
+            <div id="uploadProgressContainer" class="hidden" style="margin-top: 10px;">
+              <div class="progress-info">
+                <span>Enviando mídia para o Cloudinary...</span>
+                <strong id="uploadProgressText">0%</strong>
+              </div>
+              <div class="progress">
+                <div id="uploadProgressBar" style="width: 0%;"></div>
+              </div>
+            </div>
+            
+            <button class="primary-btn full" type="submit" id="submitPostBtn">Publicar Resenha</button>
+          </form>`);
+
+        const mediaTypeSelect = $("#mediaTypeSelect");
+        mediaTypeSelect.onchange = function() {
+          if (this.value === "photo") {
+            $("#photoInputContainer").classList.remove("hidden");
+            $("#videoInputContainer").classList.add("hidden");
+          } else {
+            $("#photoInputContainer").classList.add("hidden");
+            $("#videoInputContainer").classList.remove("hidden");
+          }
+        };
+
+        $("#postForm").onsubmit = async function (e) {
+          e.preventDefault();
+          const fd = new FormData(e.target);
+          const mediaType = $("#mediaTypeSelect").value;
+          const submitBtn = $("#submitPostBtn");
+          const progressContainer = $("#uploadProgressContainer");
+          const progressBar = $("#uploadProgressBar");
+          const progressText = $("#uploadProgressText");
+
+          submitBtn.disabled = true;
+          submitBtn.textContent = "Publicando...";
+
+          try {
+            if (mediaType === "photo") {
+              const photoFile = $("#inpPhotoFile").files[0];
+              if (!photoFile) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Publicar Resenha";
+                return toast("Por favor, selecione uma foto.", "error");
+              }
+
+              progressContainer.classList.remove("hidden");
+
+              const imageUrl = await uploadToCloudinary(photoFile, (percent) => {
+                progressBar.style.width = percent + "%";
+                progressText.textContent = percent + "%";
+              });
+
+              await db.collection("posts").add({
+                title: fd.get("title"),
+                description: fd.get("description"),
+                imageUrl: imageUrl,
+                userId: currentUser.uid,
+                userName: currentProfile.name,
+                likesCount: 0,
+                commentsCount: 0,
+                repostsCount: 0,
+                status: "active",
+                createdAt: new Date().toISOString()
+              });
+
+              closeModal();
+              toast("Foto de resenha publicada com sucesso!", "success");
+              renderBookTok();
+            } else {
+              const videoFile = $("#inpVideoFile").files[0];
+              if (!videoFile) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Publicar Resenha";
+                return toast("Por favor, selecione um arquivo de vídeo.", "error");
+              }
+
+              progressContainer.classList.remove("hidden");
+
+              const videoUrl = await uploadToCloudinary(videoFile, (percent) => {
+                progressBar.style.width = percent + "%";
+                progressText.textContent = percent + "%";
+              });
+
+              await db.collection("posts").add({
+                title: fd.get("title"),
+                description: fd.get("description"),
+                videoUrl: videoUrl,
+                userId: currentUser.uid,
+                userName: currentProfile.name,
+                likesCount: 0,
+                commentsCount: 0,
+                repostsCount: 0,
+                status: "active",
+                createdAt: new Date().toISOString()
+              });
+
+              closeModal();
+              toast("Resenha em vídeo publicada com sucesso!", "success");
+              renderBookTok();
+            }
+          } catch (error) {
+            console.log(error);
+            toast("Erro ao processar publicação no Cloudinary.", "error");
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Publicar Resenha";
+            progressContainer.classList.add("hidden");
+          }
+        };
+      };
+
+      $$(".like-btn").forEach(btn => {
+        btn.onclick = async function() {
+          await db.collection("posts").doc(this.dataset.id).update({
+            likesCount: firebase.firestore.FieldValue.increment(1)
+          });
+          toast("Você curtiu a resenha!");
+          renderBookTok();
+        };
       });
     }
 
-    const modalBody = `
-      <div style="max-height: 280px; overflow-y: auto; margin-bottom: 16px; padding-right: 4px;">
-        ${commentsListHtml}
-      </div>
-      <form id="commentForm" class="form-grid">
-        <label>Escreva seu comentário:
-          <textarea id="commentText" name="text" placeholder="Digite aqui o que achou..." required style="min-height:70px;"></textarea>
-        </label>
-        <button class="primary-btn full" type="submit" id="submitCommentBtn">Enviar Comentário</button>
-      </form>
-    `;
-
-    openModal("💬 Comentários", modalBody);
-
-    $("#commentForm").onsubmit = async (e) => {
-      e.preventDefault();
-      const text = $("#commentText").value.trim();
-      if (!text) return;
-
-      const submitBtn = $("#submitCommentBtn");
-      submitBtn.disabled = true;
-      submitBtn.textContent = "Enviando...";
-
-      try {
-        // Adiciona o comentário na subcoleção
-        await db.collection("posts").doc(postId).collection("comments").add({
-          userId: currentUser.uid,
-          userName: currentProfile.name || "Usuário",
-          text: text,
-          createdAt: new Date().toISOString()
-        });
-
-        // Incrementa o contador de comentários do post
-        await db.collection("posts").doc(postId).update({
-          commentsCount: firebase.firestore.FieldValue.increment(1)
-        });
-
-        toast("Comentário enviado!", "success");
-        openCommentsModal(postId); // Recarrega o modal para mostrar o novo comentário
-        renderBookTok(); // Atualiza a contagem no card ao fundo
-      } catch(err) {
-        console.error(err);
-        toast("Erro ao enviar comentário.", "error");
-        submitBtn.disabled = false;
-        submitBtn.textContent = "Enviar Comentário";
-      }
-    };
-
-  } catch(err) {
-    console.error(err);
-    toast("Erro ao carregar comentários.", "error");
-  }
-}
-window.openCommentsModal = openCommentsModal;
-
-    function showBookTokPostModal(id = null, dataJson = null) {
-      const data = dataJson ? JSON.parse(decodeURIComponent(dataJson)) : {};
-      openModal(id ? "✏️ Editar Resenha BookTok" : "📹 Nova Resenha BookTok", `
-        <form id="bookTokPostForm" class="form-grid">
-          <label>Título da Resenha
-            <input name="title" value="${data.title || ''}" required placeholder="Ex: Minha opinião sobre Vidas Secas" />
-          </label>
-          <label>Descrição / Opinião
-            <textarea name="description" required placeholder="O que você achou do livro? Compartilhe seus destaques...">${data.description || ''}</textarea>
-          </label>
-          
-          <div id="mediaUploadOption">
-            <label>📸 Selecionar Imagem ou Vídeo: <input type="file" id="inpCoverFile" accept="image/*,video/*" /></label>
-            </label>
-            <label style="margin-top:8px">Ou URL Direta da Mídia (Opcional):
-              <input name="mediaUrl" value="${data.imageUrl || data.videoUrl || ''}" placeholder="https://..." />
-            </label>
-          </div>
-
-          <div id="uploadPostProgress" class="hidden" style="margin-top:10px">
-            <div class="progress-info">
-              <span>Enviando mídia...</span>
-              <strong id="uploadPostPercent">0%</strong>
-            </div>
-            <div class="progress"><div id="uploadPostBar" style="width:0%"></div></div>
-          </div>
-
-          <button class="primary-btn full" type="submit" id="submitPostBtn" style="margin-top:10px">
-            ${id ? 'Salvar Alterações' : 'Publicar no BookTok'}
-          </button>
+    // --- FUNÇÕES DE AÇÃO DO BOOKTOK ---
+    function editBookTokPost(id, dataJson) {
+      const p = JSON.parse(decodeURIComponent(dataJson));
+      openModal("✏️ Editar Resenha do BookTok", `
+        <form id="editPostForm" class="form-grid">
+          <label>Título da Resenha <input name="title" value="${p.title || ''}" required /></label>
+          <label>Descrição <textarea name="description" required>${p.description || ''}</textarea></label>
+          <button class="primary-btn full" type="submit">Salvar Alterações</button>
         </form>
       `);
 
-      $("#bookTokPostForm").onsubmit = async (e) => {
+      $("#editPostForm").onsubmit = async (e) => {
         e.preventDefault();
         const fd = new FormData(e.target);
-        const fileInput = $("#inpPostMediaFile");
-        let mediaUrl = fd.get("mediaUrl");
-        let isVideo = false;
-
-        const submitBtn = $("#submitPostBtn");
-        const progressContainer = $("#uploadPostProgress");
-        const progressBar = $("#uploadPostBar");
-        const progressPercent = $("#uploadPostPercent");
-
-        if (fileInput && fileInput.files && fileInput.files[0]) {
-          const file = fileInput.files[0];
-          isVideo = file.type.startsWith("video/");
-          submitBtn.disabled = true;
-          submitBtn.textContent = "Enviando arquivo...";
-          progressContainer.classList.remove("hidden");
-
-          try {
-            mediaUrl = await uploadToCloudinary(file, (percent) => {
-              progressBar.style.width = percent + "%";
-              progressPercent.textContent = percent + "%";
-            });
-          } catch(err) {
-            console.error(err);
-            toast("Erro ao enviar mídia para o Cloudinary.", "error");
-            submitBtn.disabled = false;
-            submitBtn.textContent = "Publicar no BookTok";
-            progressContainer.classList.add("hidden");
-            return;
-          }
-        } else if (mediaUrl) {
-          isVideo = mediaUrl.endsWith(".mp4") || mediaUrl.endsWith(".webm") || mediaUrl.includes("video");
-        }
-
-        const payload = {
-          title: fd.get("title"),
-          description: fd.get("description"),
-          userId: currentUser.uid,
-          userName: currentProfile.name,
-          updatedAt: new Date().toISOString()
-        };
-
-        if (isVideo) {
-          payload.videoUrl = mediaUrl || "";
-          payload.imageUrl = "";
-        } else {
-          payload.imageUrl = mediaUrl || "";
-          payload.videoUrl = "";
-        }
-
         try {
-          if (id) {
-            await db.collection("posts").doc(id).update(payload);
-            toast("Resenha atualizada!", "success");
-          } else {
-            payload.likesCount = 0;
-            payload.commentsCount = 0;
-            payload.repostsCount = 0;
-            payload.status = "active";
-            payload.createdAt = new Date().toISOString();
-            await db.collection("posts").add(payload);
-
-            // Recompensa por publicar resenha no BookTok
-            await db.collection("users").doc(currentUser.uid).update({
-              xp: firebase.firestore.FieldValue.increment(20),
-              cactoscoins: firebase.firestore.FieldValue.increment(5)
-            });
-            toast("Resenha publicada! Você ganhou +20 XP e +5 Cactoscoins!", "success");
-          }
+          await db.collection("posts").doc(id).update({
+            title: fd.get("title"),
+            description: fd.get("description")
+          });
           closeModal();
+          toast("Resenha atualizada com sucesso!", "success");
           renderBookTok();
-        } catch(err) {
-          console.error(err);
-          toast("Erro ao salvar publicação.", "error");
-          submitBtn.disabled = false;
+        } catch(error) {
+          console.log(error);
+          toast("Erro ao atualizar a publicação.", "error");
         }
       };
-    }
-    window.showBookTokPostModal = showBookTokPostModal;
-
-    function editBookTokPost(id, encodedPost) {
-      showBookTokPostModal(id, encodedPost);
     }
     window.editBookTokPost = editBookTokPost;
 
     async function deleteBookTokPost(id) {
-      if (confirm("Deseja realmente apagar esta resenha?")) {
+      if (confirm("Deseja realmente excluir esta resenha?")) {
         try {
           await db.collection("posts").doc(id).delete();
-          toast("Resenha apagada com sucesso.", "info");
+          toast("Publicação removida com sucesso.");
           renderBookTok();
-        } catch(err) {
-          console.error(err);
-          toast("Erro ao excluir resenha.", "error");
+        } catch(error) {
+          console.log(error);
+          toast("Erro ao remover a publicação.", "error");
         }
       }
     }
     window.deleteBookTokPost = deleteBookTokPost;
 
-    async function repostBookTokPost(originalId, encodedPost) {
-      const p = JSON.parse(decodeURIComponent(encodedPost));
-      if (confirm(`Deseja repostar a resenha de @${p.userName}?`)) {
-        try {
-          await db.collection("posts").add({
-            title: p.title,
-            description: p.description,
-            imageUrl: p.imageUrl || "",
-            videoUrl: p.videoUrl || "",
-            userId: currentUser.uid,
-            userName: currentProfile.name,
-            isRepost: true,
-            originalAuthor: p.userName,
-            likesCount: 0,
-            commentsCount: 0,
-            repostsCount: 0,
-            status: "active",
-            createdAt: new Date().toISOString()
-          });
+    async function repostBookTokPost(id, dataJson) {
+      const p = JSON.parse(decodeURIComponent(dataJson));
+      
+      if (p.userId === currentUser.uid) {
+        return toast("Você já é o autor original desta publicação!", "error");
+      }
 
-          await db.collection("posts").doc(originalId).update({
-            repostsCount: firebase.firestore.FieldValue.increment(1)
-          });
+      if (!confirm(`Deseja repostar a resenha de @${p.userName}?`)) return;
 
-          toast("Resenha repostada no seu perfil BookTok!", "success");
-          renderBookTok();
-        } catch(err) {
-          console.error(err);
-          toast("Erro ao repostar.", "error");
-        }
+      try {
+        await db.collection("posts").doc(id).update({
+          repostsCount: firebase.firestore.FieldValue.increment(1)
+        });
+
+        await db.collection("posts").add({
+          title: p.title,
+          description: p.description,
+          imageUrl: p.imageUrl || null,
+          videoUrl: p.videoUrl || null,
+          userId: currentUser.uid,
+          userName: currentProfile.name,
+          originalAuthor: p.userName,
+          isRepost: true,
+          likesCount: 0,
+          commentsCount: 0,
+          repostsCount: 0,
+          status: "active",
+          createdAt: new Date().toISOString()
+        });
+
+        toast("Resenha repostada com sucesso no seu feed!", "success");
+        renderBookTok();
+      } catch(error) {
+        console.log(error);
+        toast("Erro ao repostar a publicação.", "error");
       }
     }
     window.repostBookTokPost = repostBookTokPost;
 
-    // --- PROFILE PAGE ---
-    async function renderProfile() {
+    // --- PROFILE ---
+    function renderProfile() {
       const p = currentProfile;
-      const isStu = p.role === "student";
+      const turmasTexto = Array.isArray(p.classes) ? p.classes.join(", ") : (p.className || "Não definida");
 
-      let readingsCount = 0;
-      try {
-        const snap = await db.collection("readings").where("userId", "==", currentUser.uid).get();
-        readingsCount = snap.size;
-      } catch(err) { console.error(err); }
-
-      $("#pageContent").innerHTML = `
-        ${pageTitle("Meu Perfil", "Gerencie suas informações, foto de perfil e personalização.")}
-
-        <div class="panel" style="margin-bottom:20px">
-          <div class="flex" style="gap:20px;align-items:center">
-            <div style="position:relative">
-              ${renderAvatar(p.photoURL, p.name)}
-            </div>
-            <div>
-              <h2 style="font-size:24px">${p.name}</h2>
-              <p class="muted">${roleLabel(p.role)} ${isStu ? `• Turma: ${p.className || 'Não definida'}` : ''}</p>
-              <p class="muted" style="font-size:12px">${p.email}</p>
+      $("#pageContent").innerHTML =
+        pageTitle("Meu Perfil", "Gerencie suas informações pessoais.", `<span class="tag" style="font-size:14px">${roleLabel(p.role)}</span>`) +
+        `<div class="content-grid">
+          <div class="panel">
+            <h2 style="margin-bottom:20px">Informações Pessoais</h2>
+            <div class="form-grid">
+              <label>Nome Completo <input id="editName" value="${p.name || ""}" /></label>
+              <label>E-mail <input value="${p.email || ""}" disabled /></label>
+              <label>URL da Foto de Perfil <input id="editPhoto" value="${p.photoURL || ""}" placeholder="https://..." /></label>
+              <label>Foto de Perfil do Dispositivo <input type="file" id="editPhotoFile" accept="image/*" /></label>
+              <label>Turma(s) Vinculada(s) <input value="${turmasTexto}" disabled /></label>
+              <button id="saveBtn" class="primary-btn full">Salvar Alterações</button>
             </div>
           </div>
-          <div class="flex" style="margin-top:16px">
-            <button class="primary-btn" id="editProfileBtn" style="font-size:12px;padding:8px 14px">✏️ Editar Perfil & Foto</button>
-            <button class="secondary-btn" onclick="openThemeSelectorModal()" style="font-size:12px;padding:8px 14px">🎨 Alterar Tema Visual</button>
-          </div>
-        </div>
-
-        <div class="stats-grid">
-          ${statCard(emoji('sol'), "XP Acumulado", p.xp || 0)}
-          ${statCard(emoji('cactocoin'), "Cactoscoins", p.cactoscoins || 0)}
-          ${statCard(emoji('cordel'), "Livros Lidos", p.booksRead || 0)}
-          ${statCard(emoji('chapeu'), "Registros Enviados", readingsCount)}
-        </div>
-      `;
-
-      $("#editProfileBtn").onclick = () => showEditProfileModal();
-    }
-
-    function showEditProfileModal() {
-      const p = currentProfile;
-      const isStu = p.role === "student";
-
-      openModal("✏️ Editar Perfil", `
-        <form id="editProfileForm" class="form-grid">
-          <label>Nome Completo
-            <input name="name" value="${p.name || ''}" required />
-          </label>
-          
-          ${isStu ? `
-          <label>Turma
-            <select name="className" required>
-              ${TURMAS_DISPONIVEIS.map(t => `<option value="${t}" ${p.className === t ? 'selected' : ''}>${t}</option>`).join("")}
-            </select>
-          </label>
-          ` : ''}
-
-          <label>Foto de Perfil (Enviar Arquivo)
-            <input type="file" id="inpProfilePhotoFile" accept="image/*" style="padding:8px" />
-          </label>
-
-          <label>Ou URL da Foto
-            <input name="photoURL" id="inpProfilePhotoUrl" value="${p.photoURL || ''}" placeholder="https://..." />
-          </label>
-
-          <div id="uploadProfileProgress" class="hidden" style="margin-top:10px">
-            <div class="progress-info">
-              <span>Enviando foto de perfil...</span>
-              <strong id="uploadProfilePercent">0%</strong>
+          <div class="panel">
+            <h2 style="margin-bottom:20px">Sua Conquista</h2>
+            <div class="progress-list">
+              <div class="ranking-item"><span>${emoji('cordel')}</span><span class="ranking-name">Livros Lidos</span><strong>${p.booksRead || 0}</strong></div>
+              <div class="ranking-item"><span>${emoji('sol')}</span><span class="ranking-name">Experiência (XP)</span><strong>${p.xp || 0}</strong></div>
+              <div class="ranking-item"><span>${emoji('chapeu')}</span><span class="ranking-name">Nível Atual</span><strong>${p.level || 1}</strong></div>
+              <div class="ranking-item"><span>${emoji('cactocoin')}</span><span class="ranking-name">Cactoscoins</span><strong>${p.cactoscoins || 0}</strong></div>
             </div>
-            <div class="progress"><div id="uploadProfileBar" style="width:0%"></div></div>
           </div>
+        </div>`;
 
-          <button class="primary-btn full" type="submit" id="submitProfileBtn" style="margin-top:10px">
-            Salvar Alterações
-          </button>
-        </form>
-      `);
+      $("#saveBtn").onclick = async () => {
+        const name = $("#editName").value.trim();
+        let photoURL = $("#editPhoto").value.trim();
+        const fileInput = $("#editPhotoFile");
 
-      $("#editProfileForm").onsubmit = async (e) => {
-        e.preventDefault();
-        const fd = new FormData(e.target);
-        const photoFile = $("#inpProfilePhotoFile").files[0];
-        let photoURL = fd.get("photoURL");
+        if (!name) return toast("Informe seu nome.", "error");
 
-        const submitBtn = $("#submitProfileBtn");
-        const progressContainer = $("#uploadProfileProgress");
-        const progressBar = $("#uploadProfileBar");
-        const progressPercent = $("#uploadProfilePercent");
-
-        if (photoFile) {
-          submitBtn.disabled = true;
-          submitBtn.textContent = "Enviando imagem...";
-          progressContainer.classList.remove("hidden");
-
-          try {
-            photoURL = await uploadToCloudinary(photoFile, (percent) => {
-              progressBar.style.width = percent + "%";
-              progressPercent.textContent = percent + "%";
-            });
-          } catch(err) {
-            console.error(err);
-            toast("Erro ao enviar foto para o Cloudinary.", "error");
-            submitBtn.disabled = false;
-            submitBtn.textContent = "Salvar Alterações";
-            progressContainer.classList.add("hidden");
-            return;
+        if (fileInput && fileInput.files && fileInput.files[0]) {
+          try { 
+            toast("Enviando foto de perfil...", "success");
+            photoURL = await uploadToCloudinary(fileInput.files[0]); 
+          } catch(error) { 
+            console.log(error);
+            return toast("Erro ao enviar foto para o Cloudinary.", "error");
           }
         }
 
-        const updates = {
-          name: fd.get("name"),
-          photoURL: photoURL || ""
-        };
-
-        if (isStu) {
-          updates.className = fd.get("className");
-        }
-
-        try {
-          await db.collection("users").doc(currentUser.uid).update(updates);
-          currentProfile = { ...currentProfile, ...updates };
-          closeModal();
-          toast("Perfil atualizado com sucesso!", "success");
-          renderApp();
-        } catch(err) {
-          console.error(err);
-          toast("Erro ao atualizar perfil.", "error");
-          submitBtn.disabled = false;
-        }
+        await db.collection("users").doc(currentUser.uid).update({ name, photoURL });
+        currentProfile.name = name;
+        currentProfile.photoURL = photoURL;
+        toast("Perfil atualizado!", "success");
+        renderApp();
       };
     }
 
-    // --- AUTHENTICATION SCREEN ---
+    // --- AUTH ---
+    let isRegister = false;
+
     function renderAuth() {
+      applyThemeSettings();
+      const turmasOptions = TURMAS_DISPONIVEIS.map(t => `<option value="${t}">${t}</option>`).join("");
+      const turmasCheckboxes = TURMAS_DISPONIVEIS.map(t => `
+        <label class="checkbox-item"><input type="checkbox" name="teacherClasses" value="${t}" /> ${t}</label>
+      `).join("");
+
       $("#app").innerHTML = `
         <div class="auth-layout">
           <div class="auth-hero">
+            <div class="brand"><div class="brand-mark">${emoji('brotinho')}</div><span>Sertão Literário</span></div>
             <div class="auth-hero-content">
-              <div class="brand" style="color:#F3E9DC;margin-bottom:16px">
-                <div class="brand-mark">${emoji('brotinho')}</div>
-                <span>Sertão Literário</span>
-              </div>
-              <h1>A Leitura Ganha Vida no Sertão!</h1>
-              <p>Explore a biblioteca, acumule Cactoscoins, complete desafios de leitura e compartilhe suas resenhas no BookTok Sertanejo!</p>
+              <h1>A leitura virou jornada.</h1>
+              <p>Uma experiência literária gamificada do 5º ao 9º ano. Leia, conquiste e ganhe novos temas visuais!</p>
             </div>
           </div>
           <div class="auth-panel">
             <div class="auth-card">
+              <h2 id="authTitle">Entrar na jornada</h2>
+              <p id="authDesc">Acesse seu painel literário.</p>
               <div class="auth-tabs">
-                <button id="tabLoginBtn" class="active" onclick="switchAuthTab('login')">Entrar</button>
-                <button id="tabRegisterBtn" onclick="switchAuthTab('register')">Cadastrar</button>
+                <button id="tabLogin" class="active">Entrar</button>
+                <button id="tabReg">Criar conta</button>
               </div>
-
-              <!-- FORMULÁRIO DE LOGIN -->
-              <form id="loginForm" class="form-grid">
-                <h2>Bem-vindo(a)!</h2>
-                <p>Acesse sua conta para continuar.</p>
-                <label>E-mail
-                  <input name="email" type="email" required placeholder="seuemail@escola.com" />
-                </label>
-                <label>Senha
-                  <input name="password" type="password" required placeholder="••••••••" />
-                </label>
-                <button class="primary-btn full" type="submit" id="btnLoginSubmit">Entrar no Sistema</button>
-              </form>
-
-              <!-- FORMULÁRIO DE CADASTRO -->
-              <form id="registerForm" class="form-grid hidden">
-                <h2>Criar Conta</h2>
-                <p>Junte-se ao projeto Sertão Literário!</p>
-                <label>Nome Completo
-                  <input name="name" required placeholder="Seu nome completo" />
-                </label>
-                <label>E-mail
-                  <input name="email" type="email" required placeholder="seuemail@escola.com" />
-                </label>
-                <label>Senha
-                  <input name="password" type="password" minlength="6" required placeholder="Mínimo 6 caracteres" />
-                </label>
-
-                <label>Perfil de Acesso
-                  <select name="role" id="roleSelect" required onchange="handleRoleChange(this.value)">
-                    <option value="student">Aluno(a)</option>
-                    <option value="teacher">Professor(a)</option>
-                    <option value="coordinator">Coordenador(a)</option>
-                  </select>
-                </label>
-
-                <div id="studentClassContainer">
-                  <label>Turma
-                    <select name="className">
-                      ${TURMAS_DISPONIVEIS.map(t => `<option value="${t}">${t}</option>`).join("")}
-                    </select>
-                  </label>
+              <form id="authForm" class="form-grid">
+                <div id="nameField" class="hidden"><label>Nome Completo <input id="inpName" type="text" /></label></div>
+                <label>E-mail <input id="inpEmail" type="email" required /></label>
+                
+                <div id="roleField" class="hidden">
+                  <label>Perfil <select id="inpRole">
+                    <option value="student">Aluno</option>
+                    <option value="teacher">Professor</option>
+                    <option value="coordinator">Coordenador</option>
+                  </select></label>
                 </div>
 
-                <div id="secretCodeContainer" class="hidden">
-                  <label>Código de Validação de Staff
-                    <input name="secretCode" placeholder="Informe o código fornecido pela escola" />
-                  </label>
+                <div id="studentClassField" class="hidden">
+                  <label>Selecione sua Turma <select id="inpStudentClass">${turmasOptions}</select></label>
                 </div>
 
-                <button class="primary-btn full" type="submit" id="btnRegisterSubmit">Criar minha conta</button>
+                <div id="teacherClassField" class="hidden">
+                  <label>Selecione as Turmas que leciona</label>
+                  <div class="checkbox-group">${turmasCheckboxes}</div>
+                </div>
+
+                <div id="photoField" class="hidden">
+                  <label>URL da Foto de Perfil <input id="inpPhoto" type="url" placeholder="https://..." /></label>
+                  <label style="margin-top:6px">Ou Escolher da Galeria <input type="file" id="inpPhotoFile" accept="image/*" /></label>
+                </div>
+
+                <div id="codeField" class="hidden"><label>Código de Acesso Institucional <input id="inpCode" type="password" /></label></div>
+                
+                <div>
+                  <label>Senha <input id="inpPwd" type="password" minlength="6" required /></label>
+                  <div id="forgotPwdWrapper" style="text-align: right; margin-top: 6px;">
+                    <a href="#" id="forgotPwdBtn" style="font-size: 12px; color: var(--primary); font-weight: 700; text-decoration: underline;">Esqueceu a senha?</a>
+                  </div>
+                </div>
+
+                <button class="primary-btn full" type="submit" id="authBtn">Entrar</button>
               </form>
             </div>
           </div>
-        </div>
-      `;
+        </div>`;
 
-      $("#loginForm").onsubmit = async (e) => {
-        e.preventDefault();
-        const fd = new FormData(e.target);
-        const submitBtn = $("#btnLoginSubmit");
-        submitBtn.disabled = true;
-        submitBtn.textContent = "Entrando...";
-
-        try {
-          await auth.signInWithEmailAndPassword(fd.get("email"), fd.get("password"));
-          toast("Login realizado com sucesso!", "success");
-        } catch(err) {
-          console.error(err);
-          toast("Falha no login: " + (err.message || "E-mail ou senha incorretos."), "error");
-          submitBtn.disabled = false;
-          submitBtn.textContent = "Entrar no Sistema";
-        }
+      $("#tabLogin").onclick = () => setMode(false);
+      $("#tabReg").onclick = () => setMode(true);
+      
+      $("#inpRole").onchange = function() {
+        const role = this.value;
+        $("#studentClassField").classList.toggle("hidden", role !== "student" || !isRegister);
+        $("#teacherClassField").classList.toggle("hidden", role !== "teacher" || !isRegister);
+        $("#codeField").classList.toggle("hidden", role === "student" || !isRegister);
       };
 
-      $("#registerForm").onsubmit = async (e) => {
+      $("#forgotPwdBtn").onclick = (e) => {
         e.preventDefault();
-        const fd = new FormData(e.target);
-        const role = fd.get("role");
-        const secretCode = fd.get("secretCode");
+        openForgotPasswordModal();
+      };
 
-        if (role === "teacher" && secretCode !== PROFESSOR_CODE) {
-          return toast("Código de validação de Professor incorreto!", "error");
-        }
-        if (role === "coordinator" && secretCode !== COORDINATOR_CODE) {
-          return toast("Código de validação de Coordenador incorreto!", "error");
-        }
+      $("#authForm").onsubmit = handleAuth;
+      setMode(false);
+    }
 
-        const submitBtn = $("#btnRegisterSubmit");
-        submitBtn.disabled = true;
-        submitBtn.textContent = "Criando conta...";
+    function setMode(reg) {
+      isRegister = reg;
+      $("#tabLogin").classList.toggle("active", !reg);
+      $("#tabReg").classList.toggle("active", reg);
+      $("#nameField").classList.toggle("hidden", !reg);
+      $("#roleField").classList.toggle("hidden", !reg);
+      $("#photoField").classList.toggle("hidden", !reg);
+      $("#forgotPwdWrapper").classList.toggle("hidden", reg);
+
+      const role = $("#inpRole") ? $("#inpRole").value : "student";
+      $("#studentClassField").classList.toggle("hidden", !reg || role !== "student");
+      $("#teacherClassField").classList.toggle("hidden", !reg || role !== "teacher");
+      $("#codeField").classList.toggle("hidden", !reg || role === "student");
+
+      $("#authTitle").textContent = reg ? "Crie sua jornada" : "Entrar na jornada";
+      $("#authDesc").textContent = reg ? "Escolha seu perfil e faça seu cadastro." : "Acesse seu painel.";
+      $("#authBtn").textContent = reg ? "Criar conta" : "Entrar";
+    }
+
+    function openForgotPasswordModal() {
+      const emailInput = $("#inpEmail") ? $("#inpEmail").value.trim() : "";
+      openModal("🔑 Recuperar Senha", `
+        <form id="forgotPwdForm" class="form-grid">
+          <p class="muted" style="font-size: 13px;">
+            Informe seu e-mail cadastrado para receber o link de redefinição de senha.
+          </p>
+          <label>E-mail <input id="recoveryEmail" type="email" value="${emailInput}" required placeholder="seuemail@exemplo.com" /></label>
+          <button class="primary-btn full" type="submit">Enviar Link de Recuperação</button>
+        </form>
+      `);
+
+      document.getElementById("forgotPwdForm").onsubmit = async (e) => {
+        e.preventDefault();
+        const email = document.getElementById("recoveryEmail").value.trim();
+        if (!email) return toast("Informe seu e-mail.", "error");
 
         try {
-          const cred = await auth.createUserWithEmailAndPassword(fd.get("email"), fd.get("password"));
-          const uid = cred.user.uid;
-
-          const userPayload = {
-            uid: uid,
-            name: fd.get("name"),
-            email: fd.get("email"),
-            role: role,
-            className: role === "student" ? fd.get("className") : "5º Ano",
-            classes: role !== "student" ? TURMAS_DISPONIVEIS : [fd.get("className")],
-            xp: 0,
-            cactoscoins: 100,
-            booksRead: 0,
-            level: 1,
-            activeTheme: "default",
-            unlockedThemes: ["default"],
-            photoURL: "",
-            createdAt: new Date().toISOString()
-          };
-
-          await db.collection("users").doc(uid).set(userPayload);
-          toast("Conta criada com sucesso! Bem-vindo(a)!", "success");
-        } catch(err) {
-          console.error(err);
-          toast("Erro ao cadastrar: " + (err.message || "Tente novamente."), "error");
-          submitBtn.disabled = false;
-          submitBtn.textContent = "Criar minha conta";
+          await auth.sendPasswordResetEmail(email);
+          closeModal();
+          toast("E-mail de redefinição enviado! Confira sua caixa de entrada.", "success");
+        } catch (error) {
+          console.log(error);
+          let errMsg = "Erro ao solicitar redefinição de senha.";
+          if (error.code === "auth/user-not-found") errMsg = "E-mail não encontrado no sistema.";
+          else if (error.code === "auth/invalid-email") errMsg = "E-mail inválido.";
+          toast(errMsg, "error");
         }
       };
     }
 
-    function switchAuthTab(tab) {
-      if (tab === "login") {
-        $("#tabLoginBtn").classList.add("active");
-        $("#tabRegisterBtn").classList.remove("active");
-        $("#loginForm").classList.remove("hidden");
-        $("#registerForm").classList.add("hidden");
-      } else {
-        $("#tabRegisterBtn").classList.add("active");
-        $("#tabLoginBtn").classList.remove("active");
-        $("#registerForm").classList.remove("hidden");
-        $("#loginForm").classList.add("hidden");
-      }
-    }
-    window.switchAuthTab = switchAuthTab;
+    async function handleAuth(e) {
+      e.preventDefault();
+      const email = $("#inpEmail").value.trim();
+      const pwd = $("#inpPwd").value;
 
-    function handleRoleChange(role) {
-      if (role === "student") {
-        $("#studentClassContainer").classList.remove("hidden");
-        $("#secretCodeContainer").classList.add("hidden");
-      } else {
-        $("#studentClassContainer").classList.add("hidden");
-        $("#secretCodeContainer").classList.remove("hidden");
-      }
-    }
-    window.handleRoleChange = handleRoleChange;
+      if (!email || pwd.length < 6) return toast("Informe e-mail e senha com no mínimo 6 caracteres.", "error");
 
-    // --- FIREBASE AUTH LISTENER & INIT ---
-    auth.onAuthStateChanged(async (user) => {
-      if (user) {
-        currentUser = user;
-        try {
-          const userDoc = await db.collection("users").doc(user.uid).get();
-          if (userDoc.exists) {
-            currentProfile = userDoc.data();
-            if (currentProfile.activeTheme) {
-              currentTheme = currentProfile.activeTheme;
-              localStorage.setItem("st-active-theme", currentTheme);
+      try {
+        if (isRegister) {
+          const name = $("#inpName").value.trim();
+          const role = $("#inpRole").value;
+          let photoURL = $("#inpPhoto").value.trim();
+          const fileInput = $("#inpPhotoFile");
+          const code = $("#inpCode") ? $("#inpCode").value.trim() : "";
+
+          if (!name) return toast("Informe seu nome completo.", "error");
+
+          if (fileInput && fileInput.files && fileInput.files[0]) {
+            try { 
+              toast("Enviando foto de perfil...", "success");
+              photoURL = await uploadToCloudinary(fileInput.files[0]); 
+            } catch(error) { 
+              console.log(error);
+              return toast("Erro ao enviar foto para o Cloudinary.", "error");
             }
-          } else {
-            currentProfile = {
-              uid: user.uid,
-              name: user.displayName || user.email.split("@")[0],
-              email: user.email,
-              role: "student",
-              className: "5º Ano",
-              xp: 0,
-              cactoscoins: 100,
-              booksRead: 0,
-              level: 1,
-              activeTheme: "default",
-              unlockedThemes: ["default"]
-            };
           }
+
+          let selectedClasses = [];
+          let studentClass = "";
+
+          if (role === "teacher") {
+            if (code !== PROFESSOR_CODE) return toast("Código de professor inválido.", "error");
+            const checkedBoxes = document.querySelectorAll('input[name="teacherClasses"]:checked');
+            selectedClasses = Array.from(checkedBoxes).map(cb => cb.value);
+            if (selectedClasses.length === 0) return toast("Selecione pelo menos uma turma.", "error");
+          } else if (role === "coordinator") {
+            if (code !== COORDINATOR_CODE) return toast("Código de coordenador inválido.", "error");
+            selectedClasses = TURMAS_DISPONIVEIS;
+          } else {
+            studentClass = $("#inpStudentClass").value;
+            selectedClasses = [studentClass];
+          }
+
+          const cred = await auth.createUserWithEmailAndPassword(email, pwd);
+          await db.collection("users").doc(cred.user.uid).set({
+            name, email, role, photoURL,
+            className: role === "student" ? studentClass : selectedClasses.join(", "),
+            classes: selectedClasses,
+            xp: 0, cactoscoins: 0, level: 1, booksRead: 0,
+            unlockedThemes: ["default"], activeTheme: "default",
+            isActive: true, createdAt: new Date().toISOString()
+          });
+          toast("Conta criada com sucesso!", "success");
+        } else {
+          await auth.signInWithEmailAndPassword(email, pwd);
+        }
+      } catch(error) {
+        console.log(error);
+        toast("Erro ao autenticar: " + error.message, "error");
+      }
+    }
+
+    // --- INITIALIZATION ---
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        currentUser = null; currentProfile = null;
+        renderAuth();
+        return;
+      }
+      try {
+        const snap = await db.collection("users").doc(user.uid).get();
+        if (snap.exists) {
+          currentUser = user;
+          currentProfile = { uid: user.uid, ...snap.data() };
+          
+          if (currentProfile.activeTheme) {
+            currentTheme = currentProfile.activeTheme;
+            localStorage.setItem("st-active-theme", currentTheme);
+          }
+
           renderApp();
-        } catch(err) {
-          console.error("Erro ao carregar dados do usuário:", err);
+        } else {
           renderAuth();
         }
-      } else {
-        currentUser = null;
-        currentProfile = null;
+      } catch(error) {
+        console.log(error);
         renderAuth();
       }
     });
 
-    // Fechar modal ao clicar no botão X ou fora dele
     $("#closeModalBtn").onclick = closeModal;
-    window.onclick = (e) => {
-      if (e.target === $("#modal")) closeModal();
-    };
+    $("#modal").onclick = (e) => { if (e.target === $("#modal")) closeModal(); };
   </script>
 </body>
 </html>
