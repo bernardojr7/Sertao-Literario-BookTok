@@ -348,41 +348,47 @@
       border-left: 4px solid var(--primary);
     }
 
-    .book-meta, .card-livro .acoes { display: flex; align-items: center; justify-content: space-between; margin-top: auto; gap: 8px; flex-wrap: wrap; }
+    .book-meta, .card-livro .acoes, .post-actions { display: flex; align-items: center; justify-content: space-between; margin-top: auto; gap: 8px; flex-wrap: wrap; }
 
     .tag, .status {
       display: inline-flex; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border);
       color: var(--text); background: var(--cyan); font-size: 10px; font-weight: 700; margin-bottom: 6px; align-self: flex-start; text-transform: uppercase; align-items: center; gap: 4px;
     }
 
-    /* --- AJUSTE DE VÍDEO DO BOOKTOK (TELA E PROPORÇÃO) --- */
-.post-video {
-  width: 100%;
-  aspect-ratio: 9 / 16; /* Proporção vertical padrão do TikTok / Reels */
-  max-height: 520px;    /* Limite máximo para telas maiores/desktop */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: #000000;
-  border-bottom: 2px solid var(--border);
-  color: #fff;
-  overflow: hidden;
-  position: relative;
-  margin: 0 auto;
-}
+    /* AJUSTE DE VÍDEO DO BOOKTOK */
+    .post-video {
+      width: 100%;
+      aspect-ratio: 9 / 16;
+      max-height: 520px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #000000;
+      border-bottom: 2px solid var(--border);
+      color: #fff;
+      overflow: hidden;
+      position: relative;
+      margin: 0 auto;
+    }
 
-.post-video video {
-  width: 100%;
-  height: 100%;
-  object-fit: contain; /* Exibe o vídeo inteiro sem cortar, mantendo a proporção original */
-  background: #000;
-}
+    .post-video video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #000;
+    }
 
-.post-video img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
+    .post-video img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .student-card {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 12px; border: 2px solid var(--border); border-radius: var(--radius);
+      background: var(--surface); box-shadow: var(--shadow); cursor: pointer; transition: transform .15s;
+    }
     .student-card:hover { transform: translate(-2px, -2px); box-shadow: var(--shadow); }
 
     .tab-pills { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 16px; -webkit-overflow-scrolling: touch; }
@@ -1175,7 +1181,7 @@
           .get();
 
         if (snap.empty) {
-          container.innerHTML = `<div class="empty-state">Nenum aluno cadastrado na turma ${className}.</div>`;
+          container.innerHTML = `<div class="empty-state">Nenhum aluno cadastrado na turma ${className}.</div>`;
           return;
         }
 
@@ -2056,184 +2062,179 @@
     window.buyReward = buyReward;
 
     // --- 📹 BOOKTOK PAGE ---
-async function renderBookTok() {
-  let posts = [];
-  try {
-    const snap = await db.collection("posts").where("status","==","active").get();
-    snap.forEach(d => posts.push({ id: d.id, ...d.data() }));
-    posts.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
-  } catch(error) { console.log(error); }
-
-  let postsHtml = posts.length ? "" : '<div class="empty-state">Nenhuma resenha publicada ainda. Seja o primeiro a compartilhar uma foto ou vídeo!</div>';
-  
-  for (let p of posts) {
-    let mediaContent = emoji('booktok');
-    
-    if (p.imageUrl) {
-      mediaContent = `<img src="${p.imageUrl}" alt="Foto da resenha" />`;
-    } else if (p.videoUrl) {
-      mediaContent = `
-        <video 
-          src="${p.videoUrl}" 
-          controls 
-          controlsList="nodownload" 
-          playsinline 
-          preload="metadata">
-        </video>`;
-    }
-    const isAuthor = currentUser && p.userId === currentUser.uid;
-    const isStaff = currentProfile && currentProfile.role !== "student";
-    const encodedPost = encodeURIComponent(JSON.stringify(p));
-
-    // Verifica se o usuário atual já curtiu o post
-    const isLiked = p.likedBy && Array.isArray(p.likedBy) && p.likedBy.includes(currentUser ? currentUser.uid : "");
-
-    postsHtml += `
-      <article class="post-card">
-        <div class="post-video">${mediaContent}</div>
-        <div class="post-content">
-          <div class="flex-between">
-            <span class="tag">@${(p.userName || "usuario").toLowerCase().replace(/\s/g,"")}</span>
-            ${p.isRepost ? `<span class="tag" style="background:var(--cyan);color:var(--text)">Repostado de @${p.originalAuthor}</span>` : ''}
-          </div>
-          <h3>${p.title}</h3>
-          <p>${p.description || ""}</p>
-          <div class="post-actions">
-            <button class="like-btn" data-id="${p.id}" data-liked="${isLiked}">
-              ${isLiked ? '❤️' : '🤍'} ${p.likesCount || 0}
-            </button>
-            <button onclick="openCommentsModal('${p.id}')">💬 ${p.commentsCount || 0}</button>
-            <button onclick="repostBookTokPost('${p.id}', '${encodedPost}')">🔁 ${p.repostsCount || 0}</button>
-            ${isAuthor || isStaff ? `
-              <button class="btn-editar" style="font-size:10px;padding:4px 8px" onclick="editBookTokPost('${p.id}', '${encodedPost}')">✏️</button>
-              <button class="danger-btn" style="font-size:10px;padding:4px 8px" onclick="deleteBookTokPost('${p.id}')">🗑️</button>
-            ` : ''}
-          </div>
-        </div>
-      </article>`;
-  }
-
-  $("#pageContent").innerHTML =
-    pageTitle(`BookTok Sertanejo ${emoji('booktok')}`, "Envie uma foto ou grave um vídeo para compartilhar suas resenhas literárias.", '<button class="primary-btn" id="newPostBtn">+ Nova Resenha</button>') +
-    `<div class="cards-grid">${postsHtml}</div>`;
-
-  const newPostBtn = $("#newPostBtn");
-  if (newPostBtn) {
-    newPostBtn.onclick = () => showBookTokPostModal();
-  }
-
-  // Lógica de Curtir / Descurtir
-  $$(".like-btn").forEach(btn => {
-    btn.onclick = async function() {
-      const postId = this.dataset.id;
-      const isLiked = this.dataset.liked === "true";
-
-      if (!currentUser) return toast("Você precisa estar logado.", "error");
-
+    async function renderBookTok() {
+      let posts = [];
       try {
-        if (isLiked) {
-          // Descurtir
-          await db.collection("posts").doc(postId).update({
-            likesCount: firebase.firestore.FieldValue.increment(-1),
-            likedBy: firebase.firestore.FieldValue.arrayRemove(currentUser.uid)
-          });
-          toast("Você descurtiu esta resenha.", "info");
-        } else {
-          // Curtir
-          await db.collection("posts").doc(postId).update({
-            likesCount: firebase.firestore.FieldValue.increment(1),
-            likedBy: firebase.firestore.FieldValue.arrayUnion(currentUser.uid)
-          });
-          toast("Você curtiu esta resenha!", "success");
+        const snap = await db.collection("posts").where("status","==","active").get();
+        snap.forEach(d => posts.push({ id: d.id, ...d.data() }));
+        posts.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+      } catch(error) { console.log(error); }
+
+      let postsHtml = posts.length ? "" : '<div class="empty-state">Nenhuma resenha publicada ainda. Seja o primeiro a compartilhar uma foto ou vídeo!</div>';
+      
+      for (let p of posts) {
+        let mediaContent = emoji('booktok');
+        
+        if (p.imageUrl) {
+          mediaContent = `<img src="${p.imageUrl}" alt="Foto da resenha" />`;
+        } else if (p.videoUrl) {
+          mediaContent = `
+            <video 
+              src="${p.videoUrl}" 
+              controls 
+              controlsList="nodownload" 
+              playsinline 
+              preload="metadata">
+            </video>`;
         }
-        renderBookTok();
-      } catch(err) {
-        console.error(err);
-        toast("Erro ao processar curtida.", "error");
-      }
-    };
-  });
-}
-    // --- 💬 MODAL E SISTEMA DE COMENTÁRIOS DO BOOKTOK ---
-async function openCommentsModal(postId) {
-  openModal("💬 Comentários", '<div class="empty-state">Carregando comentários...</div>');
+        const isAuthor = currentUser && p.userId === currentUser.uid;
+        const isStaff = currentProfile && currentProfile.role !== "student";
+        const encodedPost = encodeURIComponent(JSON.stringify(p));
 
-  try {
-    const commentsSnap = await db.collection("posts").doc(postId).collection("comments").orderBy("createdAt", "asc").get();
-    let commentsListHtml = "";
+        const isLiked = p.likedBy && Array.isArray(p.likedBy) && p.likedBy.includes(currentUser ? currentUser.uid : "");
 
-    if (commentsSnap.empty) {
-      commentsListHtml = '<div class="empty-state">Nenhum comentário ainda. Seja o primeiro a comentar!</div>';
-    } else {
-      commentsSnap.forEach(doc => {
-        const c = doc.data();
-        const dateStr = c.createdAt ? new Date(c.createdAt).toLocaleDateString("pt-BR", { hour: '2-digit', minute: '2-digit' }) : "";
-        commentsListHtml += `
-          <div class="ranking-item" style="cursor:default; margin-bottom:10px; align-items:flex-start;">
-            <div>
-              <strong>@${(c.userName || "usuario").toLowerCase().replace(/\s/g, "")}</strong>
-              <span class="muted" style="font-size:11px; margin-left:8px;">${dateStr}</span>
-              <p style="margin-top:4px; font-size:13px; color:var(--text);">${c.text}</p>
+        postsHtml += `
+          <article class="post-card">
+            <div class="post-video">${mediaContent}</div>
+            <div class="post-content">
+              <div class="flex-between">
+                <span class="tag">@${(p.userName || "usuario").toLowerCase().replace(/\s/g,"")}</span>
+                ${p.isRepost ? `<span class="tag" style="background:var(--cyan);color:var(--text)">Repostado de @${p.originalAuthor}</span>` : ''}
+              </div>
+              <h3>${p.title}</h3>
+              <p>${p.description || ""}</p>
+              <div class="post-actions">
+                <button class="like-btn" data-id="${p.id}" data-liked="${isLiked}">
+                  ${isLiked ? '❤️' : '🤍'} ${p.likesCount || 0}
+                </button>
+                <button onclick="openCommentsModal('${p.id}')">💬 ${p.commentsCount || 0}</button>
+                <button onclick="repostBookTokPost('${p.id}', '${encodedPost}')">🔁 ${p.repostsCount || 0}</button>
+                ${isAuthor || isStaff ? `
+                  <button class="btn-editar" style="font-size:10px;padding:4px 8px" onclick="editBookTokPost('${p.id}', '${encodedPost}')">✏️</button>
+                  <button class="danger-btn" style="font-size:10px;padding:4px 8px" onclick="deleteBookTokPost('${p.id}')">🗑️</button>
+                ` : ''}
+              </div>
             </div>
-          </div>
-        `;
+          </article>`;
+      }
+
+      $("#pageContent").innerHTML =
+        pageTitle(`BookTok Sertanejo ${emoji('booktok')}`, "Envie uma foto ou grave um vídeo para compartilhar suas resenhas literárias.", '<button class="primary-btn" id="newPostBtn">+ Nova Resenha</button>') +
+        `<div class="cards-grid">${postsHtml}</div>`;
+
+      const newPostBtn = $("#newPostBtn");
+      if (newPostBtn) {
+        newPostBtn.onclick = () => showBookTokPostModal();
+      }
+
+      $$(".like-btn").forEach(btn => {
+        btn.onclick = async function() {
+          const postId = this.dataset.id;
+          const isLiked = this.dataset.liked === "true";
+
+          if (!currentUser) return toast("Você precisa estar logado.", "error");
+
+          try {
+            if (isLiked) {
+              await db.collection("posts").doc(postId).update({
+                likesCount: firebase.firestore.FieldValue.increment(-1),
+                likedBy: firebase.firestore.FieldValue.arrayRemove(currentUser.uid)
+              });
+              toast("Você descurtiu esta resenha.", "info");
+            } else {
+              await db.collection("posts").doc(postId).update({
+                likesCount: firebase.firestore.FieldValue.increment(1),
+                likedBy: firebase.firestore.FieldValue.arrayUnion(currentUser.uid)
+              });
+              toast("Você curtiu esta resenha!", "success");
+            }
+            renderBookTok();
+          } catch(err) {
+            console.error(err);
+            toast("Erro ao processar curtida.", "error");
+          }
+        };
       });
     }
 
-    const modalBody = `
-      <div style="max-height: 280px; overflow-y: auto; margin-bottom: 16px; padding-right: 4px;">
-        ${commentsListHtml}
-      </div>
-      <form id="commentForm" class="form-grid">
-        <label>Escreva seu comentário:
-          <textarea id="commentText" name="text" placeholder="Digite aqui o que achou..." required style="min-height:70px;"></textarea>
-        </label>
-        <button class="primary-btn full" type="submit" id="submitCommentBtn">Enviar Comentário</button>
-      </form>
-    `;
-
-    openModal("💬 Comentários", modalBody);
-
-    $("#commentForm").onsubmit = async (e) => {
-      e.preventDefault();
-      const text = $("#commentText").value.trim();
-      if (!text) return;
-
-      const submitBtn = $("#submitCommentBtn");
-      submitBtn.disabled = true;
-      submitBtn.textContent = "Enviando...";
+    // --- 💬 MODAL E SISTEMA DE COMENTÁRIOS DO BOOKTOK ---
+    async function openCommentsModal(postId) {
+      openModal("💬 Comentários", '<div class="empty-state">Carregando comentários...</div>');
 
       try {
-        // Adiciona o comentário na subcoleção
-        await db.collection("posts").doc(postId).collection("comments").add({
-          userId: currentUser.uid,
-          userName: currentProfile.name || "Usuário",
-          text: text,
-          createdAt: new Date().toISOString()
-        });
+        const commentsSnap = await db.collection("posts").doc(postId).collection("comments").orderBy("createdAt", "asc").get();
+        let commentsListHtml = "";
 
-        // Incrementa o contador de comentários do post
-        await db.collection("posts").doc(postId).update({
-          commentsCount: firebase.firestore.FieldValue.increment(1)
-        });
+        if (commentsSnap.empty) {
+          commentsListHtml = '<div class="empty-state">Nenhum comentário ainda. Seja o primeiro a comentar!</div>';
+        } else {
+          commentsSnap.forEach(doc => {
+            const c = doc.data();
+            const dateStr = c.createdAt ? new Date(c.createdAt).toLocaleDateString("pt-BR", { hour: '2-digit', minute: '2-digit' }) : "";
+            commentsListHtml += `
+              <div class="ranking-item" style="cursor:default; margin-bottom:10px; align-items:flex-start;">
+                <div>
+                  <strong>@${(c.userName || "usuario").toLowerCase().replace(/\s/g, "")}</strong>
+                  <span class="muted" style="font-size:11px; margin-left:8px;">${dateStr}</span>
+                  <p style="margin-top:4px; font-size:13px; color:var(--text);">${c.text}</p>
+                </div>
+              </div>
+            `;
+          });
+        }
 
-        toast("Comentário enviado!", "success");
-        openCommentsModal(postId); // Recarrega o modal para mostrar o novo comentário
-        renderBookTok(); // Atualiza a contagem no card ao fundo
+        const modalBody = `
+          <div style="max-height: 280px; overflow-y: auto; margin-bottom: 16px; padding-right: 4px;">
+            ${commentsListHtml}
+          </div>
+          <form id="commentForm" class="form-grid">
+            <label>Escreva seu comentário:
+              <textarea id="commentText" name="text" placeholder="Digite aqui o que achou..." required style="min-height:70px;"></textarea>
+            </label>
+            <button class="primary-btn full" type="submit" id="submitCommentBtn">Enviar Comentário</button>
+          </form>
+        `;
+
+        openModal("💬 Comentários", modalBody);
+
+        $("#commentForm").onsubmit = async (e) => {
+          e.preventDefault();
+          const text = $("#commentText").value.trim();
+          if (!text) return;
+
+          const submitBtn = $("#submitCommentBtn");
+          submitBtn.disabled = true;
+          submitBtn.textContent = "Enviando...";
+
+          try {
+            await db.collection("posts").doc(postId).collection("comments").add({
+              userId: currentUser.uid,
+              userName: currentProfile.name || "Usuário",
+              text: text,
+              createdAt: new Date().toISOString()
+            });
+
+            await db.collection("posts").doc(postId).update({
+              commentsCount: firebase.firestore.FieldValue.increment(1)
+            });
+
+            toast("Comentário enviado!", "success");
+            openCommentsModal(postId);
+            renderBookTok();
+          } catch(err) {
+            console.error(err);
+            toast("Erro ao enviar comentário.", "error");
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Enviar Comentário";
+          }
+        };
+
       } catch(err) {
         console.error(err);
-        toast("Erro ao enviar comentário.", "error");
-        submitBtn.disabled = false;
-        submitBtn.textContent = "Enviar Comentário";
+        toast("Erro ao carregar comentários.", "error");
       }
-    };
-
-  } catch(err) {
-    console.error(err);
-    toast("Erro ao carregar comentários.", "error");
-  }
-}
-window.openCommentsModal = openCommentsModal;
+    }
+    window.openCommentsModal = openCommentsModal;
 
     function showBookTokPostModal(id = null, dataJson = null) {
       const data = dataJson ? JSON.parse(decodeURIComponent(dataJson)) : {};
@@ -2333,7 +2334,6 @@ window.openCommentsModal = openCommentsModal;
             payload.createdAt = new Date().toISOString();
             await db.collection("posts").add(payload);
 
-            // Recompensa por publicar resenha no BookTok
             await db.collection("users").doc(currentUser.uid).update({
               xp: firebase.firestore.FieldValue.increment(20),
               cactoscoins: firebase.firestore.FieldValue.increment(5)
@@ -2370,36 +2370,34 @@ window.openCommentsModal = openCommentsModal;
     }
     window.deleteBookTokPost = deleteBookTokPost;
 
-    async function repostBookTokPost(originalId, encodedPost) {
+    async function repostBookTokPost(id, encodedPost) {
       const p = JSON.parse(decodeURIComponent(encodedPost));
-      if (confirm(`Deseja repostar a resenha de @${p.userName}?`)) {
-        try {
-          await db.collection("posts").add({
-            title: p.title,
-            description: p.description,
-            imageUrl: p.imageUrl || "",
-            videoUrl: p.videoUrl || "",
-            userId: currentUser.uid,
-            userName: currentProfile.name,
-            isRepost: true,
-            originalAuthor: p.userName,
-            likesCount: 0,
-            commentsCount: 0,
-            repostsCount: 0,
-            status: "active",
-            createdAt: new Date().toISOString()
-          });
+      try {
+        await db.collection("posts").add({
+          title: p.title,
+          description: p.description,
+          imageUrl: p.imageUrl || "",
+          videoUrl: p.videoUrl || "",
+          userId: currentUser.uid,
+          userName: currentProfile.name,
+          isRepost: true,
+          originalAuthor: p.userName,
+          likesCount: 0,
+          commentsCount: 0,
+          repostsCount: 0,
+          status: "active",
+          createdAt: new Date().toISOString()
+        });
 
-          await db.collection("posts").doc(originalId).update({
-            repostsCount: firebase.firestore.FieldValue.increment(1)
-          });
+        await db.collection("posts").doc(id).update({
+          repostsCount: firebase.firestore.FieldValue.increment(1)
+        });
 
-          toast("Resenha repostada no seu perfil BookTok!", "success");
-          renderBookTok();
-        } catch(err) {
-          console.error(err);
-          toast("Erro ao repostar.", "error");
-        }
+        toast("Resenha repostada com sucesso!", "success");
+        renderBookTok();
+      } catch(err) {
+        console.error(err);
+        toast("Erro ao repostar.", "error");
       }
     }
     window.repostBookTokPost = repostBookTokPost;
@@ -2409,111 +2407,51 @@ window.openCommentsModal = openCommentsModal;
       const p = currentProfile;
       const isStu = p.role === "student";
 
-      let readingsCount = 0;
-      try {
-        const snap = await db.collection("readings").where("userId", "==", currentUser.uid).get();
-        readingsCount = snap.size;
-      } catch(err) { console.error(err); }
-
-      $("#pageContent").innerHTML = `
-        ${pageTitle("Meu Perfil", "Gerencie suas informações, foto de perfil e personalização.")}
-
-        <div class="panel" style="margin-bottom:20px">
-          <div class="flex" style="gap:20px;align-items:center">
-            <div style="position:relative">
-              ${renderAvatar(p.photoURL, p.name)}
-            </div>
+      $("#pageContent").innerHTML =
+        pageTitle("Seu Perfil", "Gerencie suas informações pessoais e visualize seu histórico.") +
+        `<div class="panel">
+          <div class="flex" style="gap:20px;align-items:center;margin-bottom:20px">
+            ${renderAvatar(p.photoURL, p.name)}
             <div>
-              <h2 style="font-size:24px">${p.name}</h2>
+              <h2>${p.name}</h2>
               <p class="muted">${roleLabel(p.role)} ${isStu ? `• Turma: ${p.className || 'Não definida'}` : ''}</p>
-              <p class="muted" style="font-size:12px">${p.email}</p>
+              <p class="muted">${p.email}</p>
             </div>
           </div>
-          <div class="flex" style="margin-top:16px">
-            <button class="primary-btn" id="editProfileBtn" style="font-size:12px;padding:8px 14px">✏️ Editar Perfil & Foto</button>
-            <button class="secondary-btn" onclick="openThemeSelectorModal()" style="font-size:12px;padding:8px 14px">🎨 Alterar Tema Visual</button>
-          </div>
-        </div>
 
-        <div class="stats-grid">
-          ${statCard(emoji('sol'), "XP Acumulado", p.xp || 0)}
-          ${statCard(emoji('cactocoin'), "Cactoscoins", p.cactoscoins || 0)}
-          ${statCard(emoji('cordel'), "Livros Lidos", p.booksRead || 0)}
-          ${statCard(emoji('chapeu'), "Registros Enviados", readingsCount)}
-        </div>
-      `;
+          <form id="profileForm" class="form-grid" style="max-width:500px">
+            <label>Nome Completo
+              <input name="name" value="${p.name || ''}" required />
+            </label>
+            <label>Foto de Perfil (Envio)
+              <input type="file" id="inpProfilePhoto" accept="image/*" />
+            </label>
+            <label>Ou URL da Foto
+              <input name="photoURL" value="${p.photoURL || ''}" placeholder="https://..." />
+            </label>
+            ${isStu ? `
+            <label>Turma
+              <select name="className">
+                ${TURMAS_DISPONIVEIS.map(t => `<option value="${t}" ${p.className === t ? 'selected' : ''}>${t}</option>`).join("")}
+              </select>
+            </label>` : ''}
+            <button class="primary-btn" type="submit" style="margin-top:10px">Salvar Alterações</button>
+          </form>
+        </div>`;
 
-      $("#editProfileBtn").onclick = () => showEditProfileModal();
-    }
-
-    function showEditProfileModal() {
-      const p = currentProfile;
-      const isStu = p.role === "student";
-
-      openModal("✏️ Editar Perfil", `
-        <form id="editProfileForm" class="form-grid">
-          <label>Nome Completo
-            <input name="name" value="${p.name || ''}" required />
-          </label>
-          
-          ${isStu ? `
-          <label>Turma
-            <select name="className" required>
-              ${TURMAS_DISPONIVEIS.map(t => `<option value="${t}" ${p.className === t ? 'selected' : ''}>${t}</option>`).join("")}
-            </select>
-          </label>
-          ` : ''}
-
-          <label>Foto de Perfil (Enviar Arquivo)
-            <input type="file" id="inpProfilePhotoFile" accept="image/*" style="padding:8px" />
-          </label>
-
-          <label>Ou URL da Foto
-            <input name="photoURL" id="inpProfilePhotoUrl" value="${p.photoURL || ''}" placeholder="https://..." />
-          </label>
-
-          <div id="uploadProfileProgress" class="hidden" style="margin-top:10px">
-            <div class="progress-info">
-              <span>Enviando foto de perfil...</span>
-              <strong id="uploadProfilePercent">0%</strong>
-            </div>
-            <div class="progress"><div id="uploadProfileBar" style="width:0%"></div></div>
-          </div>
-
-          <button class="primary-btn full" type="submit" id="submitProfileBtn" style="margin-top:10px">
-            Salvar Alterações
-          </button>
-        </form>
-      `);
-
-      $("#editProfileForm").onsubmit = async (e) => {
+      $("#profileForm").onsubmit = async (e) => {
         e.preventDefault();
         const fd = new FormData(e.target);
-        const photoFile = $("#inpProfilePhotoFile").files[0];
+        const fileInput = $("#inpProfilePhoto");
         let photoURL = fd.get("photoURL");
 
-        const submitBtn = $("#submitProfileBtn");
-        const progressContainer = $("#uploadProfileProgress");
-        const progressBar = $("#uploadProfileBar");
-        const progressPercent = $("#uploadProfilePercent");
-
-        if (photoFile) {
-          submitBtn.disabled = true;
-          submitBtn.textContent = "Enviando imagem...";
-          progressContainer.classList.remove("hidden");
-
+        if (fileInput && fileInput.files && fileInput.files[0]) {
           try {
-            photoURL = await uploadToCloudinary(photoFile, (percent) => {
-              progressBar.style.width = percent + "%";
-              progressPercent.textContent = percent + "%";
-            });
+            toast("Enviando imagem de perfil...", "success");
+            photoURL = await uploadToCloudinary(fileInput.files[0]);
           } catch(err) {
             console.error(err);
-            toast("Erro ao enviar foto para o Cloudinary.", "error");
-            submitBtn.disabled = false;
-            submitBtn.textContent = "Salvar Alterações";
-            progressContainer.classList.add("hidden");
-            return;
+            return toast("Erro ao enviar imagem de perfil.", "error");
           }
         }
 
@@ -2529,231 +2467,167 @@ window.openCommentsModal = openCommentsModal;
         try {
           await db.collection("users").doc(currentUser.uid).update(updates);
           currentProfile = { ...currentProfile, ...updates };
-          closeModal();
           toast("Perfil atualizado com sucesso!", "success");
           renderApp();
         } catch(err) {
           console.error(err);
           toast("Erro ao atualizar perfil.", "error");
-          submitBtn.disabled = false;
         }
       };
     }
 
-    // --- AUTHENTICATION SCREEN ---
-    function renderAuth() {
+    // --- AUTHENTICATION AND INITIALIZATION ---
+    function renderAuth(tab = "login") {
       $("#app").innerHTML = `
         <div class="auth-layout">
           <div class="auth-hero">
             <div class="auth-hero-content">
-              <div class="brand" style="color:#F3E9DC;margin-bottom:16px">
-                <div class="brand-mark">${emoji('brotinho')}</div>
-                <span>Sertão Literário</span>
-              </div>
-              <h1>A Leitura Ganha Vida no Sertão!</h1>
-              <p>Explore a biblioteca, acumule Cactoscoins, complete desafios de leitura e compartilhe suas resenhas no BookTok Sertanejo!</p>
+              <h1>Sertão Literário</h1>
+              <p>Plataforma gamificada de leitura, cordel e incentivo à literatura sertaneja.</p>
             </div>
           </div>
           <div class="auth-panel">
             <div class="auth-card">
               <div class="auth-tabs">
-                <button id="tabLoginBtn" class="active" onclick="switchAuthTab('login')">Entrar</button>
-                <button id="tabRegisterBtn" onclick="switchAuthTab('register')">Cadastrar</button>
+                <button class="${tab === 'login' ? 'active' : ''}" onclick="renderAuth('login')">Entrar</button>
+                <button class="${tab === 'register' ? 'active' : ''}" onclick="renderAuth('register')">Cadastrar</button>
               </div>
-
-              <!-- FORMULÁRIO DE LOGIN -->
-              <form id="loginForm" class="form-grid">
-                <h2>Bem-vindo(a)!</h2>
-                <p>Acesse sua conta para continuar.</p>
-                <label>E-mail
-                  <input name="email" type="email" required placeholder="seuemail@escola.com" />
-                </label>
-                <label>Senha
-                  <input name="password" type="password" required placeholder="••••••••" />
-                </label>
-                <button class="primary-btn full" type="submit" id="btnLoginSubmit">Entrar no Sistema</button>
-              </form>
-
-              <!-- FORMULÁRIO DE CADASTRO -->
-              <form id="registerForm" class="form-grid hidden">
-                <h2>Criar Conta</h2>
-                <p>Junte-se ao projeto Sertão Literário!</p>
-                <label>Nome Completo
-                  <input name="name" required placeholder="Seu nome completo" />
-                </label>
-                <label>E-mail
-                  <input name="email" type="email" required placeholder="seuemail@escola.com" />
-                </label>
-                <label>Senha
-                  <input name="password" type="password" minlength="6" required placeholder="Mínimo 6 caracteres" />
-                </label>
-
-                <label>Perfil de Acesso
-                  <select name="role" id="roleSelect" required onchange="handleRoleChange(this.value)">
-                    <option value="student">Aluno(a)</option>
-                    <option value="teacher">Professor(a)</option>
-                    <option value="coordinator">Coordenador(a)</option>
-                  </select>
-                </label>
-
-                <div id="studentClassContainer">
-                  <label>Turma
-                    <select name="className">
-                      ${TURMAS_DISPONIVEIS.map(t => `<option value="${t}">${t}</option>`).join("")}
+              
+              ${tab === 'login' ? `
+                <form id="loginForm" class="form-grid">
+                  <label>E-mail <input name="email" type="email" required /></label>
+                  <label>Senha <input name="password" type="password" required /></label>
+                  <button class="primary-btn full" type="submit">Entrar na Plataforma</button>
+                </form>
+              ` : `
+                <form id="registerForm" class="form-grid">
+                  <label>Nome Completo <input name="name" required /></label>
+                  <label>E-mail <input name="email" type="email" required /></label>
+                  <label>Senha <input name="password" type="password" minlength="6" required /></label>
+                  <label>Perfil de Usuário
+                    <select name="role" id="regRoleSelect" required>
+                      <option value="student">Aluno</option>
+                      <option value="teacher">Professor</option>
+                      <option value="coordinator">Coordenador</option>
                     </select>
                   </label>
-                </div>
-
-                <div id="secretCodeContainer" class="hidden">
-                  <label>Código de Validação de Staff
-                    <input name="secretCode" placeholder="Informe o código fornecido pela escola" />
-                  </label>
-                </div>
-
-                <button class="primary-btn full" type="submit" id="btnRegisterSubmit">Criar minha conta</button>
-              </form>
+                  <div id="studentFields">
+                    <label>Turma
+                      <select name="className">
+                        ${TURMAS_DISPONIVEIS.map(t => `<option value="${t}">${t}</option>`).join("")}
+                      </select>
+                    </label>
+                  </div>
+                  <div id="staffFields" class="hidden">
+                    <label>Código de Acesso Institucional
+                      <input name="accessCode" placeholder="Insira o código do professor/coordenador" />
+                    </label>
+                    <label>Turmas sob sua responsabilidade
+                      <div class="checkbox-group">
+                        ${TURMAS_DISPONIVEIS.map(t => `<label class="checkbox-item"><input type="checkbox" name="classes" value="${t}" checked /> ${t}</label>`).join("")}
+                      </div>
+                    </label>
+                  </div>
+                  <button class="primary-btn full" type="submit" style="margin-top:10px">Criar Conta</button>
+                </form>
+              `}
             </div>
           </div>
-        </div>
-      `;
+        </div>`;
 
-      $("#loginForm").onsubmit = async (e) => {
-        e.preventDefault();
-        const fd = new FormData(e.target);
-        const submitBtn = $("#btnLoginSubmit");
-        submitBtn.disabled = true;
-        submitBtn.textContent = "Entrando...";
-
-        try {
-          await auth.signInWithEmailAndPassword(fd.get("email"), fd.get("password"));
-          toast("Login realizado com sucesso!", "success");
-        } catch(err) {
-          console.error(err);
-          toast("Falha no login: " + (err.message || "E-mail ou senha incorretos."), "error");
-          submitBtn.disabled = false;
-          submitBtn.textContent = "Entrar no Sistema";
-        }
-      };
-
-      $("#registerForm").onsubmit = async (e) => {
-        e.preventDefault();
-        const fd = new FormData(e.target);
-        const role = fd.get("role");
-        const secretCode = fd.get("secretCode");
-
-        if (role === "teacher" && secretCode !== PROFESSOR_CODE) {
-          return toast("Código de validação de Professor incorreto!", "error");
-        }
-        if (role === "coordinator" && secretCode !== COORDINATOR_CODE) {
-          return toast("Código de validação de Coordenador incorreto!", "error");
-        }
-
-        const submitBtn = $("#btnRegisterSubmit");
-        submitBtn.disabled = true;
-        submitBtn.textContent = "Criando conta...";
-
-        try {
-          const cred = await auth.createUserWithEmailAndPassword(fd.get("email"), fd.get("password"));
-          const uid = cred.user.uid;
-
-          const userPayload = {
-            uid: uid,
-            name: fd.get("name"),
-            email: fd.get("email"),
-            role: role,
-            className: role === "student" ? fd.get("className") : "5º Ano",
-            classes: role !== "student" ? TURMAS_DISPONIVEIS : [fd.get("className")],
-            xp: 0,
-            cactoscoins: 100,
-            booksRead: 0,
-            level: 1,
-            activeTheme: "default",
-            unlockedThemes: ["default"],
-            photoURL: "",
-            createdAt: new Date().toISOString()
-          };
-
-          await db.collection("users").doc(uid).set(userPayload);
-          toast("Conta criada com sucesso! Bem-vindo(a)!", "success");
-        } catch(err) {
-          console.error(err);
-          toast("Erro ao cadastrar: " + (err.message || "Tente novamente."), "error");
-          submitBtn.disabled = false;
-          submitBtn.textContent = "Criar minha conta";
-        }
-      };
-    }
-
-    function switchAuthTab(tab) {
       if (tab === "login") {
-        $("#tabLoginBtn").classList.add("active");
-        $("#tabRegisterBtn").classList.remove("active");
-        $("#loginForm").classList.remove("hidden");
-        $("#registerForm").classList.add("hidden");
+        $("#loginForm").onsubmit = async (e) => {
+          e.preventDefault();
+          const fd = new FormData(e.target);
+          try {
+            await auth.signInWithEmailAndPassword(fd.get("email"), fd.get("password"));
+          } catch(err) {
+            console.error(err);
+            toast("Erro ao entrar: E-mail ou senha inválidos.", "error");
+          }
+        };
       } else {
-        $("#tabRegisterBtn").classList.add("active");
-        $("#tabLoginBtn").classList.remove("active");
-        $("#registerForm").classList.remove("hidden");
-        $("#loginForm").classList.add("hidden");
+        const roleSelect = $("#regRoleSelect");
+        if (roleSelect) {
+          roleSelect.onchange = (e) => {
+            const isStaffRole = e.target.value !== "student";
+            $("#studentFields").classList.toggle("hidden", isStaffRole);
+            $("#staffFields").classList.toggle("hidden", !isStaffRole);
+          };
+        }
+
+        $("#registerForm").onsubmit = async (e) => {
+          e.preventDefault();
+          const fd = new FormData(e.target);
+          const role = fd.get("role");
+          const code = fd.get("accessCode");
+
+          if (role === "teacher" && code !== PROFESSOR_CODE) {
+            return toast("Código de acesso de Professor inválido!", "error");
+          }
+          if (role === "coordinator" && code !== COORDINATOR_CODE) {
+            return toast("Código de acesso de Coordenador inválido!", "error");
+          }
+
+          const selectedClasses = Array.from(document.querySelectorAll('input[name="classes"]:checked')).map(cb => cb.value);
+
+          try {
+            const cred = await auth.createUserWithEmailAndPassword(fd.get("email"), fd.get("password"));
+            const userPayload = {
+              name: fd.get("name"),
+              email: fd.get("email"),
+              role: role,
+              activeTheme: "default",
+              unlockedThemes: ["default"],
+              createdAt: new Date().toISOString()
+            };
+
+            if (role === "student") {
+              userPayload.className = fd.get("className");
+              userPayload.xp = 0;
+              userPayload.cactoscoins = 0;
+              userPayload.booksRead = 0;
+              userPayload.level = 1;
+            } else {
+              userPayload.classes = selectedClasses;
+            }
+
+            await db.collection("users").doc(cred.user.uid).set(userPayload);
+            toast("Conta criada com sucesso!", "success");
+          } catch(err) {
+            console.error(err);
+            toast("Erro ao criar conta: " + err.message, "error");
+          }
+        };
       }
     }
-    window.switchAuthTab = switchAuthTab;
+    window.renderAuth = renderAuth;
 
-    function handleRoleChange(role) {
-      if (role === "student") {
-        $("#studentClassContainer").classList.remove("hidden");
-        $("#secretCodeContainer").classList.add("hidden");
-      } else {
-        $("#studentClassContainer").classList.add("hidden");
-        $("#secretCodeContainer").classList.remove("hidden");
-      }
-    }
-    window.handleRoleChange = handleRoleChange;
+    $("#closeModalBtn").onclick = closeModal;
 
-    // --- FIREBASE AUTH LISTENER & INIT ---
     auth.onAuthStateChanged(async (user) => {
+      currentUser = user;
       if (user) {
-        currentUser = user;
         try {
-          const userDoc = await db.collection("users").doc(user.uid).get();
-          if (userDoc.exists) {
-            currentProfile = userDoc.data();
+          const doc = await db.collection("users").doc(user.uid).get();
+          if (doc.exists) {
+            currentProfile = doc.data();
             if (currentProfile.activeTheme) {
               currentTheme = currentProfile.activeTheme;
-              localStorage.setItem("st-active-theme", currentTheme);
             }
           } else {
-            currentProfile = {
-              uid: user.uid,
-              name: user.displayName || user.email.split("@")[0],
-              email: user.email,
-              role: "student",
-              className: "5º Ano",
-              xp: 0,
-              cactoscoins: 100,
-              booksRead: 0,
-              level: 1,
-              activeTheme: "default",
-              unlockedThemes: ["default"]
-            };
+            currentProfile = { name: user.email, role: "student", className: "5º Ano", cactoscoins: 0, xp: 0, booksRead: 0, level: 1 };
           }
           renderApp();
         } catch(err) {
-          console.error("Erro ao carregar dados do usuário:", err);
-          renderAuth();
+          console.error(err);
+          toast("Erro ao carregar dados do usuário.", "error");
         }
       } else {
-        currentUser = null;
         currentProfile = null;
-        renderAuth();
+        renderAuth("login");
       }
     });
-
-    // Fechar modal ao clicar no botão X ou fora dele
-    $("#closeModalBtn").onclick = closeModal;
-    window.onclick = (e) => {
-      if (e.target === $("#modal")) closeModal();
-    };
   </script>
 </body>
 </html>
