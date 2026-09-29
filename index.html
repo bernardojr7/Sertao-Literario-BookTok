@@ -568,6 +568,7 @@
     let selectedPeriod = "1º Bimestre";
     let currentTheme = localStorage.getItem("st-active-theme") || "default";
     let isDarkMode = localStorage.getItem("st-dark-mode") === "true";
+    let pendingReadingsUnsubscribe = null;
     let currentLibraryTab = "todas"; // Estado para abas de estante da Biblioteca
 
     let chartEvolucaoInstance = null;
@@ -883,6 +884,9 @@
               readingDate: fd.get("readingDate"),
               proofUrl: proofUrl,
               teacherId: selectedTeacherId,
+              teacherName: selectedTeacherId ? (teachersSnap.docs.find(d => d.id === selectedTeacherId)?.data()?.name || "") : "",
+              studentEmail: currentProfile.email || currentUser.email || "",
+              bookId: currentProfile.currentBook?.bookId || null,
               xpEarned: xpEarned,
               coinsEarned: coinsEarned,
               status: "pending",
@@ -908,63 +912,91 @@
     }
     window.openRegisterReadingModal = openRegisterReadingModal;
 
-    async function loadPendingReadings() {
+    function loadPendingReadings() {
       const container = $("#pendingReadingsContainer");
       if (!container) return;
 
-      try {
-        const snap = await db.collection("readings").where("status", "==", "pending").get();
-        const readings = [];
+      // Evita múltiplos listeners quando o professor troca de turma ou a Home é redesenhada.
+      if (pendingReadingsUnsubscribe) {
+        try { pendingReadingsUnsubscribe(); } catch (_) {}
+        pendingReadingsUnsubscribe = null;
+      }
 
+      container.innerHTML = '<div class="empty-state">🔄 Sincronizando leituras pendentes...</div>';
+
+      const renderPending = (snap) => {
+        const readings = [];
         snap.forEach(doc => {
           const data = doc.data();
-          if (!data.teacherId || data.teacherId === currentUser.uid || currentProfile.role === "coordinator") {
-            readings.push({ id: doc.id, ...data });
-          }
+          if (data.status !== "pending") return;
+
+          // REGRA IMPORTANTE: toda leitura pendente chega ao painel dos professores.
+          // teacherId continua sendo gravado para registrar a preferência do aluno,
+          // mas não bloqueia a visualização. O coordenador também vê todas.
+          readings.push({ id: doc.id, ...data });
+        });
+
+        readings.sort((a,b) => {
+          const da = new Date(a.createdAt || a.readingDate || 0).getTime();
+          const db = new Date(b.createdAt || b.readingDate || 0).getTime();
+          return db - da;
         });
 
         if (readings.length === 0) {
-          container.innerHTML = '<div class="empty-state">Nenhuma leitura pendente de autorização no momento.</div>';
+          container.innerHTML = '<div class="empty-state">📚 Nenhuma leitura pendente de autorização no momento.<br><small>Quando um aluno enviar uma leitura, ela aparecerá aqui automaticamente.</small></div>';
           return;
         }
 
-        let html = "";
+        let html = `<div class="highlight-box" style="margin-bottom:14px"><span style="font-size:28px">🔔</span><div><strong>${readings.length} leitura${readings.length===1?'':'s'} aguardando autorização</strong><p class="muted" style="font-size:12px;margin:2px 0 0">Atualização automática ativada.</p></div></div>`;
+
         readings.forEach(r => {
           const typeLabel = r.readingType === "conclusion" ? "🏆 Conclusão" : "🔄 Continuação";
+          const destination = r.teacherId ? "Professor selecionado pelo aluno" : "Aprovação aberta para a equipe";
           html += `
-            <div class="panel" style="margin-bottom:12px;padding:16px;background:var(--surface2)">
+            <div class="panel" style="margin-bottom:12px;padding:16px;background:var(--surface2);border:1px solid var(--border)">
               <div class="flex-between" style="margin-bottom:8px">
                 <div>
-                  <strong>${r.userName}</strong> <span class="tag">${r.userClass || 'Turma'}</span>
+                  <strong>${slEsc(r.userName || 'Aluno')}</strong> <span class="tag">${slEsc(r.userClass || 'Turma')}</span>
                 </div>
                 <span class="tag" style="background:var(--primary);color:#fff">${typeLabel}</span>
               </div>
               <div style="font-size:14px;margin-bottom:8px">
-                <strong>Livro:</strong> ${r.bookTitle} • <strong>Páginas:</strong> ${r.pagesRead} • <strong>Data:</strong> ${r.readingDate || 'Hoje'}
+                <strong>Livro:</strong> ${slEsc(r.bookTitle || 'Livro não informado')} • <strong>Páginas:</strong> ${Number(r.pagesRead || 0)} • <strong>Data:</strong> ${slEsc(r.readingDate || 'Hoje')}
               </div>
-              <div style="font-size:12px;margin-bottom:12px;color:var(--muted)">
-                Recompensa estimada: <strong>+${r.xpEarned || 0} XP</strong> • <strong>+${r.coinsEarned || 0} Cactoscoins</strong>
+              <div style="font-size:12px;margin-bottom:10px;color:var(--muted)">
+                ${destination} • Recompensa: <strong>+${Number(r.xpEarned || 0)} XP</strong> • <strong>+${Number(r.coinsEarned || 0)} Cactoscoins</strong>
               </div>
               ${r.proofUrl ? `
                 <div style="margin-bottom:12px">
-                  <a href="${r.proofUrl}" target="_blank" style="font-size:12px;color:var(--primary);font-weight:700;display:inline-flex;align-items:center;gap:4px">
+                  <a href="${slEsc(r.proofUrl)}" target="_blank" rel="noopener" style="font-size:12px;color:var(--primary);font-weight:700;display:inline-flex;align-items:center;gap:4px">
                     🖼️ Ver Foto de Comprovação
                   </a>
                 </div>
-              ` : ''}
-              <div class="flex" style="gap:10px">
-                <button class="primary-btn" style="padding:6px 14px;font-size:12px" onclick="approveReading('${r.id}')">✅ Autorizar Leitura</button>
-                <button class="danger-btn" style="padding:6px 14px;font-size:12px" onclick="rejectReading('${r.id}')">❌ Recusar</button>
+              ` : '<div class="muted" style="font-size:12px;margin-bottom:12px">Sem foto de comprovação anexada.</div>'}
+              <div class="flex" style="gap:10px;flex-wrap:wrap">
+                <button class="primary-btn" style="padding:7px 14px;font-size:12px" onclick="approveReading('${r.id}')">✅ Autorizar Leitura</button>
+                <button class="danger-btn" style="padding:7px 14px;font-size:12px" onclick="rejectReading('${r.id}')">❌ Recusar</button>
               </div>
             </div>
           `;
         });
 
         container.innerHTML = html;
+      };
 
-      } catch(err) {
+      const handleError = (err) => {
+        console.error("Erro no listener de leituras pendentes:", err);
+        container.innerHTML = `<div class="empty-state">⚠️ Não foi possível sincronizar as leituras pendentes.<br><small>Verifique a conexão e as permissões do Firestore para professores.</small></div>`;
+      };
+
+      try {
+        // onSnapshot faz a leitura chegar ao professor sem precisar atualizar a página.
+        pendingReadingsUnsubscribe = db.collection("readings")
+          .where("status", "==", "pending")
+          .onSnapshot(renderPending, handleError);
+      } catch (err) {
         console.error(err);
-        container.innerHTML = '<div class="empty-state">Erro ao carregar leituras pendentes.</div>';
+        handleError(err);
       }
     }
 
@@ -976,9 +1008,12 @@
 
         const r = doc.data();
 
+        if (r.status !== "pending") return toast("Esta leitura já foi processada.", "info");
+
         await docRef.update({
           status: "approved",
           approvedBy: currentUser.uid,
+          approvedByName: currentProfile.name || currentUser.email || "Professor",
           approvedAt: new Date().toISOString()
         });
 
@@ -3098,6 +3133,7 @@
         applyThemeSettings();
         renderApp();
       } else {
+        if (pendingReadingsUnsubscribe) { try { pendingReadingsUnsubscribe(); } catch (_) {} pendingReadingsUnsubscribe = null; }
         currentProfile = null;
         renderAuth();
       }
