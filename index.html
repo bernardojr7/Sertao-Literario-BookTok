@@ -209,7 +209,7 @@
       position: relative; overflow: hidden; padding: 70px clamp(30px, 7vw, 110px);
       color: #F3E9DC;
       background: linear-gradient(135deg, rgba(26,24,23,0.92), rgba(192,92,51,0.85)),
-                  url('https://drive.google.com/uc?export=view&id=1cQ9sWGhIh0ttQsYp67H4YzBaPLcafhZb') center/cover no-repeat;
+                  url('https://down-br.img.susercontent.com/file/br-11134207-7r98o-lyjxah0w0gmd6a') center/cover;
       border-right: 3px solid var(--border);
     }
     .auth-hero-content { position: relative; z-index: 1; max-width: 620px; margin-top: 18vh; }
@@ -1018,8 +1018,8 @@
 
       try {
         // Professores consultam somente as leituras atribuídas ao próprio UID.
-        // Isso é compatível com regras do Firestore que protegem leituras por teacherId.
-        // Coordenadores continuam visualizando todas as pendentes.
+        // Essa consulta é compatível com regras do Firestore que validam teacherId.
+        // O painel continua filtrando status=pending no render, preservando a atualização em tempo real.
         let query = db.collection("readings");
         if (currentProfile?.role === "teacher") {
           query = query.where("teacherId", "==", currentUser.uid);
