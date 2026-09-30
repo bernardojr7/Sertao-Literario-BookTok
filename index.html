@@ -1017,15 +1017,14 @@
       };
 
       try {
-        // Professores consultam somente as leituras atribuídas ao próprio UID.
-        // Essa consulta é compatível com regras do Firestore que validam teacherId.
-        // O painel continua filtrando status=pending no render, preservando a atualização em tempo real.
-        let query = db.collection("readings");
-        if (currentProfile?.role === "teacher") {
-          query = query.where("teacherId", "==", currentUser.uid);
-        } else {
-          query = query.where("status", "==", "pending");
-        }
+        // As Rules atuais permitem leitura para qualquer usuário autenticado.
+        // Para garantir que nenhum registro fique invisível por divergência entre
+        // teacherId, UID, coordenador ou registros antigos, o painel da equipe
+        // acompanha a coleção inteira em tempo real e o render exibe apenas
+        // documentos com status === "pending".
+        // O teacherId continua sendo gravado no registro para identificar o
+        // professor escolhido pelo aluno.
+        const query = db.collection("readings");
         pendingReadingsUnsubscribe = query.onSnapshot(renderPending, handleError);
       } catch (err) {
         console.error(err);
