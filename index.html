@@ -8,7 +8,7 @@
   <!-- Fonts: Special Elite (Cordel) e Bitter (Leitura) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Bitter:ital,wght@0,400;0,600;0,700;1,400&family=Special+Elite&family=Nunito+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Bitter:ital,wght@0,400;0,600;0,700;1,400&family=Special+Elite&display=swap" rel="stylesheet" />
 
   <!-- Firebase Compat Libraries -->
   <script src="https://www.gstatic.com/firebasejs/12.16.0/firebase-app-compat.js"></script>
@@ -208,8 +208,8 @@
     .auth-hero {
       position: relative; overflow: hidden; padding: 70px clamp(30px, 7vw, 110px);
       color: #F3E9DC;
-      background: linear-gradient(135deg, rgba(26,24,23,0.92), rgba(192,92,51,0.85)),
-                  url('https://drive.google.com/file/d/1cQ9sWGhIh0ttQsYp67H4YzBaPLcafhZb/view?usp=drive_link') center/cover;
+      background: linear-gradient(135deg, rgba(26,24,23,0.12), rgba(192,92,51,0.08)),
+                  url('https://drive.google.com/uc?export=view&id=1cQ9sWGhIh0ttQsYp67H4YzBaPLcafhZb') center/cover no-repeat;
       border-right: 3px solid var(--border);
     }
     .auth-hero-content { position: relative; z-index: 1; max-width: 620px; margin-top: 18vh; }
@@ -459,26 +459,7 @@
       .highlight-box { flex-direction: column; align-items: flex-start; gap: 10px; }
       .chart-container { height: 200px; }
     }
-  
-      /* NOVA IDENTIDADE VISUAL DA ENTRADA — inspirada na proposta aprovada */
-      .auth-layout{min-height:100vh;display:grid;grid-template-columns:minmax(0,1.08fr) minmax(380px,.92fr);background:#F8EFEC!important;gap:0;overflow:hidden}
-      .auth-hero{position:relative;min-height:100vh;background-image:url("https://drive.google.com/file/d/1cQ9sWGhIh0ttQsYp67H4YzBaPLcafhZb/view?usp=drive_link");background-size:cover;background-position:center top;border:0!important;padding:0!important}
-      .auth-hero:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(248,239,236,.05),rgba(248,239,236,.12));pointer-events:none}
-      .auth-hero-content{position:absolute!important;left:7%;bottom:7%;z-index:2;max-width:430px;background:rgba(255,253,251,.76);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.7);border-radius:24px;padding:18px 20px!important;margin:0!important;box-shadow:0 15px 45px rgba(74,47,34,.08)}
-      .auth-hero-content h1{font-family:'Nunito Sans',sans-serif!important;font-size:26px!important;color:#292522!important;margin:0 0 5px!important}.auth-hero-content p{color:#6F6259!important;font-size:13px!important;line-height:1.45;margin:0!important}
-      .auth-panel{display:flex!important;align-items:center;justify-content:center;background:#F8EFEC!important;padding:42px!important;border:0!important}
-      .auth-card{width:min(100%,430px)!important;padding:36px!important;border:1px solid #E3D9D2!important;background:rgba(255,253,251,.94)!important;border-radius:28px!important;box-shadow:0 18px 55px rgba(74,47,34,.09)!important}
-      .auth-card h2{font-family:'Nunito Sans',sans-serif!important;font-size:32px!important;letter-spacing:-1px;color:#292522!important}.auth-card>p{color:#8C827B!important;font-family:'Nunito Sans',sans-serif!important}
-      .auth-tabs{background:#EEE5DE!important;border-radius:14px!important;padding:4px!important}.auth-tabs button{border-radius:11px!important;color:#8C827B!important}.auth-tabs button.active{background:#FFFDFC!important;color:#B9583B!important;box-shadow:0 1px 4px rgba(60,45,35,.08)!important}
-      .auth-card label{color:#5D5149!important;font-size:12px!important;font-weight:800}.auth-card input,.auth-card select{background:#FBF7F4!important;border:1px solid #E3D9D2!important;border-radius:14px!important;padding:13px 14px!important;color:#292522!important;font-family:'Nunito Sans',sans-serif!important}
-      .auth-card .primary-btn{background:#B9583B!important;border-radius:14px!important;min-height:48px!important;font-size:13px!important;box-shadow:0 8px 18px rgba(185,88,59,.18)!important}
-      .auth-card .primary-btn:hover{background:#99472F!important}.auth-card:before{content:'🌵  📖';display:block;font-size:19px;letter-spacing:6px;color:#4C8877;margin-bottom:8px}
-      body.dark .auth-layout,body.dark .auth-panel{background:#211B18!important}.auth-panel{color:#292522}
-      body.dark .auth-card{background:#2E2723!important;border-color:#4A3D35!important;color:#F6EEE9!important}.dark .auth-card h2,.dark .auth-card label{color:#F6EEE9!important}.dark .auth-card>p{color:#C7B9AF!important}.dark .auth-card input,.dark .auth-card select{background:#241F1C!important;border-color:#55473E!important;color:#F6EEE9!important}.dark .auth-tabs{background:#3A302B!important}.dark .auth-tabs button.active{background:#4A3D35!important;color:#F2B39B!important}.dark .auth-hero-content{background:rgba(46,39,35,.84);border-color:#55473E}.dark .auth-hero-content h1{color:#F6EEE9!important}.dark .auth-hero-content p{color:#C7B9AF!important}
-      .sl-sound-btn{font-size:18px!important}
-      @media(max-width:900px){.auth-layout{grid-template-columns:1fr}.auth-hero{min-height:310px;height:42vh;background-position:center top}.auth-hero-content{left:18px;right:18px;bottom:18px;max-width:none}.auth-panel{padding:18px 14px 34px}.auth-card{padding:28px 22px!important;margin-top:-12px;position:relative;z-index:3}}
-      @media(max-width:560px){.auth-hero{min-height:285px;height:38vh}.auth-hero-content{padding:14px 16px!important}.auth-hero-content h1{font-size:21px!important}.auth-card h2{font-size:27px!important}}
-</style>
+  </style>
 </head>
 <body>
 
@@ -587,7 +568,6 @@
     let selectedPeriod = "1º Bimestre";
     let currentTheme = localStorage.getItem("st-active-theme") || "default";
     let isDarkMode = localStorage.getItem("st-dark-mode") === "true";
-    let pendingReadingsUnsubscribe = null;
     let currentLibraryTab = "todas"; // Estado para abas de estante da Biblioteca
 
     let chartEvolucaoInstance = null;
@@ -729,6 +709,7 @@
             </div>
             <div class="top-actions">
               ${isStaff ? `<button id="reportsTopBtn" class="primary-btn" style="font-size:11px;padding:6px 10px">${emoji('relatorio')} Relatórios</button>` : ''}
+              <button id="themePickerBtn" class="icon-btn" title="Trocar Tema Visual">🎨</button>
               <button id="darkToggleBtn" class="icon-btn" title="Modo Claro/Escuro">${isDarkMode ? "☀" : "☾"}</button>
               <div class="user-pill">
                 ${renderAvatar(p.photoURL, p.name)}
@@ -745,6 +726,7 @@
         $("#reportsTopBtn").onclick = () => navigateTo('reports');
       }
 
+      $("#themePickerBtn").onclick = openThemeSelectorModal;
 
       $("#darkToggleBtn").onclick = () => {
         isDarkMode = !isDarkMode;
@@ -801,7 +783,7 @@
     async function openRegisterReadingModal(prefilledTitle = "") {
       openModal("📖 Registrar Leitura", '<div class="empty-state">Carregando formulário...</div>');
       try {
-        let teachersOptions = '<option value="" disabled selected>Selecione o professor que irá aprovar</option>';
+        let teachersOptions = '<option value="">Selecione o professor responsável</option>';
         const teachersSnap = await db.collection("users").where("role", "in", ["teacher", "coordinator"]).get();
         teachersSnap.forEach(doc => {
           const t = doc.data();
@@ -889,10 +871,16 @@
             const xpEarned = (basePages * 2) + (readingType === "conclusion" ? 50 : 0);
             const coinsEarned = Math.max(1, Math.floor(basePages / 5)) + (readingType === "conclusion" ? 10 : 0);
 
-            const selectedTeacherId = fd.get("teacherId") || "";
+            const selectedTeacherId = fd.get("teacherId") || null;
             if (!selectedTeacherId) {
               throw new Error("Selecione o professor responsável pela aprovação.");
             }
+
+            const selectedTeacherDoc = await db.collection("users").doc(selectedTeacherId).get();
+            if (!selectedTeacherDoc.exists) {
+              throw new Error("Professor selecionado não encontrado.");
+            }
+            const selectedTeacher = selectedTeacherDoc.data();
 
             await db.collection("readings").add({
               userId: currentUser.uid,
@@ -904,9 +892,8 @@
               readingDate: fd.get("readingDate"),
               proofUrl: proofUrl,
               teacherId: selectedTeacherId,
-              teacherName: selectedTeacherId ? (teachersSnap.docs.find(d => d.id === selectedTeacherId)?.data()?.name || "") : "",
-              studentEmail: currentProfile.email || currentUser.email || "",
-              bookId: currentProfile.currentBook?.bookId || null,
+              teacherName: selectedTeacher.name || "Professor",
+              teacherEmail: selectedTeacher.email || "",
               xpEarned: xpEarned,
               coinsEarned: coinsEarned,
               status: "pending",
@@ -918,7 +905,7 @@
             renderHome();
           } catch (err) {
             console.error(err);
-            toast(err?.message === "Selecione o professor responsável pela aprovação." ? err.message : "Erro ao registrar leitura. Tente novamente.", "error");
+            toast("Erro ao registrar leitura. Tente novamente.", "error");
             submitBtn.disabled = false;
             submitBtn.textContent = "Enviar para Autorização";
             progressContainer.classList.add("hidden");
@@ -932,98 +919,99 @@
     }
     window.openRegisterReadingModal = openRegisterReadingModal;
 
-    function loadPendingReadings() {
+    async function loadPendingReadings() {
       const container = $("#pendingReadingsContainer");
-      if (!container) return;
+      if (!container || !currentUser || !currentProfile) return;
 
-      // Evita múltiplos listeners quando o professor troca de turma ou a Home é redesenhada.
-      if (pendingReadingsUnsubscribe) {
-        try { pendingReadingsUnsubscribe(); } catch (_) {}
-        pendingReadingsUnsubscribe = null;
-      }
+      try {
+        // Professores consultam SOMENTE os registros atribuídos ao próprio UID.
+        // Isso é importante para que as Firestore Security Rules consigam validar
+        // a consulta (teacherId == request.auth.uid) em vez de bloquear uma query
+        // global de todos os registros pendentes.
+        let query = db.collection("readings").where("status", "==", "pending");
+        if (currentProfile.role === "teacher") {
+          query = db.collection("readings")
+            .where("teacherId", "==", currentUser.uid)
+            .where("status", "==", "pending");
+        }
 
-      container.innerHTML = '<div class="empty-state">🔄 Sincronizando leituras pendentes...</div>';
-
-      const renderPending = (snap) => {
+        const snap = await query.get();
         const readings = [];
-        snap.forEach(doc => {
-          const data = doc.data();
-          if (data.status !== "pending") return;
+        snap.forEach(doc => readings.push({ id: doc.id, ...doc.data() }));
 
-          // REGRA IMPORTANTE: toda leitura pendente chega ao painel dos professores.
-          // teacherId continua sendo gravado para registrar a preferência do aluno,
-          // mas não bloqueia a visualização. O coordenador também vê todas.
-          readings.push({ id: doc.id, ...data });
-        });
-
-        readings.sort((a,b) => {
-          const da = new Date(a.createdAt || a.readingDate || 0).getTime();
-          const db = new Date(b.createdAt || b.readingDate || 0).getTime();
-          return db - da;
-        });
+        readings.sort((a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || "")));
 
         if (readings.length === 0) {
-          container.innerHTML = '<div class="empty-state">📚 Nenhuma leitura pendente de autorização no momento.<br><small>Quando um aluno enviar uma leitura, ela aparecerá aqui automaticamente.</small></div>';
+          container.innerHTML = '<div class="empty-state">Nenhuma leitura pendente de autorização no momento.</div>';
           return;
         }
 
-        let html = `<div class="highlight-box" style="margin-bottom:14px"><span style="font-size:28px">🔔</span><div><strong>${readings.length} leitura${readings.length===1?'':'s'} aguardando autorização</strong><p class="muted" style="font-size:12px;margin:2px 0 0">Atualização automática ativada.</p></div></div>`;
-
+        let html = "";
         readings.forEach(r => {
           const typeLabel = r.readingType === "conclusion" ? "🏆 Conclusão" : "🔄 Continuação";
-          const destination = r.teacherId ? "Professor selecionado pelo aluno" : "Aprovação aberta para a equipe";
           html += `
-            <div class="panel" style="margin-bottom:12px;padding:16px;background:var(--surface2);border:1px solid var(--border)">
+            <div class="panel" style="margin-bottom:12px;padding:16px;background:var(--surface2)">
               <div class="flex-between" style="margin-bottom:8px">
                 <div>
-                  <strong>${slEsc(r.userName || 'Aluno')}</strong> <span class="tag">${slEsc(r.userClass || 'Turma')}</span>
+                  <strong>${r.userName || 'Aluno'}</strong> <span class="tag">${r.userClass || 'Turma'}</span>
                 </div>
                 <span class="tag" style="background:var(--primary);color:#fff">${typeLabel}</span>
               </div>
               <div style="font-size:14px;margin-bottom:8px">
-                <strong>Livro:</strong> ${slEsc(r.bookTitle || 'Livro não informado')} • <strong>Páginas:</strong> ${Number(r.pagesRead || 0)} • <strong>Data:</strong> ${slEsc(r.readingDate || 'Hoje')}
+                <strong>Livro:</strong> ${r.bookTitle || 'Livro não informado'} • <strong>Páginas:</strong> ${r.pagesRead || 0} • <strong>Data:</strong> ${r.readingDate || 'Hoje'}
               </div>
-              <div style="font-size:12px;margin-bottom:10px;color:var(--muted)">
-                ${destination} • Recompensa: <strong>+${Number(r.xpEarned || 0)} XP</strong> • <strong>+${Number(r.coinsEarned || 0)} Cactoscoins</strong>
+              <div style="font-size:12px;margin-bottom:12px;color:var(--muted)">
+                Recompensa estimada: <strong>+${r.xpEarned || 0} XP</strong> • <strong>+${r.coinsEarned || 0} Cactoscoins</strong>
               </div>
               ${r.proofUrl ? `
                 <div style="margin-bottom:12px">
-                  <a href="${slEsc(r.proofUrl)}" target="_blank" rel="noopener" style="font-size:12px;color:var(--primary);font-weight:700;display:inline-flex;align-items:center;gap:4px">
+                  <a href="${r.proofUrl}" target="_blank" rel="noopener" style="font-size:12px;color:var(--primary);font-weight:700;display:inline-flex;align-items:center;gap:4px">
                     🖼️ Ver Foto de Comprovação
                   </a>
                 </div>
-              ` : '<div class="muted" style="font-size:12px;margin-bottom:12px">Sem foto de comprovação anexada.</div>'}
-              <div class="flex" style="gap:10px;flex-wrap:wrap">
-                <button class="primary-btn" style="padding:7px 14px;font-size:12px" onclick="approveReading('${r.id}')">✅ Autorizar Leitura</button>
-                <button class="danger-btn" style="padding:7px 14px;font-size:12px" onclick="rejectReading('${r.id}')">❌ Recusar</button>
+              ` : ''}
+              <div class="flex" style="gap:10px">
+                <button class="primary-btn" style="padding:6px 14px;font-size:12px" onclick="approveReading('${r.id}')">✅ Autorizar Leitura</button>
+                <button class="danger-btn" style="padding:6px 14px;font-size:12px" onclick="rejectReading('${r.id}')">❌ Recusar</button>
               </div>
             </div>
           `;
         });
 
         container.innerHTML = html;
-      };
-
-      const handleError = (err) => {
-        console.error("Erro no listener de leituras pendentes:", err);
-        container.innerHTML = `<div class="empty-state">⚠️ Não foi possível sincronizar as leituras pendentes.<br><small>Verifique a conexão e as permissões do Firestore para professores.</small></div>`;
-      };
-
-      try {
-        // Professores consultam somente as leituras atribuídas ao próprio UID.
-        // Isso é compatível com regras do Firestore que protegem leituras por teacherId.
-        // Coordenadores continuam visualizando todas as pendentes.
-        let query = db.collection("readings");
-        if (currentProfile?.role === "teacher") {
-          query = query.where("teacherId", "==", currentUser.uid);
-        } else {
-          query = query.where("status", "==", "pending");
-        }
-        pendingReadingsUnsubscribe = query.onSnapshot(renderPending, handleError);
-      } catch (err) {
-        console.error(err);
-        handleError(err);
+      } catch(err) {
+        console.error("loadPendingReadings:", err);
+        container.innerHTML = '<div class="empty-state">Não foi possível carregar as leituras. Verifique as permissões do Firestore para a consulta por teacherId.</div>';
       }
+    }
+
+    // Atualização em tempo real: quando um aluno envia uma leitura, o professor
+    // vê a solicitação sem precisar recarregar a página.
+    let pendingReadingsUnsubscribe = null;
+    function subscribeToPendingReadings() {
+      if (pendingReadingsUnsubscribe) {
+        pendingReadingsUnsubscribe();
+        pendingReadingsUnsubscribe = null;
+      }
+      if (!currentUser || !currentProfile || currentProfile.role === "student") return;
+
+      const container = $("#pendingReadingsContainer");
+      if (!container) return;
+
+      let query = db.collection("readings").where("status", "==", "pending");
+      if (currentProfile.role === "teacher") {
+        query = db.collection("readings")
+          .where("teacherId", "==", currentUser.uid)
+          .where("status", "==", "pending");
+      }
+
+      pendingReadingsUnsubscribe = query.onSnapshot(
+        () => loadPendingReadings(),
+        (err) => {
+          console.error("subscribeToPendingReadings:", err);
+          loadPendingReadings();
+        }
+      );
     }
 
     async function approveReading(readingId) {
@@ -1034,12 +1022,9 @@
 
         const r = doc.data();
 
-        if (r.status !== "pending") return toast("Esta leitura já foi processada.", "info");
-
         await docRef.update({
           status: "approved",
           approvedBy: currentUser.uid,
-          approvedByName: currentProfile.name || currentUser.email || "Professor",
           approvedAt: new Date().toISOString()
         });
 
@@ -1206,6 +1191,7 @@
         $("#newMissionBtn").onclick = () => showMissionModal();
         loadStudentsByClass(selectedTeacherClass);
         loadPendingReadings();
+        subscribeToPendingReadings();
       }
 
       loadCampaigns();
@@ -2536,8 +2522,12 @@
             payload.repostsCount = 0;
             payload.status = "active";
             payload.createdAt = new Date().toISOString();
-            const postRef=await db.collection("posts").add(payload);
-            await slRewardOnce(`post_${postRef.id}`,20,5);
+            await db.collection("posts").add(payload);
+
+            await db.collection("users").doc(currentUser.uid).update({
+              xp: firebase.firestore.FieldValue.increment(20),
+              cactoscoins: firebase.firestore.FieldValue.increment(5)
+            });
             toast("Resenha publicada! Você ganhou +20 XP e +5 Cactoscoins!", "success");
           }
           closeModal();
@@ -2591,9 +2581,8 @@
         await db.collection("posts").doc(id).update({
           repostsCount: firebase.firestore.FieldValue.increment(1)
         });
-        await slRewardOnce(`repost_${id}`,8,2);
 
-        toast("Resenha repostada com sucesso no seu perfil! +8 XP e +2 Cactoscoins", "success");
+        toast("Resenha repostada com sucesso no seu perfil!", "success");
         renderBookTok();
       } catch(err) {
         console.error(err);
@@ -2674,479 +2663,6 @@
       };
     }
 
-
-    /* =========================================================
-       SERTÃO LITERÁRIO — ATUALIZAÇÃO 29/09/2026
-       Mantém o visual-base e acrescenta as funções definidas no PDF.
-       Temas visuais foram retirados da experiência do aluno.
-       ========================================================= */
-    const SL_V2_STYLE = `
-      .sl-hero { background:var(--surface); border:2px solid var(--border); border-radius:var(--radius); padding:22px; box-shadow:var(--shadow); margin-bottom:18px; }
-      .sl-home-grid { display:grid; grid-template-columns:1.25fr .75fr; gap:18px; }
-      .sl-action-row { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
-      .sl-fire { font-size:28px; display:inline-flex; align-items:center; gap:8px; }
-      .sl-fire button { border:0; border-radius:999px; padding:10px 16px; cursor:pointer; font-weight:800; background:#F97316; color:#fff; }
-      .sl-goal { margin-top:14px; padding:14px; border-radius:var(--radius); background:var(--surface2); border:2px solid var(--border); }
-      .sl-goal-bar { height:14px; border-radius:999px; overflow:hidden; background:var(--bg); border:2px solid var(--border); margin-top:8px; }
-      .sl-goal-bar > div { height:100%; background:var(--primary); transition:width .35s ease; }
-      .sl-book-mini { display:flex; gap:14px; align-items:center; padding:14px; border:2px solid var(--border); border-radius:var(--radius); background:var(--surface); }
-      .sl-book-mini .book-cover { width:70px; min-width:70px; height:92px; }
-      .sl-tabs { display:flex; gap:8px; flex-wrap:wrap; margin:14px 0; }
-      .sl-tab { border:2px solid var(--border); background:var(--surface); padding:8px 13px; border-radius:999px; cursor:pointer; font-weight:700; }
-      .sl-tab.active { background:var(--primary); color:#fff; border-color:var(--primary); }
-      .sl-feed-card { border:2px solid var(--border); border-radius:var(--radius); background:var(--surface); padding:16px; box-shadow:var(--shadow); }
-      .sl-feed-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
-      .sl-status { font-size:11px; font-weight:800; border-radius:999px; padding:5px 9px; background:var(--surface2); border:1px solid var(--border); }
-      .sl-two-col { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-      @media(max-width:800px){ .sl-home-grid,.sl-two-col{grid-template-columns:1fr;} }
-    `;
-    if (!document.getElementById('sl-v2-style')) { const st=document.createElement('style'); st.id='sl-v2-style'; st.textContent=SL_V2_STYLE; document.head.appendChild(st); }
-
-    function slEsc(v){ return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
-    function slDateKey(){ return new Date().toISOString().slice(0,10); }
-    function slYesterday(){ const d=new Date(); d.setDate(d.getDate()-1); return d.toISOString().slice(0,10); }
-    function slReadList(){ return Array.isArray(currentProfile.readBooks) ? currentProfile.readBooks : []; }
-    function slReadingList(){ return Array.isArray(currentProfile.readingBooks) ? currentProfile.readingBooks : (currentProfile.currentBook ? [currentProfile.currentBook] : []); }
-    function slWishList(){ return Array.isArray(currentProfile.wishlist) ? currentProfile.wishlist : []; }
-    function slCurrentBook(){
-      if (currentProfile.currentBook) return currentProfile.currentBook;
-      const r=slReadingList()[0];
-      if (typeof r==='string') return {title:r, progress:0};
-      return r || null;
-    }
-    async function slUpdateProfile(patch){
-      await db.collection('users').doc(currentUser.uid).update(patch);
-      Object.assign(currentProfile,patch);
-    }
-
-    async function slRewardOnce(key,xp,coins,message=''){
-      if(!currentUser || currentProfile.role!=='student') return false;
-      const safe=String(key).replace(/[^a-zA-Z0-9_-]/g,'_').slice(0,120);
-      try{
-        const ref=db.collection('users').doc(currentUser.uid);
-        let granted=false;
-        await db.runTransaction(async tx=>{
-          const snap=await tx.get(ref);
-          const data=snap.data()||{}; const rewards=data.engagementRewards||{};
-          if(rewards[safe]) return;
-          tx.update(ref,{xp:firebase.firestore.FieldValue.increment(Number(xp)||0),cactoscoins:firebase.firestore.FieldValue.increment(Number(coins)||0),[`engagementRewards.${safe}`]:new Date().toISOString()});
-          granted=true;
-        });
-        if(granted){currentProfile.xp=Number(currentProfile.xp||0)+(Number(xp)||0);currentProfile.cactoscoins=Number(currentProfile.cactoscoins||0)+(Number(coins)||0);if(message)toast(message,'success');}
-        return granted;
-      }catch(e){console.error('Reward error',e);return false;}
-    }
-    window.slRewardOnce=slRewardOnce;
-
-    async function slLightFire(){
-      if (!currentUser || currentProfile.role!=='student') return;
-      const today=slDateKey(), last=currentProfile.streakLastDate || '';
-      if(last===today) return toast('🔥 Seu foguinho já está aceso hoje!','success');
-      let streak=Number(currentProfile.readingStreak||0);
-      streak = last===slYesterday() ? streak+1 : 1;
-      await slUpdateProfile({readingStreak:streak,streakLastDate:today});
-      await slRewardOnce(`fire_${today}`,5,2);
-      toast(`🔥 Foguinho aceso! ${streak} dia${streak===1?'':'s'} de sequência. +5 XP e +2 Cactoscoins`,'success');
-      renderHome();
-    }
-    window.slLightFire=slLightFire;
-
-    async function slSetAnnualGoal(){
-      const current=Number(currentProfile.annualGoal||10);
-      const value=prompt('Quantos livros você quer ler durante o ano?',String(current));
-      if(value===null) return;
-      const goal=Math.max(1,Math.min(500,Number(value)||current));
-      await slUpdateProfile({annualGoal:goal});
-      await slRewardOnce(`goal_${new Date().getFullYear()}_${goal}`,2,1);
-      toast(`🎯 Meta anual definida: ${goal} livros. +2 XP e +1 Cactoscoin`,'success');
-      renderHome();
-    }
-    window.slSetAnnualGoal=slSetAnnualGoal;
-
-    async function slSetCurrentBook(){
-      const title=prompt('Qual livro você está lendo agora?');
-      if(!title) return;
-      const progress=Math.max(0,Math.min(100,Number(prompt('Quanto você já leu? (%)','0'))||0));
-      let book={title:title.trim(),progress};
-      try{const snap=await db.collection('books').where('title','==',book.title).limit(1).get();if(!snap.empty){const d=snap.docs[0].data();book={...book,bookId:snap.docs[0].id,author:d.author||'',coverUrl:d.coverUrl||d.imageUrl||d.cover||''}}}catch(e){console.log(e)}
-      await slUpdateProfile({currentBook:book,readingBooks:[book]});
-      await slRewardOnce(`start_book_${book.bookId||book.title.toLowerCase().replace(/\W+/g,'_')}`,5,2);
-      toast('📖 Livro atual salvo na sua estante. +5 XP e +2 Cactoscoins','success');
-      renderHome();
-    }
-    window.slSetCurrentBook=slSetCurrentBook;
-
-    async function slCompleteCurrentBook(){
-      const b=slCurrentBook(); if(!b) return toast('Você ainda não selecionou um livro em leitura.','error');
-      const reads=slReadList();
-      const title=typeof b==='string'?b:b.title;
-      if(!reads.some(x=>(typeof x==='string'?x:x.title)===title)) reads.push({...((typeof b==='string')?{title}:b),title,finishedAt:new Date().toISOString()});
-      const nextGoal=Math.max(0,Number(currentProfile.booksRead||0)+1);
-      await slUpdateProfile({readBooks:reads,booksRead:nextGoal,currentBook:null,readingBooks:[],wishlist:slWishList().filter(x=>(typeof x==='string'?x:x.title)!==title)});
-      await slRewardOnce(`finish_book_${title.toLowerCase().replace(/\W+/g,'_')}`,10,5);
-      toast('🏆 Leitura concluída! O livro foi para “Lidos”. +10 XP e +5 Cactoscoins','success'); renderHome();
-    }
-    window.slCompleteCurrentBook=slCompleteCurrentBook;
-
-    function slBookObjFromCard(book){ return {bookId:book.id||'',title:book.title||'',author:book.author||'',coverUrl:book.coverUrl||''}; }
-    async function slToggleWishlist(book){
-      const list=slWishList(); const title=book.title||''; const idx=list.findIndex(x=>(typeof x==='string'?x:x.title)===title);
-      if(idx>=0) list.splice(idx,1); else list.push(slBookObjFromCard(book));
-      await slUpdateProfile({wishlist:list});
-      if(idx<0) await slRewardOnce(`wishlist_${book.id||title.toLowerCase().replace(/\W+/g,'_')}`,2,1);
-      toast(idx>=0?'💭 Removido dos desejos.':'💭 Adicionado aos desejos.','success');
-      renderLibrary();
-    }
-    window.slToggleWishlist=slToggleWishlist;
-
-    async function slOfferLoan(book){
-      if(!currentUser) return;
-      const payload={ownerId:currentUser.uid,ownerName:currentProfile.name,bookId:book.id||'',bookTitle:book.title||'',author:book.author||'',coverUrl:book.coverUrl||'',status:'available',type:'loan',createdAt:new Date().toISOString()};
-      const ref=await db.collection('bookExchanges').add(payload);
-      await slRewardOnce(`offer_loan_${ref.id}`,10,5);
-      toast(`📚 “${book.title}” está disponível para empréstimo. +10 XP e +5 Cactoscoins`,'success');
-    }
-    window.slOfferLoan=slOfferLoan;
-
-    async function slRequestLoan(id){
-      const ref=db.collection('bookExchanges').doc(id); const snap=await ref.get(); if(!snap.exists) return;
-      const d=snap.data(); if(d.ownerId===currentUser.uid) return toast('Você não pode solicitar seu próprio livro.','error');
-      await ref.update({status:'requested',requesterId:currentUser.uid,requesterName:currentProfile.name,requestedAt:new Date().toISOString()});
-      await slRewardOnce(`request_${id}`,5,2);
-      toast('📨 Solicitação enviada ao dono do livro. +5 XP e +2 Cactoscoins','success'); renderExchanges();
-    }
-    window.slRequestLoan=slRequestLoan;
-
-    async function slRespondLoan(id,accept){
-      await db.collection('bookExchanges').doc(id).update({status:accept?'accepted':'declined',respondedAt:new Date().toISOString()});
-      if(accept) await slRewardOnce(`accept_${id}`,5,2);
-      toast(accept?'🤝 Empréstimo aceito. +5 XP e +2 Cactoscoins':'Solicitação recusada.','success'); renderExchanges();
-    }
-    window.slRespondLoan=slRespondLoan;
-
-    async function slCreateDiscussion(bookTitle){
-      const title=bookTitle || prompt('Livro ou tema da discussão:'); if(!title) return;
-      const text=prompt(`O que você quer discutir sobre “${title}”?`); if(!text) return;
-      const ref=await db.collection('discussions').add({title,body:text,userId:currentUser.uid,userName:currentProfile.name,status:'active',createdAt:new Date().toISOString()});
-      await slRewardOnce(`discussion_${ref.id}`,10,3);
-      toast('💬 Discussão criada! +10 XP e +3 Cactoscoins','success'); renderDiscover();
-    }
-    window.slCreateDiscussion=slCreateDiscussion;
-
-    async function slCreateCitation(){
-      const quote=prompt('Digite a passagem/citação que você quer guardar:'); if(!quote) return;
-      const book=prompt('De qual livro é a citação?')||'';
-      const ref=await db.collection('citations').add({quote,book,userId:currentUser.uid,userName:currentProfile.name,status:'active',createdAt:new Date().toISOString()});
-      await slRewardOnce(`citation_${ref.id}`,5,2);
-      toast('📝 Citação salva na comunidade. +5 XP e +2 Cactoscoins','success'); renderDiscover();
-    }
-    window.slCreateCitation=slCreateCitation;
-
-    async function slModerate(collection,id,status){
-      if(currentProfile.role==='student') return;
-      await db.collection(collection).doc(id).update({status});
-      toast(status==='hidden'?'Publicação ocultada.':status==='removed'?'Publicação removida.':'Publicação liberada.','success'); renderDiscover();
-    }
-    window.slModerate=slModerate;
-
-    async function slComment(collection,id){
-      const text=prompt('Escreva seu comentário:'); if(!text) return;
-      const ref=await db.collection(collection).doc(id).collection('comments').add({text,userId:currentUser.uid,userName:currentProfile.name,createdAt:new Date().toISOString()});
-      await slRewardOnce(`comment_${collection}_${id}_${ref.id}`,3,1);
-      toast('💬 Comentário publicado. +3 XP e +1 Cactoscoin','success'); renderDiscover();
-    }
-    window.slComment=slComment;
-
-    async function renderHome(){
-      const p=currentProfile, isStu=p.role==='student';
-      if(!isStu){
-        return renderHomeStaffOriginal();
-      }
-      const read=Number(p.booksRead||0), goal=Number(p.annualGoal||10), pct=Math.min(100,Math.round(read/Math.max(goal,1)*100));
-      const b=slCurrentBook(); const streak=Number(p.readingStreak||0); const fired=p.streakLastDate===slDateKey();
-      const reads=slReadList(), wishes=slWishList();
-      $('#pageContent').innerHTML=pageTitle(`Olá, ${(p.name||'').split(' ')[0]}!`,`Sua jornada literária`) + `
-        <div class="sl-hero">
-          <div class="sl-home-grid">
-            <div>
-              <div class="sl-fire"><span>${fired?'🔥':'💨'}</span><strong>${streak} dia${streak===1?'':'s'}</strong></div>
-              <p class="muted" style="margin-top:6px">Acenda o foguinho diariamente para manter sua sequência de leitura.</p>
-              <div class="sl-action-row"><button class="primary-btn" onclick="slLightFire()">${fired?'🔥 Foguinho aceso':'🔥 Acender o foguinho'}</button><button class="secondary-btn" onclick="slSetAnnualGoal()">🎯 Meta anual: ${goal} livros</button></div>
-              <div class="sl-goal"><div class="flex-between"><strong>Toda leitura deixa uma marca.</strong><strong>${pct}%</strong></div><div class="sl-goal-bar"><div style="width:${pct}%"></div></div><div class="muted" style="margin-top:6px;font-size:12px">${read} de ${goal} livros lidos</div></div>
-            </div>
-            <div>
-              <div class="panel-header"><h2>📚 Continue de onde parou</h2></div>
-              ${b?`<div class="sl-book-mini"><div class="book-cover">${b.coverUrl?`<img src="${slEsc(b.coverUrl)}" alt="Capa" style="width:100%;height:100%;object-fit:cover"/>`:'📖'}</div><div><strong>${slEsc(b.title)}</strong><p class="muted">${Number(b.progress||0)}% concluído</p><div class="progress"><div style="width:${Math.min(100,Number(b.progress||0))}%"></div></div><div class="sl-action-row"><button class="secondary-btn" onclick="slSetCurrentBook()">Alterar</button><button class="primary-btn" onclick="slCompleteCurrentBook()">Concluir leitura</button></div></div></div>`:`<div class="empty-state">Você ainda não tem um livro em andamento.<br><button class="primary-btn" style="margin-top:10px" onclick="slSetCurrentBook()">Escolher livro atual</button></div>`}
-            </div>
-          </div>
-        </div>
-        <div class="stats-grid">
-          ${statCard(emoji('cactoscoin'),'Cactoscoins',p.cactoscoins||0)}${statCard(emoji('sol'),'XP Total',p.xp||0)}${statCard(emoji('cordel'),'Livros Lidos',read)}${statCard('💭','Desejos',wishes.length)}
-        </div>
-        <div class="sl-two-col" style="margin-top:18px">
-          <section class="panel"><div class="panel-header"><h2>📖 Ver estante</h2><button class="secondary-btn" onclick="navigateTo('shelf')">Abrir</button></div><p class="muted">Lidos: ${reads.length} • Lendo: ${slReadingList().length} • Desejos: ${wishes.length}</p></section>
-          <section class="panel"><div class="panel-header"><h2>🌵 Comunidade</h2><button class="secondary-btn" onclick="navigateTo('discover')">Descobrir</button></div><p class="muted">Livros, discussões e citações de outros leitores.</p></section>
-        </div>`;
-    }
-    function renderHomeStaffOriginal(){
-      /* Mantém o painel pedagógico existente para professores/coordenadores. */
-      const p=currentProfile; const userClasses=Array.isArray(p.classes)&&p.classes.length?p.classes:[p.className||'5º Ano'];
-      $('#pageContent').innerHTML=pageTitle(`Olá, ${(p.name||'').split(' ')[0]}!`,`Painel do ${roleLabel(p.role)}`,`<button class="primary-btn" onclick="navigateTo('reports')">📊 Relatórios</button>`)+`
-        <div class="stats-grid">${statCard('👥','Suas Turmas',userClasses.length)}${statCard(emoji('cordel'),'Turma Atual',selectedTeacherClass)}${statCard(emoji('sanfona'),'Missões Ativas','Disponíveis')}${statCard(emoji('cactoscoin'),'Sertão Literário','2026')}</div>
-        <section class="panel section-space"><div class="panel-header"><h2>Alunos por Turma</h2></div><div class="tab-pills">${userClasses.map(c=>`<button class="tab-pill ${c===selectedTeacherClass?'active':''}" onclick="selectClass('${slEsc(c)}')">${slEsc(c)}</button>`).join('')}</div><div id="studentsListContainer" class="cards-grid">Carregando alunos...</div></section>`;
-      loadStudentsByClass(selectedTeacherClass);
-    }
-
-    async function renderLibrary(){
-      let books=[]; try{const snap=await db.collection('books').get(); snap.forEach(d=>{const b={id:d.id,...d.data()}; if(isBookAvailableForUser(b,currentProfile)) books.push(b);});}catch(e){console.log(e)}
-      const recent=[...books].sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||''))).slice(0,4);
-      const wish=slWishList(); const isStaff=currentProfile.role!=='student';
-      const card=(b)=>{const wished=wish.some(x=>(typeof x==='string'?x:x.title)===b.title); return `<article class="book-card"><div class="book-cover">${b.coverUrl?`<img src="${slEsc(b.coverUrl)}" alt="Capa" style="width:100%;height:100%;object-fit:cover"/>`:'📖'}</div><div class="book-content"><span class="tag">${slEsc(b.category||'Livro')}</span><h3>${slEsc(b.title)}</h3><p>${slEsc(b.author||'Autor não informado')}</p><p class="muted" style="font-size:12px">${slEsc(b.summary||'')}</p><div class="flex" style="gap:6px;flex-wrap:wrap;margin-top:10px">${currentProfile.role==='student'?`<button class="secondary-btn" onclick='slToggleWishlist(${JSON.stringify(b)})'>${wished?'💭 Desejo marcado':'💭 Quero ler'}</button><button class="secondary-btn" onclick='slOfferLoan(${JSON.stringify(b)})'>📚 Oferecer para empréstimo</button><button class="primary-btn" onclick='slSetCurrentBookFromLibrary(${JSON.stringify(b)})'>📖 Ler agora</button>`:''}${isStaff?`<button class="secondary-btn" onclick="abrirModalEdicao('${b.id}')">✏️ Editar</button>`:''}</div></div></article>`};
-      $('#pageContent').innerHTML=pageTitle('Biblioteca Sertaneja 📚',isStaff?'Cadastre e gerencie o acervo da escola.':'Escolha sua leitura, marque desejos e ofereça livros para empréstimo.',isStaff?'<button class="primary-btn" id="addBookBtn">+ Cadastrar Livro</button>':'')+
-        (recent.length?`<section class="panel" style="margin-bottom:18px"><div class="panel-header"><h2>✨ Novos livros</h2></div><div class="cards-grid">${recent.map(card).join('')}</div></section>`:'')+
-        `<section class="panel"><div class="panel-header"><h2>Estante de Livros</h2><input id="searchInput" placeholder="🔍 Buscar por título, autor..." style="max-width:280px"/></div><div class="tab-pills" style="margin-bottom:16px">${['todas','Crônicas','Fábulas','Poemas','Cordel','Outros'].map(c=>`<button class="tab-pill ${currentLibraryTab===c?'active':''}" onclick="selectLibraryTab('${c}')">${c==='todas'?'📚 Todas':c}</button>`).join('')}</div><div id="booksGrid" class="cards-grid">${(currentLibraryTab==='todas'?books:books.filter(b=>(b.category||'Outros').toLowerCase()===currentLibraryTab.toLowerCase())).map(card).join('')||'<div class="empty-state">Nenhum livro encontrado.</div>'}</div></section>`;
-      if($('#searchInput')) $('#searchInput').oninput=e=>{const q=e.target.value.toLowerCase(); $$('#booksGrid .book-card').forEach(x=>x.style.display=x.innerText.toLowerCase().includes(q)?'':'none')};
-      if($('#addBookBtn')) $('#addBookBtn').onclick=()=>typeof showBookModal==='function'?showBookModal():toast('Use o cadastro de livros do acervo.','info');
-    }
-    async function slSetCurrentBookFromLibrary(b){ await slUpdateProfile({currentBook:{...slBookObjFromCard(b),progress:0},readingBooks:[{...slBookObjFromCard(b),progress:0}]}); toast(`📖 “${b.title}” entrou em sua leitura atual.`,'success'); navigateTo('home'); }
-    window.slSetCurrentBookFromLibrary=slSetCurrentBookFromLibrary;
-
-    async function renderStore(){
-      const isStu=currentProfile.role==='student', isStaff=!isStu, coins=currentProfile.cactoscoins||0, xp=currentProfile.xp||0;
-      let items=[]; try{const snap=await db.collection('storeItems').get();snap.forEach(d=>{const x={id:d.id,...d.data()};if(x.isActive!==false)items.push(x)})}catch(e){console.log(e)}
-      if(!items.length) items=[{id:'default_1',title:'Marca-Página Sertão',description:'Design exclusivo de cordel',priceCoins:50,requiredXp:0,icon:'🔖'},{id:'default_2',title:'Botton Sertão Literário',description:'Pin colecionável de leitor',priceCoins:100,requiredXp:100,icon:emoji('chapeu')},{id:'default_3',title:'Vale-Livro Físico',description:'Troque por um livro novo na escola',priceCoins:300,requiredXp:300,icon:emoji('cordel')}];
-      $('#pageContent').innerHTML=pageTitle('Loja Literária 🛍️',isStu?'Troque Cactoscoins por recompensas.':'Gerencie as recompensas da loja.',isStaff?'<button class="primary-btn" id="newStoreItemBtn">+ Novo Item</button>':'')+`<div class="stats-grid" style="margin-bottom:18px">${statCard(emoji('cactoscoin'),'Seu Saldo',coins)}${statCard(emoji('sol'),'Seu XP',xp)}</div><div class="cards-grid">${items.map(it=>`<article class="book-card"><div class="book-cover">${it.icon||'🎁'}</div><div class="book-content"><span class="tag">Recompensa</span><h3>${slEsc(it.title)}</h3><p>${slEsc(it.description)}</p><div class="book-meta"><strong>${emoji('cactoscoin')} ${it.priceCoins||0} • ${emoji('sol')} ${it.requiredXp||0} XP</strong><div class="flex" style="gap:6px;margin-top:8px">${isStu?`<button class="primary-btn" onclick="buyReward('${it.id}',${it.priceCoins||0},${it.requiredXp||0})">Resgatar</button>`:''}${isStaff&&!String(it.id).startsWith('default_')?`<button class="secondary-btn" onclick="showStoreItemModal('${it.id}','${encodeURIComponent(JSON.stringify(it))}')">✏️ Editar</button>`:''}</div></div></div></article>`).join('')}</div>`;
-      if($('#newStoreItemBtn')) $('#newStoreItemBtn').onclick=()=>showStoreItemModal();
-    }
-
-    async function renderShelf(){
-      const reads=slReadList(), reading=slReadingList(), wishes=slWishList();
-      let catalog=[];
-      try{const snap=await db.collection('books').get(); snap.forEach(d=>catalog.push({id:d.id,...d.data()}));}catch(e){console.log(e)}
-      const enrich=async x=>{
-        const o=typeof x==='string'?{title:x}:Object.assign({},x);
-        if(!o.coverUrl){
-          const found=catalog.find(b=>String(b.title||'').trim().toLowerCase()===String(o.title||'').trim().toLowerCase());
-          if(found){o.coverUrl=found.coverUrl||found.imageUrl||found.cover||'';o.author=o.author||found.author||'';o.bookId=o.bookId||found.id||'';}
-        }
-        return o;
-      };
-      const makeList=async arr=>Promise.all(arr.map(enrich));
-      const [readsE,readingE,wishesE]=await Promise.all([makeList(reads),makeList(reading),makeList(wishes)]);
-      const listHtml=(arr,empty)=>arr.length?arr.map(o=>`<div class="book-card"><div class="book-cover" style="overflow:hidden">${o.coverUrl?`<img src="${slEsc(o.coverUrl)}" alt="Capa de ${slEsc(o.title||'livro')}" style="width:100%;height:100%;object-fit:cover;display:block"/>`:'<div style="display:grid;place-items:center;width:100%;height:100%;font-size:34px">📖</div>'}</div><div class="book-content"><span class="tag">Livro</span><h3>${slEsc(o.title||'')}</h3><p>${slEsc(o.author||'')}</p>${o.progress!=null?`<div class="progress"><div style="width:${Math.min(100,Number(o.progress)||0)}%"></div></div><p class="muted">${Number(o.progress)||0}% concluído</p>`:''}</div></div>`).join(''):empty;
-      $('#pageContent').innerHTML=pageTitle('Minha Estante 📚','Seu histórico de leitura: lidos, lendo e desejos.')+`<div class="sl-tabs"><button class="sl-tab active" data-shelf="lendo">Lendo</button><button class="sl-tab" data-shelf="lidos">Lidos</button><button class="sl-tab" data-shelf="desejos">Desejos</button></div><section id="shelfContent" class="cards-grid">${listHtml(readingE,'Você não está lendo nenhum livro no momento.')}</section>`;
-      const renderTab=async tab=>{ $$('.sl-tab').forEach(b=>b.classList.toggle('active',b.dataset.shelf===tab)); $('#shelfContent').innerHTML=listHtml(tab==='lendo'?readingE:tab==='lidos'?readsE:wishesE,'Nenhum livro nesta aba.'); };
-      $$('.sl-tab').forEach(b=>b.onclick=()=>renderTab(b.dataset.shelf));
-    }
-
-    async function renderDiscover(){
-      let posts=[], discussions=[], citations=[];
-      try{const s=await db.collection('posts').where('status','==','active').get();s.forEach(d=>posts.push({id:d.id,...d.data()}))}catch(e){}
-      try{const s=await db.collection('discussions').where('status','==','active').get();s.forEach(d=>discussions.push({id:d.id,...d.data()}))}catch(e){}
-      try{const s=await db.collection('citations').where('status','==','active').get();s.forEach(d=>citations.push({id:d.id,...d.data()}))}catch(e){}
-      const staff=currentProfile.role!=='student';
-      const postHtml=posts.map(p=>`<article class="sl-feed-card"><div class="flex-between"><strong>@${slEsc(p.userName||'leitor')}</strong><span class="sl-status">Livro</span></div><h3>${slEsc(p.title||'Resenha')}</h3><p>${slEsc(p.description||'')}</p><div class="sl-feed-actions"><button class="secondary-btn" onclick="slComment('posts','${p.id}')">💬 Comentar</button><button class="secondary-btn" onclick="repostBookTokPost('${p.id}','${encodeURIComponent(JSON.stringify(p))}')">🔁 Republicar</button>${staff?`<button class="danger-btn" onclick="slModerate('posts','${p.id}','hidden')">Ocultar</button>`:''}</div></article>`).join('');
-      const discussionHtml=discussions.map(d=>`<article class="sl-feed-card"><div class="flex-between"><strong>💬 ${slEsc(d.title||'Discussão')}</strong><span class="sl-status">@${slEsc(d.userName||'leitor')}</span></div><p>${slEsc(d.body||'')}</p><div class="sl-feed-actions"><button class="secondary-btn" onclick="slComment('discussions','${d.id}')">💬 Participar</button>${staff?`<button class="danger-btn" onclick="slModerate('discussions','${d.id}','hidden')">Ocultar</button>`:''}</div></article>`).join('');
-      const citationHtml=citations.map(c=>`<article class="sl-feed-card"><div class="flex-between"><strong>📝 Citação</strong><span class="sl-status">${slEsc(c.book||'')}</span></div><blockquote style="margin:12px 0;font-style:italic">“${slEsc(c.quote||'')}”</blockquote><p class="muted">@${slEsc(c.userName||'leitor')}</p>${staff?`<button class="danger-btn" onclick="slModerate('citations','${c.id}','hidden')">Ocultar</button>`:''}</article>`).join('');
-      $('#pageContent').innerHTML=pageTitle('Descobrir 🌵','Uma comunidade para compartilhar leituras, discutir ideias e guardar citações.')+`<div class="sl-action-row"><button class="primary-btn" onclick="slCreateDiscussion()">💬 Nova discussão</button><button class="secondary-btn" onclick="slCreateCitation()">📝 Nova citação</button></div><div class="sl-tabs"><button class="sl-tab active" data-disc="livros">📚 Livros</button><button class="sl-tab" data-disc="discussoes">💬 Discussões</button><button class="sl-tab" data-disc="citacoes">📝 Citações</button></div><section id="discoverContent" class="cards-grid">${postHtml||'<div class="empty-state">Nenhuma publicação de livro ainda.</div>'}</section><section class="panel" style="margin-top:18px"><div class="panel-header"><h2>🛡️ Guardião Literário</h2></div><p class="muted">A comunidade conta com moderação: denúncias e publicações podem ser analisadas, ocultadas ou removidas pela equipe responsável.</p></section>`;
-      const setTab=t=>{$$('.sl-tab').forEach(b=>b.classList.toggle('active',b.dataset.disc===t));$('#discoverContent').innerHTML=t==='livros'?(postHtml||'<div class="empty-state">Nenhuma publicação de livro ainda.</div>'):t==='discussoes'?(discussionHtml||'<div class="empty-state">Nenhuma discussão ainda.</div>'):(citationHtml||'<div class="empty-state">Nenhuma citação ainda.</div>')};
-      $$('.sl-tab').forEach(b=>b.onclick=()=>setTab(b.dataset.disc));
-    }
-
-    async function renderExchanges(){
-      let items=[];try{const s=await db.collection('bookExchanges').get();s.forEach(d=>items.push({id:d.id,...d.data()}))}catch(e){console.log(e)}
-      const mine=items.filter(x=>x.ownerId===currentUser.uid||x.requesterId===currentUser.uid);
-      const available=items.filter(x=>x.status==='available'&&x.ownerId!==currentUser.uid);
-      const typeLabel=x=>x.type==='exchange'?'Troca':x.type==='both'?'Troca ou empréstimo':'Empréstimo';
-      const matchesType=(x,tab)=>tab==='all'||(tab==='loan'?(x.type==='loan'||x.type==='both'):(x.type==='exchange'||x.type==='both'));
-      const card=x=>`<article class="book-card"><div class="book-cover" style="height:170px;overflow:hidden">${x.coverUrl?`<img src="${slEsc(x.coverUrl)}" alt="Capa de ${slEsc(x.bookTitle)}" style="width:100%;height:100%;object-fit:cover;display:block"/>`:slIcon('book',34)}</div><div class="book-content"><span class="tag">${typeLabel(x)}</span><h3>${slEsc(x.bookTitle)}</h3><p>${slEsc(x.author||'Autor não informado')}<br><span class="muted">Disponibilizado por ${slEsc(x.ownerName||'leitor')}</span></p>${x.note?`<p class="muted" style="font-size:11px">${slEsc(x.note)}</p>`:''}<div class="sl-action-row">${x.status==='available'&&x.ownerId!==currentUser.uid?`<button class="primary-btn" onclick="slRequestLoan('${x.id}')">📨 Solicitar</button>`:''}${x.status==='requested'&&x.ownerId===currentUser.uid?`<button class="primary-btn" onclick="slRespondLoan('${x.id}',true)">🤝 Aceitar</button><button class="secondary-btn" onclick="slRespondLoan('${x.id}',false)">Recusar</button>`:''}<span class="sl-status">${x.status==='available'?'Disponível':x.status==='requested'?'Solicitado':x.status==='accepted'?'Aceito':'Recusado'}</span></div></div></article>`;
-      const renderTab=tab=>{
-        $$('.sl-ex-tab').forEach(b=>b.classList.toggle('active',b.dataset.exTab===tab));
-        const publicItems=available.filter(x=>matchesType(x,tab));
-        const myItems=mine.filter(x=>matchesType(x,tab));
-        $('#exchangePublic').innerHTML=publicItems.map(card).join('')||'<div class="empty-state">Nenhuma oferta encontrada nesta categoria.</div>';
-        $('#exchangeMine').innerHTML=myItems.map(card).join('')||'<div class="empty-state">Nenhuma solicitação nesta categoria.</div>';
-      };
-      $('#pageContent').innerHTML=`<div class="page-title"><div><h1>Trocas & Empréstimos 🤝</h1><p>Ofereça um livro, receba solicitações e confirme a troca ou o empréstimo.</p></div></div><section class="panel" style="margin-bottom:18px"><div class="panel-header"><h2>Como funciona</h2><button class="primary-btn" style="min-height:36px;padding:7px 12px;font-size:11px" onclick="showExchangeRegisterModal()">${slIcon('plus',15)} Cadastrar livro</button></div><p>Cadastre uma obra e escolha se aceita empréstimo, troca ou os dois. Outro aluno solicita e você decide como combinar a entrega.</p></section><div class="sl-tabs"><button class="sl-tab sl-ex-tab active" data-ex-tab="all">Tudo</button><button class="sl-tab sl-ex-tab" data-ex-tab="loan">Empréstimos</button><button class="sl-tab sl-ex-tab" data-ex-tab="exchange">Trocas</button></div><div class="sl-section-head"><h2>Oportunidades por perto</h2></div><section id="exchangePublic" class="cards-grid"></section><div class="sl-exchange-offer" onclick="showExchangeRegisterModal()"><span class="sl-round">${slIcon('plus',20)}</span><div style="flex:1"><strong>Quer colocar um livro para circular?</strong><div class="muted" style="font-size:11px">Cadastre a obra e escolha se aceita empréstimo, troca ou os dois.</div></div>${slIcon('arrow',18)}</div><div class="sl-section-head"><h2>Minhas solicitações</h2></div><section id="exchangeMine" class="cards-grid"></section>`;
-      $$('.sl-ex-tab').forEach(b=>b.onclick=()=>renderTab(b.dataset.exTab));
-      renderTab('all');
-    }
-
-    async function renderProfile(){
-      const p=currentProfile, reads=slReadList(), reading=slReadingList(), wishes=slWishList();
-      let catalog=[];try{const snap=await db.collection('books').get();snap.forEach(d=>catalog.push({id:d.id,...d.data()}))}catch(e){console.log(e)}
-      const enrich=arr=>arr.map(x=>{const o=typeof x==='string'?{title:x}:Object.assign({},x);if(!o.coverUrl){const f=catalog.find(b=>String(b.title||'').trim().toLowerCase()===String(o.title||'').trim().toLowerCase());if(f){o.coverUrl=f.coverUrl||f.imageUrl||f.cover||'';o.author=o.author||f.author||''}}return o});
-      const readsE=enrich(reads), readingE=enrich(reading), wishesE=enrich(wishes);
-      $('#pageContent').innerHTML=pageTitle('Seu Perfil','Informações e estante pública do leitor.')+`<div class="panel"><div class="flex" style="gap:20px;margin-bottom:20px">${renderAvatar(p.photoURL,p.name)}<div><h2>${slEsc(p.name)}</h2><p class="muted">${roleLabel(p.role)} ${p.className?`• ${slEsc(p.className)}`:''}</p></div></div><form id="profileEditForm" class="form-grid"><label>Nome Completo<input name="name" value="${slEsc(p.name||'')}" required/></label><label>Foto de Perfil<input type="file" id="inpProfilePhotoFile" accept="image/*"/></label><button class="primary-btn full" type="submit">Salvar Alterações</button></form></div><section class="panel" style="margin-top:18px"><div class="panel-header"><h2>Estante pública</h2></div><div class="sl-tabs"><button class="sl-tab active" data-profile="lidos">Lidos (${readsE.length})</button><button class="sl-tab" data-profile="lendo">Lendo (${readingE.length})</button><button class="sl-tab" data-profile="desejos">Desejos (${wishesE.length})</button></div><div id="profileShelf" class="cards-grid"></div></section>`;
-      const arrHtml=a=>a.length?a.map(o=>`<div class="sl-book-mini"><div class="book-cover" style="overflow:hidden;width:58px;height:76px;flex:none">${o.coverUrl?`<img src="${slEsc(o.coverUrl)}" alt="Capa" style="width:100%;height:100%;object-fit:cover;display:block"/>`:'<div style="display:grid;place-items:center;width:100%;height:100%">📖</div>'}</div><div><strong>${slEsc(o.title||'')}</strong><p class="muted">${slEsc(o.author||'')}</p></div></div>`).join(''):'<div class="empty-state">Nenhum livro nesta aba.</div>';
-      const set=t=>{$$('.sl-tab').forEach(b=>b.classList.toggle('active',b.dataset.profile===t));$('#profileShelf').innerHTML=arrHtml(t==='lidos'?readsE:t==='lendo'?readingE:wishesE)}; set('lidos'); $$('.sl-tab').forEach(b=>b.onclick=()=>set(b.dataset.profile));
-      $('#profileEditForm').onsubmit=async e=>{e.preventDefault();const fd=new FormData(e.target);let photoURL=p.photoURL||'';const f=$('#inpProfilePhotoFile').files[0];if(f)photoURL=await uploadToCloudinary(f);await slUpdateProfile({name:fd.get('name'),photoURL});await slRewardOnce('profile_edit',3,1);toast('Perfil atualizado! Você ganhou +3 XP e +1 Cactoscoin.','success');renderProfile()};
-    }
-
-    function renderApp(){
-      applyThemeSettings(); const p=currentProfile, isStaff=p&&p.role!=='student';
-      /* O visual-base é preservado; apenas a arquitetura de navegação é atualizada. */
-      const icons=['🏠','📚','🌵','🛍️','📖','🤝','👤']; const labels=['Home','Biblioteca','Descobrir','Loja','Minha Estante','Trocas','Perfil']; const pages=['home','library','discover','store','shelf','exchanges','profile'];
-      const navHtml=pages.map((page,i)=>`<button class="nav-btn${page===currentPage?' active':''}" data-page="${page}"><span>${icons[i]}</span><span>${labels[i]}</span></button>`).join('');
-      $('#app').innerHTML=`<div class="app-shell"><header class="topbar"><div class="brand" onclick="navigateTo('home')"><div class="brand-mark">${p.photoURL?`<img src="${p.photoURL}"/>`:emoji('brotinho')}</div><span>Sertão Literário</span></div><div class="top-actions">${isStaff?`<button class="primary-btn" style="font-size:11px;padding:6px 10px" onclick="navigateTo('reports')">📊 Relatórios</button>`:''}<button id="darkToggleBtn" class="icon-btn" title="Modo Claro/Escuro">${isDarkMode?'☀':'☾'}</button><div class="user-pill">${renderAvatar(p.photoURL,p.name)}<span>${(p.name||'').split(' ')[0]}</span></div><button id="logoutBtn" class="secondary-btn" style="padding:6px 10px">Sair</button></div></header><main id="pageContent" class="page"></main><nav class="bottom-nav">${navHtml}</nav></div>`;
-      $('#darkToggleBtn').onclick=()=>{isDarkMode=!isDarkMode;localStorage.setItem('st-dark-mode',isDarkMode);applyThemeSettings();$('#darkToggleBtn').textContent=isDarkMode?'☀':'☾'};
-      $('#logoutBtn').onclick=()=>auth.signOut(); $$('.nav-btn').forEach(btn=>btn.onclick=()=>navigateTo(btn.dataset.page)); loadPage();
-    }
-    function loadPage(){const pages={home:renderHome,library:renderLibrary,discover:renderDiscover,store:renderStore,shelf:renderShelf,exchanges:renderExchanges,profile:renderProfile,reports:renderReports};(pages[currentPage]||renderHome)();}
-
-
-    /* =========================================================
-       V3 — VISUAL DO PDF + BOOKTOK REELS + REGISTRO DE LEITURA
-       ========================================================= */
-    currentTheme = "default";
-    function applyThemeSettings(){
-      // O layout novo é fixo; apenas o modo claro/escuro pode ser alternado.
-      currentTheme = "default";
-      document.body.setAttribute("data-theme","default");
-      document.body.classList.toggle("dark", !!isDarkMode);
-    }
-
-    function slIcon(name, size=20){
-      const paths={
-        home:'<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9 21v-6h6v6"/>',
-        book:'<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 5.5v15A2.5 2.5 0 0 1 6.5 18H20"/>',
-        store:'<path d="M4 8h16l-1 12H5z"/><path d="M6 8 7.5 4h9L18 8"/><path d="M9 12a3 3 0 0 0 6 0"/>',
-        reel:'<rect x="4" y="3" width="16" height="18" rx="4"/><path d="m9 3 3 5 3-5M15 8l3-5"/><path d="m10 11 5 3-5 3z"/>',
-        user:'<circle cx="12" cy="8" r="3.5"/><path d="M5 21c.8-4 3-6 7-6s6.2 2 7 6"/>',
-        discover:'<circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/>',
-        swap:'<path d="M7 7h11l-3-3M17 17H6l3 3"/><path d="M18 7v4M6 13v4"/>',
-        bell:'<path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/>',
-        search:'<circle cx="11" cy="11" r="6.5"/><path d="m16 16 5 5"/>',
-        plus:'<path d="M12 5v14M5 12h14"/>',
-        heart:'<path d="M20.8 8.6c0 5.2-8.8 10.4-8.8 10.4S3.2 13.8 3.2 8.6A4.6 4.6 0 0 1 12 6.1a4.6 4.6 0 0 1 8.8 2.5z"/>',
-        comment:'<path d="M20 11.5a7.5 7.5 0 0 1-8 7.5 9 9 0 0 1-4-.9L4 20l1.4-3.4A7.2 7.2 0 0 1 4 11.5 7.5 7.5 0 0 1 12 4a7.5 7.5 0 0 1 8 7.5z"/>',
-        repeat:'<path d="M17 3l3 3-3 3"/><path d="M4 6h16"/><path d="M7 21l-3-3 3-3"/><path d="M20 18H4"/>',
-        bookmark:'<path d="M6 4h12v17l-6-4-6 4z"/>',
-        camera:'<path d="M4 7h4l1.5-2h5L16 7h4v12H4z"/><circle cx="12" cy="13" r="3.5"/>',
-        logout:'<path d="M10 5H5v14h5"/><path d="m14 8 4 4-4 4M18 12H9"/>',
-        arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>'
-      };
-      return `<svg class="sl-svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]||paths.book}</svg>`;
-    }
-
-    function slReferenceCss(){
-      if(document.getElementById('slReferenceCss')) return;
-      const style=document.createElement('style'); style.id='slReferenceCss';
-      style.textContent=`
-        @import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800;900&display=swap');
-        :root, body[data-theme="default"]{
-          --bg:#F8EFEC;--surface:#FFFDFC;--surface2:#EEE5DE;--text:#292522;--muted:#8C827B;
-          --border:#E3D9D2;--primary:#B9583B;--primary-dark:#99472F;--green:#4C8877;--cyan:#DDEDE7;
-          --danger:#B94A42;--shadow:0 1px 0 rgba(60,45,35,.04);--radius:18px;--font-title:'Nunito Sans',sans-serif;--font-body:'Nunito Sans',sans-serif;
-        }
-        *{box-sizing:border-box} html,body{background:var(--bg)!important;color:var(--text)!important;font-family:'Nunito Sans',sans-serif!important}
-        body{min-height:100vh} h1,h2,h3,h4,.brand,.page-title h1,.stat-value,.book-cover{font-family:'Nunito Sans',sans-serif!important}
-        .app-shell{width:min(100%,920px);margin:0 auto;min-height:100vh;padding:0 0 104px;background:var(--bg)}
-        .topbar{position:relative;top:auto;border:0;background:transparent;padding:26px 24px 10px;min-height:76px}
-        .topbar .brand{display:none}.top-actions{width:100%;justify-content:flex-end;gap:10px}.top-actions .primary-btn{display:none}.top-actions .icon-btn{width:42px;height:42px;border:0;background:#EEE8DF;box-shadow:none;border-radius:50%;color:#645B54}
-        .top-actions .user-pill{border:0;background:#4E8778;color:#fff;width:42px;height:42px;padding:0;border-radius:50%;justify-content:center;box-shadow:none}.top-actions .user-pill span{display:none}.top-actions .avatar{width:42px;height:42px;border:0;background:transparent}
-        #logoutBtn{display:inline-flex;align-items:center;gap:6px}
-        .page{width:100%;padding:8px 24px 28px}.page-title{display:block;margin:0 0 22px}.page-title>div:first-child:before{content:'SERTÃO LITERÁRIO';display:block;color:var(--primary);font-size:11px;font-weight:900;letter-spacing:1.5px;margin-bottom:6px}.page-title h1{font-size:31px;line-height:1.08;letter-spacing:-.7px}.page-title p{font-size:13px;margin-top:7px;color:var(--muted)}
-        .panel,.stat-card,.book-card,.campaign-card,.post-card{border:1px solid var(--border)!important;background:var(--surface)!important;box-shadow:var(--shadow)!important;border-radius:18px!important}
-        .primary-btn,.secondary-btn,.danger-btn,.btn-editar{border:0!important;box-shadow:none!important;text-transform:none!important;border-radius:12px!important;font-weight:800!important;min-height:42px}
-        .primary-btn{background:var(--primary)!important}.secondary-btn,.btn-editar{background:#F0E8E1!important;color:var(--text)!important}.danger-btn{background:var(--danger)!important}
-        .bottom-nav{left:0;right:0;bottom:0;transform:none;width:100%;max-width:none;grid-template-columns:repeat(8,1fr);gap:0;padding:8px 8px 9px;border:0;border-top:1px solid var(--border);border-radius:0;background:rgba(255,253,251,.98);box-shadow:0 -5px 20px rgba(70,50,40,.05);backdrop-filter:blur(12px)}
-        .nav-btn{border:0!important;background:transparent!important;color:#8C837D!important;padding:5px 2px 3px;border-radius:10px!important;font-size:9px;font-weight:700;line-height:1.1}.nav-btn .sl-svg{width:20px;height:20px}.nav-btn.active{color:var(--primary)!important;box-shadow:none!important}.nav-btn.active .sl-svg{stroke-width:2.3}
-        body.dark{--bg:#241F1D!important;--surface:#302A27!important;--surface2:#3A332F!important;--text:#F6EEE9!important;--muted:#B8AAA2!important;--border:#514640!important;--primary:#D87858!important;--primary-dark:#B95B3E!important;--green:#67A18F!important;--cyan:#3B4E49!important;--danger:#D36A60!important;--shadow:0 1px 0 rgba(0,0,0,.15)!important}
-        body.dark .top-actions .icon-btn,body.dark .sl-round,body.dark .secondary-btn,body.dark .btn-editar{background:#403834!important;color:#F6EEE9!important}
-        body.dark .bottom-nav{background:rgba(48,42,39,.98)}
-        .sl-svg{display:block}.sl-home-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px}.sl-date{font-size:11px;color:var(--primary);font-weight:900;letter-spacing:1.5px;text-transform:uppercase}.sl-greeting{font-size:31px;font-weight:900;letter-spacing:-1px;margin-top:5px}.sl-header-actions{display:flex;gap:8px}.sl-round{width:42px;height:42px;border:0;border-radius:50%;background:#EEE8DF;color:#655C55;display:grid;place-items:center}
-        .sl-hero-ref{background:var(--primary);color:white;border-radius:24px;padding:24px 20px 20px;margin-bottom:14px;display:flex;justify-content:space-between;gap:18px;min-height:154px}.sl-hero-ref small{display:block;font-size:11px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;opacity:.85}.sl-hero-ref h2{font-size:27px;line-height:1.05;margin:12px 0 8px;letter-spacing:-.7px}.sl-hero-ref p{font-size:15px;opacity:.92}.sl-progress-big{min-width:70px;text-align:center}.sl-progress-big strong{font-size:29px;line-height:1}.sl-progress-big span{display:block;font-size:11px;margin-top:2px}.sl-progress-vert{height:72px;width:12px;border-radius:10px;background:rgba(255,255,255,.28);margin:8px auto 0;display:flex;align-items:flex-end;overflow:hidden}.sl-progress-vert>div{width:100%;background:#EFC56D;border-radius:10px;min-height:4px}
-        .sl-quick{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:28px}.sl-quick-card{border:1px solid var(--border);background:var(--surface);border-radius:18px;padding:12px;display:flex;align-items:center;gap:10px;min-height:70px}.sl-quick-card.green{background:#DDEDE7;border-color:#DDEDE7}.sl-quick-icon{width:34px;height:34px;border-radius:11px;background:#F4E4C7;color:#6B5645;display:grid;place-items:center;flex:none}.sl-quick-card.green .sl-quick-icon{background:#F7FBF9;color:#4C8877}.sl-quick-card strong{font-size:16px}.sl-quick-card small{display:block;color:var(--muted);font-size:11px;margin-top:2px}.sl-section-head{display:flex;justify-content:space-between;align-items:center;margin:20px 0 10px}.sl-section-head h2{font-size:20px;letter-spacing:-.3px}.sl-link{color:var(--primary);font-size:13px;font-weight:800;background:none;border:0}.sl-reading-card{border:1px solid var(--border);background:var(--surface);border-radius:18px;padding:18px;text-align:center;min-height:125px;display:flex;flex-direction:column;align-items:center;justify-content:center}.sl-reading-card .sl-svg{color:#756D66;margin-bottom:8px}.sl-reading-card strong{font-size:16px}.sl-reading-card p{font-size:12px;color:var(--muted);margin-top:5px}.sl-register{margin-top:14px;display:flex;gap:10px}.sl-register .primary-btn{flex:1}
-        .sl-tabs{display:grid;grid-template-columns:repeat(3,1fr);background:#EDE4DC;border-radius:13px;padding:3px;margin:10px 0 18px}.sl-tab{border:0;background:transparent;padding:9px 6px;border-radius:10px;color:#827972;font-size:11px;font-weight:800}.sl-tab.active{background:#FFFDFC;color:var(--text);box-shadow:0 1px 3px rgba(60,45,35,.08)}
-        .sl-goal-ref{background:var(--primary);color:#fff;border-radius:20px;padding:16px;margin:12px 0 22px}.sl-goal-ref .row{display:flex;justify-content:space-between;align-items:center}.sl-goal-ref small{font-size:10px;font-weight:900;letter-spacing:1.3px}.sl-goal-ref h3{font-size:17px;margin:4px 0}.sl-goal-line{height:6px;background:rgba(255,255,255,.35);border-radius:10px;margin-top:10px;overflow:hidden}.sl-goal-line>div{height:100%;background:#fff;border-radius:10px}
-        .sl-reels{height:calc(100vh - 185px);min-height:520px;overflow-y:auto;scroll-snap-type:y mandatory;border-radius:22px;background:#151515;scrollbar-width:none}.sl-reels::-webkit-scrollbar{display:none}.sl-reel{position:relative;min-height:100%;height:100%;scroll-snap-align:start;background:#111;overflow:hidden}.sl-reel-media,.sl-reel-media img,.sl-reel-media video{width:100%;height:100%;object-fit:cover;display:block}.sl-reel-media{position:absolute;inset:0}.sl-reel-shade{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.82),rgba(0,0,0,.08) 52%,rgba(0,0,0,.15))}.sl-reel-top{position:absolute;top:14px;left:14px;right:14px;display:flex;justify-content:space-between;align-items:center;z-index:2;color:#fff}.sl-reel-top .sl-round{background:rgba(255,255,255,.18);color:#fff;backdrop-filter:blur(8px)}.sl-reel-side{position:absolute;right:12px;bottom:92px;display:grid;gap:14px;z-index:3;color:#fff;text-align:center}.sl-reel-side button{border:0;background:none;color:#fff;display:grid;justify-items:center;gap:3px;font-size:10px;font-weight:800}.sl-reel-side .sl-reel-icon{width:42px;height:42px;border-radius:50%;background:rgba(0,0,0,.28);backdrop-filter:blur(8px);display:grid;place-items:center}.sl-reel-bottom{position:absolute;left:16px;right:78px;bottom:20px;color:#fff;z-index:3}.sl-reel-user{font-weight:900;font-size:14px;margin-bottom:8px}.sl-reel-title{font-size:20px;font-weight:900;line-height:1.1}.sl-reel-desc{font-size:12px;line-height:1.35;margin-top:5px;opacity:.92}.sl-reel-empty{height:100%;display:grid;place-items:center;color:#fff;text-align:center;padding:40px}.sl-reel-empty .sl-round{margin:0 auto 12px;background:rgba(255,255,255,.15);color:#fff}
-        .sl-exchange-banner{background:#DDEDE7;border-radius:18px;padding:14px 15px;display:flex;gap:10px;align-items:center;margin-bottom:14px}.sl-exchange-banner .sl-round{background:#4C8877;color:#fff;width:38px;height:38px}.sl-exchange-offer{display:flex;align-items:center;gap:12px;padding:13px;border:1px solid var(--border);border-radius:16px;background:var(--surface);cursor:pointer}.sl-exchange-offer:hover{border-color:var(--primary)}.sl-exchange-offer .sl-round{background:#F5DEB7}.sl-status{font-size:10px;font-weight:800;color:var(--primary);background:#F4E6DF;border-radius:10px;padding:5px 8px}
-        .sl-library-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.sl-book-ref{background:var(--surface);border:1px solid var(--border);border-radius:18px;overflow:hidden}.sl-book-ref-cover{height:190px;background:#EEE5DE}.sl-book-ref-cover img{width:100%;height:100%;object-fit:cover}.sl-book-ref-body{padding:12px}.sl-book-ref-body h3{font-size:15px}.sl-book-ref-body p{font-size:11px;color:var(--muted);margin-top:3px}.sl-book-ref-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.sl-book-ref-actions button{font-size:10px!important;padding:7px 9px!important;min-height:32px!important}
-        @media(max-width:640px){.topbar{padding:18px 14px 4px}.page{padding:8px 14px 24px}.bottom-nav{padding-left:4px;padding-right:4px}.nav-btn{font-size:8px}.nav-btn .sl-svg{width:19px;height:19px}.sl-greeting{font-size:28px}.sl-hero-ref h2{font-size:24px}.sl-library-grid{grid-template-columns:1fr 1fr}.sl-reels{height:calc(100vh - 150px);min-height:500px;border-radius:18px}.sl-reel-title{font-size:18px}}
-      `;
-      document.head.appendChild(style);
-    }
-    slReferenceCss();
-
-    async function renderHome(){
-      const p=currentProfile; if(!p) return;
-      if(p.role!=='student') return renderHomeStaffOriginal();
-      const read=Number(p.booksRead||0), goal=Number(p.annualGoal||10), pct=Math.min(100,Math.round(read/Math.max(goal,1)*100));
-      let b=slCurrentBook();
-      if(b && !b.coverUrl){try{const s=await db.collection('books').where('title','==',b.title).limit(1).get();if(!s.empty){const d=s.docs[0].data();b={...b,bookId:s.docs[0].id,author:b.author||d.author||'',coverUrl:d.coverUrl||d.imageUrl||d.cover||''};await slUpdateProfile({currentBook:b,readingBooks:[b]})}}catch(e){console.log(e)}}
-      const streak=Number(p.readingStreak||0), fired=p.streakLastDate===slDateKey();
-      const first=(p.name||'Leitor').split(' ')[0];
-      const today=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'}).replace(/^./,c=>c.toUpperCase());
-      $('#pageContent').innerHTML=`
-        <div class="sl-home-head"><div><div class="sl-date">${today}</div><div class="sl-greeting">Oi, ${slEsc(first)}.</div></div><div class="sl-header-actions"><button class="sl-round" title="Notificações">${slIcon('bell',19)}</button>${renderAvatar(p.photoURL,p.name)}</div></div>
-        <section class="sl-hero-ref"><div><small>Sua jornada</small><h2>Toda leitura deixa uma marca.</h2><p>Você está mais perto da sua meta do que imagina.</p></div><div class="sl-progress-big"><strong>${pct}%</strong><span>da meta</span><div class="sl-progress-vert"><div style="height:${pct}%"></div></div></div></section>
-        <div class="sl-quick"><button class="sl-quick-card" onclick="slLightFire()"><span class="sl-quick-icon">${slIcon('reel',18)}</span><span><strong>${streak} dia${streak===1?'':'s'}</strong><small>${fired?'foguinho aceso hoje':'acenda o foguinho hoje'}</small></span></button><button class="sl-quick-card green" onclick="slSetAnnualGoal()"><span class="sl-quick-icon">${slIcon('bookmark',18)}</span><span><strong>${read}/${goal}</strong><small>livros este ano</small></span></button></div>
-        <div class="sl-section-head"><h2>Continue de onde parou</h2><button class="sl-link" onclick="navigateTo('shelf')">Ver estante</button></div>
-        ${b?`<div class="sl-reading-card" style="text-align:left;align-items:flex-start"><div style="display:flex;gap:14px;align-items:center;width:100%"><div class="sl-book-ref-cover" style="width:62px;height:82px;border-radius:10px;flex:none;overflow:hidden">${b.coverUrl?`<img src="${slEsc(b.coverUrl)}"/>`:slIcon('book',25)}</div><div style="flex:1"><strong>${slEsc(b.title)}</strong><p>${slEsc(b.author||'')}</p><div class="sl-register"><button class="primary-btn" onclick="openRegisterReadingModal()">${slIcon('book',16)} Registrar leitura</button><button class="secondary-btn" onclick="slCompleteCurrentBook()">Concluir</button></div></div></div></div>`:`<div class="sl-reading-card"><div>${slIcon('book',25)}</div><strong>Seu próximo livro começa aqui</strong><p>Quando a equipe escolar adicionar livros ao acervo, você poderá escolher um para começar.</p><div class="sl-register"><button class="primary-btn" onclick="openRegisterReadingModal()">${slIcon('book',16)} Registrar leitura</button><button class="secondary-btn" onclick="navigateTo('library')">Explorar biblioteca</button></div></div>`}
-        <div class="sl-section-head"><h2>Feito para você</h2><button class="sl-link" onclick="navigateTo('discover')">Explorar</button></div><div class="empty-state" style="padding-top:8px">O acervo ainda está sendo preparado para você.</div>
-        <div class="sl-section-head"><h2>Campanhas e desafios</h2></div><div class="empty-state" style="padding-top:8px">Ainda não há campanhas ou desafios publicados pela equipe.</div>`;
-    }
-
-    async function renderBookTok(){
-      let posts=[]; try{const snap=await db.collection('posts').where('status','==','active').get();snap.forEach(d=>posts.push({id:d.id,...d.data()}));posts.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));}catch(e){console.log(e)}
-      const makeMedia=p=>p.videoUrl?`<video src="${slEsc(p.videoUrl)}" playsinline loop muted autoplay preload="auto" aria-label="Vídeo BookTok com áudio disponível"></video>`:p.imageUrl?`<img src="${slEsc(p.imageUrl)}" alt="Publicação BookTok"/>`:`<div class="sl-reel-empty"><div><div class="sl-round">${slIcon('camera',22)}</div><strong>Publicação sem mídia</strong></div></div>`;
-      const cards=posts.length?posts.map(p=>{const liked=Array.isArray(p.likedBy)&&p.likedBy.includes(currentUser.uid);const enc=encodeURIComponent(JSON.stringify(p));return `<article class="sl-reel"><div class="sl-reel-media">${makeMedia(p)}</div><div class="sl-reel-shade"></div><div class="sl-reel-top"><strong>BookTok</strong><div style="display:flex;gap:8px"><button class="sl-round sl-sound-btn" onclick="toggleReelSound(this)" title="Ativar/desativar áudio">🔇</button><button class="sl-round" onclick="showBookTokPostModal()">${slIcon('camera',19)}</button></div></div><div class="sl-reel-side"><button onclick="slToggleReelLike('${p.id}',${liked})"><span class="sl-reel-icon">${slIcon('heart',22)}</span>${p.likesCount||0}</button><button onclick="openCommentsModal('${p.id}')"><span class="sl-reel-icon">${slIcon('comment',21)}</span>${p.commentsCount||0}</button><button onclick="repostBookTokPost('${p.id}','${enc}')"><span class="sl-reel-icon">${slIcon('repeat',21)}</span>${p.repostsCount||0}</button><button onclick="navigator.clipboard?.writeText(location.href);toast('Link copiado!','success')"><span class="sl-reel-icon">${slIcon('bookmark',20)}</span>Salvar</button></div><div class="sl-reel-bottom"><div class="sl-reel-user">@${slEsc((p.userName||'leitor').toLowerCase().replace(/\s+/g,''))}</div><div class="sl-reel-title">${slEsc(p.title||'Minha leitura')}</div><div class="sl-reel-desc">${slEsc(p.description||'')}</div>${p.userId===currentUser.uid||currentProfile.role!=='student'?`<div class="sl-register"><button class="secondary-btn" onclick="editBookTokPost('${p.id}','${enc}')">Editar</button><button class="danger-btn" onclick="deleteBookTokPost('${p.id}')">Excluir</button></div>`:''}</div></article>`}).join(''):`<article class="sl-reel"><div class="sl-reel-empty"><div><div class="sl-round">${slIcon('reel',25)}</div><h2>Seu BookTok começa aqui</h2><p>Publique uma foto ou vídeo sobre o livro que você está lendo.</p><button class="primary-btn" style="margin-top:14px" onclick="showBookTokPostModal()">${slIcon('plus',17)} Publicar</button></div></div></article>`;
-      $('#pageContent').innerHTML=`<div class="page-title"><div><h1>BookTok</h1><p>Fotos, vídeos e resenhas para deixar a leitura mais viva.</p></div></div><div class="sl-tabs" style="grid-template-columns:1fr 1fr 1fr"><button class="sl-tab active">Feed</button><button class="sl-tab" onclick="navigateTo('discover')">Discussões</button><button class="sl-tab" onclick="navigateTo('discover')">Citações</button></div><div class="sl-reels">${cards}</div>`;
-      const reelVideos=$$('.sl-reel video'); const io=new IntersectionObserver(es=>es.forEach(e=>{const v=e.target;if(e.isIntersecting){v.play().catch(()=>{});}else{v.pause();}}),{threshold:.65}); reelVideos.forEach(v=>io.observe(v));
-    }
-    function toggleReelSound(button){
-      const reel = button.closest('.sl-reel');
-      const video = reel ? reel.querySelector('video') : null;
-      if(!video){ toast('Esta publicação não possui vídeo com áudio.', 'info'); return; }
-      video.muted = !video.muted;
-      video.volume = 1;
-      if(video.paused) video.play().catch(()=>{});
-      button.textContent = video.muted ? '🔇' : '🔊';
-      button.title = video.muted ? 'Ativar áudio' : 'Desativar áudio';
-    }
-    window.toggleReelSound = toggleReelSound;
-
-    async function slToggleReelLike(id,liked){try{await db.collection('posts').doc(id).update({likesCount:firebase.firestore.FieldValue.increment(liked?-1:1),likedBy:liked?firebase.firestore.FieldValue.arrayRemove(currentUser.uid):firebase.firestore.FieldValue.arrayUnion(currentUser.uid)});if(!liked) await slRewardOnce(`like_${id}`,2,1);renderBookTok();}catch(e){toast('Não foi possível atualizar a curtida.','error')}}
-    window.slToggleReelLike=slToggleReelLike;
-
-    function showExchangeRegisterModal(){
-      openModal('📚 Colocar livro para circular',`<form id="exchangeRegisterForm" class="form-grid"><label>Livro <input name="bookTitle" required placeholder="Ex.: O Pequeno Príncipe"></label><label>Autor <input name="author" placeholder="Ex.: Antoine de Saint-Exupéry"></label><label>O que você aceita? <select name="type"><option value="loan">Empréstimo</option><option value="exchange">Troca</option><option value="both">Empréstimo ou troca</option></select></label><label>Capa do livro (opcional)<input type="file" id="exchangeCoverFile" accept="image/*"></label><label>Ou URL da capa<input name="coverUrl" placeholder="https://..."></label><label>Observação <textarea name="note" placeholder="Ex.: entregar na escola, bom estado..."></textarea></label><button class="primary-btn full" type="submit">Cadastrar oferta</button></form>`);
-      $('#exchangeRegisterForm').onsubmit=async e=>{e.preventDefault();const fd=new FormData(e.target);let cover=fd.get('coverUrl')||'';const f=$('#exchangeCoverFile').files[0];if(f)cover=await uploadToCloudinary(f);const type=fd.get('type');const ref=await db.collection('bookExchanges').add({ownerId:currentUser.uid,ownerName:currentProfile.name,bookTitle:fd.get('bookTitle'),author:fd.get('author'),coverUrl:cover,note:fd.get('note'),type:type==='both'?'both':type,status:'available',createdAt:new Date().toISOString()});await slRewardOnce(`offer_${ref.id}`,10,5);closeModal();toast('Livro cadastrado para circular! +10 XP e +5 Cactoscoins','success');renderExchanges()};
-    }
-    window.showExchangeRegisterModal=showExchangeRegisterModal;
-
-    async function renderExchanges(){
-      let items=[];try{const s=await db.collection('bookExchanges').get();s.forEach(d=>items.push({id:d.id,...d.data()}))}catch(e){console.log(e)}
-      const mine=items.filter(x=>x.ownerId===currentUser.uid||x.requesterId===currentUser.uid);
-      const available=items.filter(x=>x.status==='available'&&x.ownerId!==currentUser.uid);
-      const typeLabel=x=>x.type==='exchange'?'Troca':x.type==='both'?'Troca ou empréstimo':'Empréstimo';
-      const matchesType=(x,tab)=>tab==='all'||(tab==='loan'?(x.type==='loan'||x.type==='both'):(x.type==='exchange'||x.type==='both'));
-      const card=x=>`<article class="book-card"><div class="book-cover" style="height:170px;overflow:hidden">${x.coverUrl?`<img src="${slEsc(x.coverUrl)}" alt="Capa de ${slEsc(x.bookTitle)}" style="width:100%;height:100%;object-fit:cover;display:block"/>`:slIcon('book',34)}</div><div class="book-content"><span class="tag">${typeLabel(x)}</span><h3>${slEsc(x.bookTitle)}</h3><p>${slEsc(x.author||'Autor não informado')}<br><span class="muted">Disponibilizado por ${slEsc(x.ownerName||'leitor')}</span></p>${x.note?`<p class="muted" style="font-size:11px">${slEsc(x.note)}</p>`:''}<div class="sl-action-row">${x.status==='available'&&x.ownerId!==currentUser.uid?`<button class="primary-btn" onclick="slRequestLoan('${x.id}')">📨 Solicitar</button>`:''}${x.status==='requested'&&x.ownerId===currentUser.uid?`<button class="primary-btn" onclick="slRespondLoan('${x.id}',true)">🤝 Aceitar</button><button class="secondary-btn" onclick="slRespondLoan('${x.id}',false)">Recusar</button>`:''}<span class="sl-status">${x.status==='available'?'Disponível':x.status==='requested'?'Solicitado':x.status==='accepted'?'Aceito':'Recusado'}</span></div></div></article>`;
-      const renderTab=tab=>{
-        $$('.sl-ex-tab').forEach(b=>b.classList.toggle('active',b.dataset.exTab===tab));
-        const publicItems=available.filter(x=>matchesType(x,tab));
-        const myItems=mine.filter(x=>matchesType(x,tab));
-        $('#exchangePublic').innerHTML=publicItems.map(card).join('')||'<div class="empty-state">Nenhuma oferta encontrada nesta categoria.</div>';
-        $('#exchangeMine').innerHTML=myItems.map(card).join('')||'<div class="empty-state">Nenhuma solicitação nesta categoria.</div>';
-      };
-      $('#pageContent').innerHTML=`<div class="page-title"><div><h1>Trocas & Empréstimos 🤝</h1><p>Ofereça um livro, receba solicitações e confirme a troca ou o empréstimo.</p></div></div><section class="panel" style="margin-bottom:18px"><div class="panel-header"><h2>Como funciona</h2><button class="primary-btn" style="min-height:36px;padding:7px 12px;font-size:11px" onclick="showExchangeRegisterModal()">${slIcon('plus',15)} Cadastrar livro</button></div><p>Cadastre uma obra e escolha se aceita empréstimo, troca ou os dois. Outro aluno solicita e você decide como combinar a entrega.</p></section><div class="sl-tabs"><button class="sl-tab sl-ex-tab active" data-ex-tab="all">Tudo</button><button class="sl-tab sl-ex-tab" data-ex-tab="loan">Empréstimos</button><button class="sl-tab sl-ex-tab" data-ex-tab="exchange">Trocas</button></div><div class="sl-section-head"><h2>Oportunidades por perto</h2></div><section id="exchangePublic" class="cards-grid"></section><div class="sl-exchange-offer" onclick="showExchangeRegisterModal()"><span class="sl-round">${slIcon('plus',20)}</span><div style="flex:1"><strong>Quer colocar um livro para circular?</strong><div class="muted" style="font-size:11px">Cadastre a obra e escolha se aceita empréstimo, troca ou os dois.</div></div>${slIcon('arrow',18)}</div><div class="sl-section-head"><h2>Minhas solicitações</h2></div><section id="exchangeMine" class="cards-grid"></section>`;
-      $$('.sl-ex-tab').forEach(b=>b.onclick=()=>renderTab(b.dataset.exTab));
-      renderTab('all');
-    }
-
-    function renderApp(){
-      applyThemeSettings(); const p=currentProfile,isStaff=p&&p.role!=='student';
-      const pages=['home','library','store','booktok','profile','shelf','discover','exchanges']; const labels=['Home','Biblioteca','Loja','BookTok','Perfil','Minha estante','Descobrir','Trocas & empr.']; const icons=['home','book','store','reel','user','book','discover','swap'];
-      const navHtml=pages.map((page,i)=>`<button class="nav-btn${page===currentPage?' active':''}" data-page="${page}">${slIcon(icons[i],20)}<span>${labels[i]}</span></button>`).join('');
-      $('#app').innerHTML=`<div class="app-shell"><header class="topbar"><div class="top-actions">${isStaff?`<button class="primary-btn" onclick="navigateTo('reports')">Relatórios</button>`:''}<button id="darkToggleBtn" class="icon-btn" title="Alternar claro/escuro" aria-label="Alternar claro/escuro">${isDarkMode?slIcon('sun',19):slIcon('moon',19)}</button><button id="logoutBtn" class="secondary-btn" title="Sair da conta">${slIcon('logout',17)}<span>Sair</span></button><div class="user-pill">${renderAvatar(p.photoURL,p.name)}</div></div></header><main id="pageContent" class="page"></main><nav class="bottom-nav">${navHtml}</nav></div>`;
-      $('#darkToggleBtn').onclick=()=>{isDarkMode=!isDarkMode;localStorage.setItem('st-dark-mode',isDarkMode?'true':'false');applyThemeSettings();renderApp()};
-      $('#logoutBtn').onclick=()=>auth.signOut();
-      $$('.nav-btn').forEach(btn=>btn.onclick=()=>navigateTo(btn.dataset.page)); loadPage();
-    }
-
-    function loadPage(){const pages={home:renderHome,library:renderLibrary,store:renderStore,booktok:renderBookTok,discover:renderDiscover,shelf:renderShelf,exchanges:renderExchanges,profile:renderProfile,reports:renderReports};(pages[currentPage]||renderHome)();}
-
     // --- AUTHENTICATION FLOW ---
     auth.onAuthStateChanged(async (user) => {
       currentUser = user;
@@ -3167,11 +2683,13 @@
           userDoc = await db.collection("users").doc(user.uid).get();
         }
         currentProfile = userDoc.data();
-        currentTheme = "default";
-        applyThemeSettings();
+        currentTheme = currentProfile.activeTheme || localStorage.getItem("st-active-theme") || "default";
         renderApp();
       } else {
-        if (pendingReadingsUnsubscribe) { try { pendingReadingsUnsubscribe(); } catch (_) {} pendingReadingsUnsubscribe = null; }
+        if (pendingReadingsUnsubscribe) {
+          pendingReadingsUnsubscribe();
+          pendingReadingsUnsubscribe = null;
+        }
         currentProfile = null;
         renderAuth();
       }
@@ -3185,14 +2703,13 @@
         <div class="auth-layout">
           <div class="auth-hero">
             <div class="auth-hero-content">
-              <h1>Toda leitura deixa uma marca.</h1>
-              <p>Leia. Descubra. Compartilhe. Deixe sua marca.</p>
+              <span class="tag" style="background:rgba(255,255,255,.78);color:#3b3028;border:0;backdrop-filter:blur(8px)">📚 Toda leitura deixa uma marca.</span>
             </div>
           </div>
           <div class="auth-panel">
             <div class="auth-card">
-              <h2>Bem-vindo ao Sertão Literário</h2>
-              <p>Entre para continuar sua jornada de leitura.</p>
+              <h2>Bem-vindo!</h2>
+              <p>Acesse sua conta para entrar na biblioteca.</p>
               
               <div class="auth-tabs">
                 <button id="tabLogin" class="active">Entrar</button>
@@ -3223,10 +2740,10 @@
                   </div>
                 </div>
 
-                <label>E-mail <input name="email" type="email" required placeholder="Digite seu e-mail" /></label>
-                <label>Senha <input name="password" type="password" required placeholder="Digite sua senha" /></label>
+                <label>E-mail <input name="email" type="email" required placeholder="seu@email.com" /></label>
+                <label>Senha <input name="password" type="password" required placeholder="••••••••" /></label>
 
-                <button class="primary-btn full" type="submit" id="authSubmitBtn">Entrar</button>
+                <button class="primary-btn full" type="submit" id="authSubmitBtn">Entrar no Sistema</button>
               </form>
             </div>
           </div>
@@ -3246,7 +2763,7 @@
         tabLogin.classList.add("active");
         tabRegister.classList.remove("active");
         registerFields.classList.add("hidden");
-        authSubmitBtn.textContent = "Entrar";
+        authSubmitBtn.textContent = "Entrar no Sistema";
       };
 
       tabRegister.onclick = () => {
@@ -3254,7 +2771,7 @@
         tabRegister.classList.add("active");
         tabLogin.classList.remove("active");
         registerFields.classList.remove("hidden");
-        authSubmitBtn.textContent = "Criar minha conta";
+        authSubmitBtn.textContent = "Criar Minha Conta";
       };
 
       roleSelect.onchange = (e) => {
