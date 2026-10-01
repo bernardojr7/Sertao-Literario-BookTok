@@ -462,7 +462,7 @@
   
       /* NOVA IDENTIDADE VISUAL DA ENTRADA — inspirada na proposta aprovada */
       .auth-layout{min-height:100vh;display:grid;grid-template-columns:minmax(0,1.08fr) minmax(380px,.92fr);background:#F8EFEC!important;gap:0;overflow:hidden}
-      .auth-hero{position:relative;min-height:100vh;background-image:url("https://drive.google.com/file/d/1cQ9sWGhIh0ttQsYp67H4YzBaPLcafhZb/view?usp=sharing");background-size:cover;background-position:center top;border:0!important;padding:0!important}
+      .auth-hero{position:relative;min-height:100vh;background-image:url("https://drive.google.com/uc?export=view&id=1cQ9sWGhIh0ttQsYp67H4YzBaPLcafhZb");background-size:cover;background-position:center top;border:0!important;padding:0!important}
       .auth-hero:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(248,239,236,.05),rgba(248,239,236,.12));pointer-events:none}
       .auth-hero-content{position:absolute!important;left:7%;bottom:7%;z-index:2;max-width:430px;background:rgba(255,253,251,.76);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.7);border-radius:24px;padding:18px 20px!important;margin:0!important;box-shadow:0 15px 45px rgba(74,47,34,.08)}
       .auth-hero-content h1{font-family:'Nunito Sans',sans-serif!important;font-size:26px!important;color:#292522!important;margin:0 0 5px!important}.auth-hero-content p{color:#6F6259!important;font-size:13px!important;line-height:1.45;margin:0!important}
@@ -614,7 +614,7 @@
     }
 
     function roleLabel(r) {
-      const map = { student: "Aluno", teacher: "Professor", coordinator: "Coordenador" };
+      const map = { student: "Aluno", teacher: "Professor", professor: "Professor", coordinator: "Coordenador" };
       return map[r] || "Usuário";
     }
 
@@ -802,7 +802,7 @@
       openModal("📖 Registrar Leitura", '<div class="empty-state">Carregando formulário...</div>');
       try {
         let teachersOptions = '<option value="" disabled selected>Selecione o professor que irá aprovar</option>';
-        const teachersSnap = await db.collection("users").where("role", "in", ["teacher", "coordinator"]).get();
+        const teachersSnap = await db.collection("users").where("role", "in", ["teacher", "professor", "coordinator"]).get();
         teachersSnap.forEach(doc => {
           const t = doc.data();
           teachersOptions += `<option value="${doc.id}">${t.name} (${roleLabel(t.role)})</option>`;
@@ -949,7 +949,7 @@
         pendingReadingsUnsubscribe = null;
       }
 
-      container.innerHTML = '<div class="empty-state">🔄 Sincronizando leituras pendentes...</div>';
+      container.innerHTML = `<div class="empty-state">🔄 Sincronizando leituras pendentes...<br><small>Professor: ${slEsc(currentProfile?.name || "equipe")} • UID: ${slEsc(currentUser?.uid || "não identificado")}</small></div>`;
 
       const renderPending = (snap) => {
         const readings = [];
@@ -1091,7 +1091,7 @@
     async function renderHome() {
       const p = currentProfile;
       const isStu = p.role === "student";
-      const isStaff = !isStu;
+      const isStaff = ["teacher", "professor", "coordinator"].includes(p.role);
 
       const userClasses = Array.isArray(p.classes) && p.classes.length > 0 ? p.classes : [p.className || "5º Ano"];
       if (!userClasses.includes(selectedTeacherClass)) {
@@ -1156,7 +1156,7 @@
           <div class="panel-header">
             <h2>📑 Leituras Pendentes de Aprovação</h2>
           </div>
-          <div id="pendingReadingsContainer">Carregando leituras pendentes...</div>
+          <div id="pendingReadingsContainer">🔄 Conectando às leituras dos alunos...</div>
         </section>
 
         <section class="panel section-space">
@@ -3077,7 +3077,20 @@
 
     async function renderHome(){
       const p=currentProfile; if(!p) return;
-      if(p.role!=='student') return renderHomeStaffOriginal();
+      const isStaff=["teacher","professor","coordinator"].includes(p.role);
+      if(isStaff){
+        const userClasses=Array.isArray(p.classes)&&p.classes.length?p.classes:[p.className||"5º Ano"];
+        if(!userClasses.includes(selectedTeacherClass)) selectedTeacherClass=userClasses[0];
+        const first=(p.name||"Professor").split(" " )[0];
+        $('#pageContent').innerHTML=`
+          <div class="sl-home-head"><div><div class="sl-date">PAINEL PEDAGÓGICO</div><div class="sl-greeting">Olá, ${slEsc(first)}.</div></div><div class="sl-header-actions"><button class="sl-round" title="Relatórios" onclick="navigateTo('reports')">${slIcon('bar-chart',19)}</button>${renderAvatar(p.photoURL,p.name)}</div></div>
+          <section class="sl-hero-ref"><div><small>Equipe escolar</small><h2>Acompanhe as leituras dos seus alunos.</h2><p>As leituras enviadas aparecem aqui para análise e autorização.</p></div><div class="sl-progress-big"><strong>📖</strong><span>leituras</span></div></section>
+          <section class="panel section-space"><div class="panel-header"><h2>🔔 Leituras aguardando autorização</h2><span class="tag">Tempo real</span></div><div id="pendingReadingsContainer">🔄 Conectando às leituras dos alunos...</div></section>
+          <section class="panel section-space"><div class="panel-header"><h2>Alunos por Turma</h2></div><div class="tab-pills">${userClasses.map(c=>`<button class="tab-pill ${c===selectedTeacherClass?'active':''}" onclick="selectClass('${slEsc(c)}')">${slEsc(c)}</button>`).join('')}</div><div id="studentsListContainer" class="cards-grid">Carregando alunos...</div></section>`;
+        loadStudentsByClass(selectedTeacherClass);
+        loadPendingReadings();
+        return;
+      }
       const read=Number(p.booksRead||0), goal=Number(p.annualGoal||10), pct=Math.min(100,Math.round(read/Math.max(goal,1)*100));
       let b=slCurrentBook();
       if(b && !b.coverUrl){try{const s=await db.collection('books').where('title','==',b.title).limit(1).get();if(!s.empty){const d=s.docs[0].data();b={...b,bookId:s.docs[0].id,author:b.author||d.author||'',coverUrl:d.coverUrl||d.imageUrl||d.cover||''};await slUpdateProfile({currentBook:b,readingBooks:[b]})}}catch(e){console.log(e)}}
@@ -3173,6 +3186,9 @@
           userDoc = await db.collection("users").doc(user.uid).get();
         }
         currentProfile = userDoc.data();
+        // Compatibilidade com contas antigas: alguns perfis foram salvos como "professor".
+        // O app aceita tanto "teacher" quanto "professor" como equipe pedagógica.
+        if (currentProfile.role === "professor") currentProfile.role = "professor";
         currentTheme = "default";
         applyThemeSettings();
         renderApp();
