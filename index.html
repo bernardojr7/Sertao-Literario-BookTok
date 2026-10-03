@@ -2928,6 +2928,81 @@
       loadStudentsByClass(selectedTeacherClass);
     }
 
+    function showBookModal(){
+      if(!currentProfile || !['teacher','professor','coordinator'].includes(currentProfile.role)){
+        return toast('Apenas professores e coordenadores podem cadastrar livros no acervo.','info');
+      }
+      openModal('Cadastrar Novo Livro', `
+        <form id="bookFormV14" class="form-grid">
+          <label>Título <input name="title" required placeholder="Ex.: O Leão e o Rato" /></label>
+          <label>Autor <input name="author" required placeholder="Ex.: Monteiro Lobato" /></label>
+          <label>Páginas <input name="pages" type="number" min="1" required placeholder="Ex.: 80" /></label>
+          <label>Gênero / Categoria
+            <select name="category" required>
+              <option value="Fábulas">Fábulas (Livre para todos)</option>
+              <option value="Poemas">Poemas (Livre para todos)</option>
+              <option value="Cordel">Cordel (Livre para todos)</option>
+              <option value="Crônicas">Crônicas (Ex.: 8º e 9º Ano)</option>
+              <option value="Romance Clássico">Romance Clássico (Livre para todos)</option>
+              <option value="HQ">HQ (Livre para todos)</option>
+              <option value="Terror">Terror (9º Ano)</option>
+              <option value="Fantasia">Fantasia (Ex.: 6º ao 9º Ano)</option>
+              <option value="Suspense e Mistério">Suspense e Mistério (Ex.: 8º e 9º Ano)</option>
+              <option value="História e Ciências">História e Ciências (Livre para todos)</option>
+              <option value="Outros">Outros</option>
+            </select>
+          </label>
+          <label>🎯 Turmas Autorizadas
+            <div class="checkbox-group" style="margin-top:6px">
+              ${TURMAS_DISPONIVEIS.map(t => `<label class="checkbox-item"><input type="checkbox" name="allowedClasses" value="${t}" checked /> ${t}</label>`).join('')}
+            </div>
+            <span class="muted" style="font-size:11px;text-transform:none">Desmarque as turmas que não poderão acessar este livro.</span>
+          </label>
+          <label>Resumo / Sinopse <textarea name="summary" placeholder="Escreva um breve resumo..."></textarea></label>
+          <label>Capa - Escolher Imagem <input type="file" id="bookCoverFileV14" accept="image/*" /></label>
+          <label>Ou Link/URL da Capa <input name="coverUrl" id="bookCoverUrlV14" placeholder="https://..." /></label>
+          <label>Link do PDF (opcional) <input name="pdfUrl" type="url" placeholder="https://..." /></label>
+          <button class="primary-btn full" type="submit">Salvar Livro</button>
+        </form>`);
+
+      const form=document.getElementById('bookFormV14');
+      if(!form) return;
+      form.onsubmit=async(e)=>{
+        e.preventDefault();
+        const fd=new FormData(form);
+        const file=document.getElementById('bookCoverFileV14');
+        let coverUrl=String(fd.get('coverUrl')||'').trim();
+        const allowedClasses=Array.from(form.querySelectorAll('input[name="allowedClasses"]:checked')).map(cb=>cb.value);
+        try{
+          if(file && file.files && file.files[0]){
+            toast('Enviando imagem da capa...','success');
+            coverUrl=await uploadToCloudinary(file.files[0]);
+          }
+          await db.collection('books').add({
+            title:String(fd.get('title')||'').trim(),
+            author:String(fd.get('author')||'').trim(),
+            pages:Number(fd.get('pages')||0),
+            category:fd.get('category'),
+            allowedClasses,
+            summary:String(fd.get('summary')||'').trim(),
+            coverUrl,
+            pdfUrl:String(fd.get('pdfUrl')||'').trim(),
+            status:'Disponível',
+            downloadsCount:0,
+            isActive:true,
+            createdAt:new Date().toISOString()
+          });
+          closeModal();
+          toast('📚 Livro cadastrado com sucesso no acervo!','success');
+          await renderLibrary();
+        }catch(error){
+          console.error('Erro ao cadastrar livro:',error);
+          toast('Não foi possível cadastrar o livro. Verifique os dados e tente novamente.','error');
+        }
+      };
+    }
+    window.showBookModal=showBookModal;
+
     async function renderLibrary(){
       let books=[]; try{const snap=await db.collection('books').get(); snap.forEach(d=>{const b={id:d.id,...d.data()}; if(isBookAvailableForUser(b,currentProfile)) books.push(b);});}catch(e){console.log(e)}
       const recent=[...books].sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||''))).slice(0,4);
