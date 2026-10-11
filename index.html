@@ -2939,17 +2939,15 @@
           <label>Páginas <input name="pages" type="number" min="1" required placeholder="Ex.: 80" /></label>
           <label>Gênero / Categoria
             <select name="category" required>
-              <option value="Fábulas">Fábulas (Livre para todos)</option>
-              <option value="Poemas">Poemas (Livre para todos)</option>
-              <option value="Cordel">Cordel (Livre para todos)</option>
-              <option value="Crônicas">Crônicas (Ex.: 8º e 9º Ano)</option>
-              <option value="Romance Clássico">Romance Clássico (Livre para todos)</option>
-              <option value="HQ">HQ (Livre para todos)</option>
-              <option value="Terror">Terror (9º Ano)</option>
-              <option value="Fantasia">Fantasia (Ex.: 6º ao 9º Ano)</option>
-              <option value="Suspense e Mistério">Suspense e Mistério (Ex.: 8º e 9º Ano)</option>
-              <option value="História e Ciências">História e Ciências (Livre para todos)</option>
-              <option value="Outros">Outros</option>
+              <option value="Romance">Romance</option><option value="Fantasia">Fantasia</option><option value="Aventura">Aventura</option>
+              <option value="Suspense e Mistério">Suspense e Mistério</option><option value="Terror">Terror</option><option value="Ficção científica">Ficção científica</option>
+              <option value="Literatura brasileira">Literatura brasileira</option><option value="Clássicos">Clássicos</option><option value="Contos">Contos</option>
+              <option value="Crônicas">Crônicas</option><option value="Fábulas">Fábulas</option><option value="Poemas">Poemas</option><option value="Cordel">Cordel</option>
+              <option value="HQ e Mangá">HQ e Mangá</option><option value="Infantil">Infantil</option><option value="Juvenil">Juvenil</option>
+              <option value="Biografia e Memórias">Biografia e Memórias</option><option value="História">História</option><option value="Ciências">Ciências</option>
+              <option value="Meio ambiente">Meio ambiente</option><option value="Filosofia">Filosofia</option><option value="Desenvolvimento pessoal">Desenvolvimento pessoal</option>
+              <option value="Religião e Espiritualidade">Religião e Espiritualidade</option><option value="Educação">Educação</option><option value="Artes">Artes</option>
+              <option value="Folclore">Folclore</option><option value="Humor">Humor</option><option value="Outros">Outros</option>
             </select>
           </label>
           <label>🎯 Turmas Autorizadas
@@ -3003,16 +3001,84 @@
     }
     window.showBookModal=showBookModal;
 
+    const SL_LIBRARY_CATEGORIES = [
+      'todas','Romance','Fantasia','Aventura','Suspense e Mistério','Terror','Ficção científica',
+      'Literatura brasileira','Clássicos','Contos','Crônicas','Fábulas','Poemas','Cordel','HQ e Mangá',
+      'Infantil','Juvenil','Biografia e Memórias','História','Ciências','Meio ambiente','Filosofia',
+      'Desenvolvimento pessoal','Religião e Espiritualidade','Educação','Artes','Folclore','Humor','Outros'
+    ];
+    window.openLibraryBookDetails = async function(bookId){
+      let book = (window.slLibraryBooksCache||[]).find(x=>x.id===bookId);
+      try { const snap=await db.collection('books').doc(bookId).get(); if(snap.exists) book={id:snap.id,...snap.data()}; } catch(e) { console.warn(e); }
+      if(!book) return toast('Não foi possível abrir os detalhes deste livro.','error');
+      const likedBy=Array.isArray(book.likedBy)?book.likedBy:[];
+      const liked=!!(currentUser && likedBy.includes(currentUser.uid));
+      const cover=book.coverUrl||book.imageUrl||book.cover||'';
+      openModal('Detalhes do livro', `
+        <div class="sl-book-detail">
+          <div class="sl-book-detail-cover">${cover?`<img src="${slEsc(cover)}" alt="Capa de ${slEsc(book.title)}">`:'<span>📖</span>'}</div>
+          <div class="sl-book-detail-info"><span class="tag">${slEsc(book.category||'Literatura')}</span><h2>${slEsc(book.title||'Livro sem título')}</h2><p class="sl-book-author">por ${slEsc(book.author||'Autor não informado')}</p><p class="sl-book-summary">${slEsc(book.summary||'A sinopse deste livro ainda não foi adicionada ao acervo.')}</p><div class="sl-book-detail-meta">${book.pages?`<span>📄 ${Number(book.pages)} páginas</span>`:''}<span>❤️ <b id="slBookLikeCount">${Number(book.likesCount||likedBy.length||0)}</b> curtidas</span></div></div>
+        </div>
+        <div class="sl-book-detail-actions">
+          <button class="secondary-btn" id="slBookLikeBtn">${liked?'❤️ Curtido':'🤍 Curtir'}</button>
+          ${book.pdfUrl?`<button class="secondary-btn" id="slBookDownloadBtn">⬇️ Baixar PDF</button>`:'<button class="secondary-btn" disabled title="PDF ainda não cadastrado">⬇️ PDF indisponível</button>'}
+          <button class="primary-btn" id="slBookReadBtn">📖 Ler agora</button>
+        </div>`);
+      const likeBtn=document.getElementById('slBookLikeBtn');
+      if(likeBtn) likeBtn.onclick=async()=>{
+        if(!currentUser) return toast('Entre na sua conta para curtir livros.','info');
+        try{
+          const ref=db.collection('books').doc(book.id); const snap=await ref.get(); if(!snap.exists) return;
+          const data=snap.data(), arr=Array.isArray(data.likedBy)?data.likedBy:[];
+          const already=arr.includes(currentUser.uid); const next=already?arr.filter(id=>id!==currentUser.uid):[...arr,currentUser.uid];
+          await ref.update({likedBy:next,likesCount:next.length});
+          book.likedBy=next; book.likesCount=next.length;
+          if(window.slLibraryBooksCache){const i=window.slLibraryBooksCache.findIndex(x=>x.id===book.id);if(i>=0)window.slLibraryBooksCache[i]={...window.slLibraryBooksCache[i],likedBy:next,likesCount:next.length};}
+          likeBtn.innerHTML=already?'🤍 Curtir':'❤️ Curtido';
+          const count=document.getElementById('slBookLikeCount'); if(count)count.textContent=String(next.length);
+          toast(already?'Curtida removida.':'Livro curtido! ❤️','success');
+        }catch(e){console.error(e);toast('Não foi possível registrar a curtida.','error');}
+      };
+      const downloadBtn=document.getElementById('slBookDownloadBtn');
+      if(downloadBtn) downloadBtn.onclick=()=>downloadBookPdf(book.id,book.pdfUrl,book.title);
+      const readBtn=document.getElementById('slBookReadBtn');
+      if(readBtn) readBtn.onclick=async()=>{closeModal();await slSetCurrentBookFromLibrary(book);};
+    };
+
     async function renderLibrary(){
-      let books=[]; try{const snap=await db.collection('books').get(); snap.forEach(d=>{const b={id:d.id,...d.data()}; if(isBookAvailableForUser(b,currentProfile)) books.push(b);});}catch(e){console.log(e)}
-      const recent=[...books].sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||''))).slice(0,4);
-      const wish=slWishList(); const isStaff=currentProfile.role!=='student';
-      const card=(b)=>{const wished=wish.some(x=>(typeof x==='string'?x:x.title)===b.title); const bookJson=JSON.stringify(b).replace(/'/g,'&#039;'); return `<article class="book-card"><div class="book-cover">${b.coverUrl?`<img src="${slEsc(b.coverUrl)}" alt="Capa" style="width:100%;height:100%;object-fit:cover"/>`:'📖'}</div><div class="book-content"><span class="tag">${slEsc(b.category||'Livro')}</span><h3>${slEsc(b.title)}</h3><p>${slEsc(b.author||'Autor não informado')}</p><p class="muted" style="font-size:12px">${slEsc(b.summary||'')}</p><div class="flex" style="gap:6px;flex-wrap:wrap;margin-top:10px">${currentProfile.role==='student'?`<button class="secondary-btn" onclick='slToggleWishlist(${bookJson})'>${wished?'💭 Desejo marcado':'💭 Quero ler'}</button><button class="secondary-btn" onclick='slOfferLoan(${bookJson})'>📚 Oferecer para empréstimo</button>${b.pdfUrl?`<button class="secondary-btn" onclick='downloadBookPdf(${JSON.stringify(b.id)},${JSON.stringify(b.pdfUrl)},${JSON.stringify(b.title)})'>⬇️ Baixar PDF</button>`:''}<button class="primary-btn" onclick='slSetCurrentBookFromLibrary(${bookJson})'>📖 Abrir estante</button>`:''}${isStaff?`<button class="secondary-btn" onclick="abrirModalEdicao('${b.id}')">✏️ Editar</button>`:''}</div></div></article>`};
-      $('#pageContent').innerHTML=pageTitle('Biblioteca Sertaneja 📚',isStaff?'Cadastre e gerencie o acervo da escola.':'Escolha sua leitura, marque desejos e ofereça livros para empréstimo.',isStaff?'<button class="primary-btn" id="addBookBtn">+ Cadastrar Livro</button>':'')+
-        (recent.length?`<section class="panel" style="margin-bottom:18px"><div class="panel-header"><h2>✨ Novos livros</h2></div><div class="cards-grid">${recent.map(card).join('')}</div></section>`:'')+
-        `<section class="panel"><div class="panel-header"><h2>Estante de Livros</h2><input id="searchInput" placeholder="🔍 Buscar por título, autor..." style="max-width:280px"/></div><div class="tab-pills" style="margin-bottom:16px">${['todas','Crônicas','Fábulas','Poemas','Cordel','Outros'].map(c=>`<button class="tab-pill ${currentLibraryTab===c?'active':''}" onclick="selectLibraryTab('${c}')">${c==='todas'?'📚 Todas':c}</button>`).join('')}</div><div id="booksGrid" class="cards-grid">${(currentLibraryTab==='todas'?books:books.filter(b=>(b.category||'Outros').toLowerCase()===currentLibraryTab.toLowerCase())).map(card).join('')||'<div class="empty-state">Nenhum livro encontrado.</div>'}</div></section>`;
-      if($('#searchInput')) $('#searchInput').oninput=e=>{const q=e.target.value.toLowerCase(); $$('#booksGrid .book-card').forEach(x=>x.style.display=x.innerText.toLowerCase().includes(q)?'':'none')};
-      if($('#addBookBtn')) $('#addBookBtn').onclick=()=>typeof showBookModal==='function'?showBookModal():toast('Use o cadastro de livros do acervo.','info');
+      let books=[];
+      try{const snap=await db.collection('books').get();snap.forEach(d=>{const b={id:d.id,...d.data()};if(isBookAvailableForUser(b,currentProfile))books.push(b);});}catch(e){console.log(e)}
+      window.slLibraryBooksCache=books;
+      const recent=[...books].sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||''))).slice(0,18);
+      const wish=slWishList(); const isStaff=['teacher','professor','coordinator'].includes(currentProfile.role);
+      const cats=[...SL_LIBRARY_CATEGORIES.filter(c=>c==='todas'||books.some(b=>String(b.category||'Outros').toLowerCase()===c.toLowerCase())),...([...new Set(books.map(b=>String(b.category||'Outros')))].filter(c=>!SL_LIBRARY_CATEGORIES.some(x=>x.toLowerCase()===c.toLowerCase())))];
+      const visibleBooks=(tab)=>tab==='todas'?books:books.filter(b=>String(b.category||'Outros').toLowerCase()===String(tab).toLowerCase());
+      const spine=(b)=>{const cover=b.coverUrl||b.imageUrl||b.cover||'';const colors=['#9d4b3e','#c78c46','#6b8064','#6c7c9b','#a45c78','#6e5548'];const color=colors[(String(b.title||'').length+(String(b.author||'').length))%colors.length];return `<button class="sl-library-book" style="--spine:${color}" onclick="openLibraryBookDetails('${b.id}')" aria-label="Abrir ${slEsc(b.title)}"><span class="sl-library-book-cover">${cover?`<img src="${slEsc(cover)}" alt="">`:'📖'}</span><span class="sl-library-book-title">${slEsc(b.title||'Livro sem título')}</span><span class="sl-library-book-author">${slEsc(b.author||'Autor não informado')}</span></button>`};
+      const shelf=(items)=>items.length?`<div class="sl-library-shelf">${items.map(spine).join('')}</div>`:'<div class="empty-state">Nenhum livro nesta categoria ainda. Em breve teremos novas leituras! 🌵</div>';
+      $('#pageContent').innerHTML=`
+        <style>
+          .sl-library-hero{padding:24px 26px;margin-bottom:20px;border-radius:22px;background:linear-gradient(120deg,#f4e4d2,#f8efe5 55%,#e4eadc);color:#47372f;position:relative;overflow:hidden}
+          .sl-library-hero h2{font-size:clamp(23px,3vw,32px);margin:0 0 8px}.sl-library-hero p{margin:0;max-width:620px;line-height:1.55}.sl-library-hero:after{content:'📚';position:absolute;right:24px;bottom:-14px;font-size:92px;opacity:.18}
+          .sl-library-shelf{display:flex;align-items:stretch;gap:10px;overflow-x:auto;padding:18px 12px 0;min-height:220px;scrollbar-width:thin}
+          .sl-library-shelf:after{content:'';display:block;position:absolute}
+          .sl-library-book{flex:0 0 118px;min-height:188px;padding:0 0 12px;border:0;border-radius:7px 7px 2px 2px;background:linear-gradient(90deg,rgba(0,0,0,.08),transparent 18%),var(--spine);color:white;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;box-shadow:2px 3px 5px #0002;cursor:pointer;overflow:hidden;transition:transform .18s,box-shadow .18s;text-align:center}
+          .sl-library-book:hover{transform:translateY(-5px);box-shadow:3px 8px 12px #0003}.sl-library-book-cover{width:100%;height:108px;display:grid;place-items:center;background:#fff1;font-size:28px;overflow:hidden}.sl-library-book-cover img{width:100%;height:100%;object-fit:cover}
+          .sl-library-book-title{font-size:12px;font-weight:750;line-height:1.25;padding:9px 7px 3px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}.sl-library-book-author{font-size:10px;line-height:1.2;padding:0 6px;opacity:.9;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+          .sl-library-shelf-wrap{position:relative;margin-bottom:22px;padding-bottom:12px}.sl-library-shelf-wrap:after{content:'';display:block;height:13px;margin:0 2px;background:linear-gradient(#b99070,#7a5138);border-radius:3px;box-shadow:0 5px 8px #0002}.sl-library-category-row{display:flex;gap:8px;overflow-x:auto;padding:2px 0 12px}.sl-library-category-row .tab-pill{white-space:nowrap}.sl-book-detail{display:grid;grid-template-columns:150px minmax(0,1fr);gap:20px;align-items:start}.sl-book-detail-cover{height:220px;border-radius:12px;background:#f0e4d8;display:grid;place-items:center;overflow:hidden;font-size:45px;box-shadow:0 5px 15px #0001}.sl-book-detail-cover img{width:100%;height:100%;object-fit:cover}.sl-book-detail-info h2{margin:9px 0 4px}.sl-book-author{color:var(--muted);margin:0 0 15px}.sl-book-summary{line-height:1.65;white-space:pre-wrap}.sl-book-detail-meta{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;margin-top:16px}.sl-book-detail-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}.sl-book-detail-actions button{flex:1;min-width:120px}
+          @media(max-width:600px){.sl-library-hero{padding:20px 18px}.sl-library-hero:after{font-size:65px;right:10px}.sl-library-book{flex-basis:102px;min-height:176px}.sl-library-book-cover{height:94px}.sl-book-detail{grid-template-columns:100px minmax(0,1fr);gap:12px}.sl-book-detail-cover{height:150px}.sl-book-detail-actions button{min-width:100%;}}
+        </style>
+        ${pageTitle('Biblioteca Sertaneja 📚',isStaff?'Cuide do acervo e descubra novas leituras.':'Explore as estantes, descubra livros e encontre sua próxima leitura.',isStaff?'<button class="primary-btn" id="addBookBtn">+ Cadastrar Livro</button>':'')}
+        <section class="sl-library-hero"><h2>Um mundo de histórias espera por você.</h2><p>Explore por gênero, descubra novidades e escolha uma leitura para chamar de sua. <b>Toda leitura deixa uma marca.</b></p></section>
+        ${recent.length?`<section class="panel" style="margin-bottom:20px"><div class="panel-header"><h2>✨ Novos no acervo</h2><span class="muted">${recent.length} novidades</span></div><div class="sl-library-shelf-wrap">${shelf(recent)}</div></section>`:''}
+        <section class="panel"><div class="panel-header" style="gap:12px;flex-wrap:wrap"><div><h2>📚 Estantes literárias</h2><p class="muted" style="margin:4px 0 0">Escolha uma categoria ou pesquise por título e autor.</p></div><input id="searchInput" placeholder="🔍 Buscar título ou autor..." style="max-width:280px"/></div>
+          <div class="sl-library-category-row">${cats.map(c=>`<button class="tab-pill ${currentLibraryTab===c?'active':''}" data-library-tab="${slEsc(c)}">${c==='todas'?'📚 Todas':slEsc(c)}</button>`).join('')}</div>
+          <div id="libraryShelfHeading" style="font-weight:750;margin:8px 0 0">${currentLibraryTab==='todas'?'Todos os livros':slEsc(currentLibraryTab)}</div>
+          <div id="booksGrid">${shelf(visibleBooks(currentLibraryTab))}</div>
+        </section>`;
+      const drawBooks=(query='')=>{const filtered=visibleBooks(currentLibraryTab).filter(b=>`${b.title||''} ${b.author||''} ${b.category||''}`.toLowerCase().includes(query.toLowerCase()));$('#libraryShelfHeading').textContent=currentLibraryTab==='todas'?'Todos os livros':currentLibraryTab;$('#booksGrid').innerHTML=shelf(filtered);};
+      $$('#pageContent [data-library-tab]').forEach(btn=>btn.onclick=()=>{currentLibraryTab=btn.dataset.libraryTab;$$('#pageContent [data-library-tab]').forEach(x=>x.classList.toggle('active',x===btn));drawBooks($('#searchInput')?.value||'');});
+      if($('#searchInput'))$('#searchInput').oninput=e=>drawBooks(e.target.value);
+      if($('#addBookBtn'))$('#addBookBtn').onclick=()=>showBookModal();
     }
     function slPdfDownloadUrl(url){
       const raw=String(url||'').trim();
