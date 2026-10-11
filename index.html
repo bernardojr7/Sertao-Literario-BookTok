@@ -1935,17 +1935,66 @@
 
               <label>Gênero / Categoria
                 <select name="category" required id="categorySelect">
-                  <option value="Fábulas">Fábulas (Livre para todos)</option>
-                  <option value="Poemas">Poemas (Livre para todos)</option>
-                  <option value="Cordel">Cordel (Livre para todos)</option>
-                  <option value="Crônicas">Crônicas (Ex: 8º e 9º Ano)</option>
-                  <option value="Romance Clássico">Romance Clássico (Livre para todos)</option>
-                  <option value="HQ">HQ (Livre para todos)</option>
-                  <option value="Terror">Terror (9º Ano)</option>
-                  <option value="Fantasia">Fantasia (Ex: 6°, 7°, 8º e 9º Ano)</option>
-                  <option value="Suspense e Mistério">Suspense e Mistério (Ex: 8º e 9º Ano)</option>
-                  <option value="História e Ciências">História e Ciências (Livre para todos)</option>
-                  <option value="Outros">Outros</option>
+                <option value="Romance">Romance</option>
+                <option value="Romance clássico">Romance clássico</option>
+                <option value="Romance contemporâneo">Romance contemporâneo</option>
+                <option value="Fantasia">Fantasia</option>
+                <option value="Aventura">Aventura</option>
+                <option value="Suspense">Suspense</option>
+                <option value="Mistério e investigação">Mistério e investigação</option>
+                <option value="Terror e horror">Terror e horror</option>
+                <option value="Ficção científica">Ficção científica</option>
+                <option value="Distopia e utopia">Distopia e utopia</option>
+                <option value="Drama">Drama</option>
+                <option value="Comédia e humor">Comédia e humor</option>
+                <option value="Contos">Contos</option>
+                <option value="Crônicas">Crônicas</option>
+                <option value="Fábulas">Fábulas</option>
+                <option value="Lendas e mitos">Lendas e mitos</option>
+                <option value="Folclore brasileiro">Folclore brasileiro</option>
+                <option value="Poesia">Poesia</option>
+                <option value="Poemas">Poemas</option>
+                <option value="Cordel">Cordel</option>
+                <option value="Teatro e dramaturgia">Teatro e dramaturgia</option>
+                <option value="HQ e quadrinhos">HQ e quadrinhos</option>
+                <option value="Mangá">Mangá</option>
+                <option value="Graphic novel">Graphic novel</option>
+                <option value="Literatura infantil">Literatura infantil</option>
+                <option value="Literatura juvenil">Literatura juvenil</option>
+                <option value="Literatura brasileira">Literatura brasileira</option>
+                <option value="Literatura potiguar">Literatura potiguar</option>
+                <option value="Literatura nordestina">Literatura nordestina</option>
+                <option value="Literatura africana">Literatura africana</option>
+                <option value="Literatura indígena">Literatura indígena</option>
+                <option value="Clássicos da literatura">Clássicos da literatura</option>
+                <option value="Biografia e autobiografia">Biografia e autobiografia</option>
+                <option value="Memórias e relatos">Memórias e relatos</option>
+                <option value="História">História</option>
+                <option value="Geografia">Geografia</option>
+                <option value="Ciências">Ciências</option>
+                <option value="Meio ambiente">Meio ambiente</option>
+                <option value="Educação">Educação</option>
+                <option value="Filosofia">Filosofia</option>
+                <option value="Psicologia">Psicologia</option>
+                <option value="Sociologia">Sociologia</option>
+                <option value="Política e cidadania">Política e cidadania</option>
+                <option value="Religião e espiritualidade">Religião e espiritualidade</option>
+                <option value="Mitologia">Mitologia</option>
+                <option value="Artes">Artes</option>
+                <option value="Música">Música</option>
+                <option value="Esportes">Esportes</option>
+                <option value="Tecnologia e informática">Tecnologia e informática</option>
+                <option value="Matemática">Matemática</option>
+                <option value="Língua portuguesa">Língua portuguesa</option>
+                <option value="Língua inglesa">Língua inglesa</option>
+                <option value="Gramática">Gramática</option>
+                <option value="Dicionários e enciclopédias">Dicionários e enciclopédias</option>
+                <option value="Desenvolvimento pessoal">Desenvolvimento pessoal</option>
+                <option value="Saúde e bem-estar">Saúde e bem-estar</option>
+                <option value="Culinária">Culinária</option>
+                <option value="Viagem e aventura real">Viagem e aventura real</option>
+                <option value="Cordel e cultura popular">Cordel e cultura popular</option>
+                <option value="Outros">Outros</option>
                 </select>
               </label>
 
@@ -2049,10 +2098,66 @@
             
             <label>Gênero / Categoria
               <select name="category" required>
+                ${!['Romance','Romance clássico','Romance contemporâneo','Fantasia','Aventura','Suspense','Mistério e investigação','Terror e horror','Ficção científica','Distopia e utopia','Drama','Comédia e humor','Contos','Crônicas','Fábulas','Lendas e mitos','Folclore brasileiro','Poesia','Poemas','Cordel','Teatro e dramaturgia','HQ e quadrinhos','Mangá','Graphic novel','Literatura infantil','Literatura juvenil','Literatura brasileira','Literatura potiguar','Literatura nordestina','Literatura africana','Literatura indígena','Clássicos da literatura','Biografia e autobiografia','Memórias e relatos','História','Geografia','Ciências','Meio ambiente','Educação','Filosofia','Psicologia','Sociologia','Política e cidadania','Religião e espiritualidade','Mitologia','Artes','Música','Esportes','Tecnologia e informática','Matemática','Língua portuguesa','Língua inglesa','Gramática','Dicionários e enciclopédias','Desenvolvimento pessoal','Saúde e bem-estar','Culinária','Viagem e aventura real','Cordel e cultura popular','Outros'].includes(book.category) && book.category ? `<option value="${book.category}" selected>${book.category}</option>` : ''}
+                <option value="Romance" ${book.category === 'Romance' ? 'selected' : ''}>Romance</option>
+                <option value="Romance clássico" ${book.category === 'Romance clássico' ? 'selected' : ''}>Romance clássico</option>
+                <option value="Romance contemporâneo" ${book.category === 'Romance contemporâneo' ? 'selected' : ''}>Romance contemporâneo</option>
+                <option value="Fantasia" ${book.category === 'Fantasia' ? 'selected' : ''}>Fantasia</option>
+                <option value="Aventura" ${book.category === 'Aventura' ? 'selected' : ''}>Aventura</option>
+                <option value="Suspense" ${book.category === 'Suspense' ? 'selected' : ''}>Suspense</option>
+                <option value="Mistério e investigação" ${book.category === 'Mistério e investigação' ? 'selected' : ''}>Mistério e investigação</option>
+                <option value="Terror e horror" ${book.category === 'Terror e horror' ? 'selected' : ''}>Terror e horror</option>
+                <option value="Ficção científica" ${book.category === 'Ficção científica' ? 'selected' : ''}>Ficção científica</option>
+                <option value="Distopia e utopia" ${book.category === 'Distopia e utopia' ? 'selected' : ''}>Distopia e utopia</option>
+                <option value="Drama" ${book.category === 'Drama' ? 'selected' : ''}>Drama</option>
+                <option value="Comédia e humor" ${book.category === 'Comédia e humor' ? 'selected' : ''}>Comédia e humor</option>
+                <option value="Contos" ${book.category === 'Contos' ? 'selected' : ''}>Contos</option>
+                <option value="Crônicas" ${book.category === 'Crônicas' ? 'selected' : ''}>Crônicas</option>
                 <option value="Fábulas" ${book.category === 'Fábulas' ? 'selected' : ''}>Fábulas</option>
+                <option value="Lendas e mitos" ${book.category === 'Lendas e mitos' ? 'selected' : ''}>Lendas e mitos</option>
+                <option value="Folclore brasileiro" ${book.category === 'Folclore brasileiro' ? 'selected' : ''}>Folclore brasileiro</option>
+                <option value="Poesia" ${book.category === 'Poesia' ? 'selected' : ''}>Poesia</option>
                 <option value="Poemas" ${book.category === 'Poemas' ? 'selected' : ''}>Poemas</option>
                 <option value="Cordel" ${book.category === 'Cordel' ? 'selected' : ''}>Cordel</option>
-                <option value="Crônicas" ${book.category === 'Crônicas' ? 'selected' : ''}>Crônicas</option>
+                <option value="Teatro e dramaturgia" ${book.category === 'Teatro e dramaturgia' ? 'selected' : ''}>Teatro e dramaturgia</option>
+                <option value="HQ e quadrinhos" ${book.category === 'HQ e quadrinhos' ? 'selected' : ''}>HQ e quadrinhos</option>
+                <option value="Mangá" ${book.category === 'Mangá' ? 'selected' : ''}>Mangá</option>
+                <option value="Graphic novel" ${book.category === 'Graphic novel' ? 'selected' : ''}>Graphic novel</option>
+                <option value="Literatura infantil" ${book.category === 'Literatura infantil' ? 'selected' : ''}>Literatura infantil</option>
+                <option value="Literatura juvenil" ${book.category === 'Literatura juvenil' ? 'selected' : ''}>Literatura juvenil</option>
+                <option value="Literatura brasileira" ${book.category === 'Literatura brasileira' ? 'selected' : ''}>Literatura brasileira</option>
+                <option value="Literatura potiguar" ${book.category === 'Literatura potiguar' ? 'selected' : ''}>Literatura potiguar</option>
+                <option value="Literatura nordestina" ${book.category === 'Literatura nordestina' ? 'selected' : ''}>Literatura nordestina</option>
+                <option value="Literatura africana" ${book.category === 'Literatura africana' ? 'selected' : ''}>Literatura africana</option>
+                <option value="Literatura indígena" ${book.category === 'Literatura indígena' ? 'selected' : ''}>Literatura indígena</option>
+                <option value="Clássicos da literatura" ${book.category === 'Clássicos da literatura' ? 'selected' : ''}>Clássicos da literatura</option>
+                <option value="Biografia e autobiografia" ${book.category === 'Biografia e autobiografia' ? 'selected' : ''}>Biografia e autobiografia</option>
+                <option value="Memórias e relatos" ${book.category === 'Memórias e relatos' ? 'selected' : ''}>Memórias e relatos</option>
+                <option value="História" ${book.category === 'História' ? 'selected' : ''}>História</option>
+                <option value="Geografia" ${book.category === 'Geografia' ? 'selected' : ''}>Geografia</option>
+                <option value="Ciências" ${book.category === 'Ciências' ? 'selected' : ''}>Ciências</option>
+                <option value="Meio ambiente" ${book.category === 'Meio ambiente' ? 'selected' : ''}>Meio ambiente</option>
+                <option value="Educação" ${book.category === 'Educação' ? 'selected' : ''}>Educação</option>
+                <option value="Filosofia" ${book.category === 'Filosofia' ? 'selected' : ''}>Filosofia</option>
+                <option value="Psicologia" ${book.category === 'Psicologia' ? 'selected' : ''}>Psicologia</option>
+                <option value="Sociologia" ${book.category === 'Sociologia' ? 'selected' : ''}>Sociologia</option>
+                <option value="Política e cidadania" ${book.category === 'Política e cidadania' ? 'selected' : ''}>Política e cidadania</option>
+                <option value="Religião e espiritualidade" ${book.category === 'Religião e espiritualidade' ? 'selected' : ''}>Religião e espiritualidade</option>
+                <option value="Mitologia" ${book.category === 'Mitologia' ? 'selected' : ''}>Mitologia</option>
+                <option value="Artes" ${book.category === 'Artes' ? 'selected' : ''}>Artes</option>
+                <option value="Música" ${book.category === 'Música' ? 'selected' : ''}>Música</option>
+                <option value="Esportes" ${book.category === 'Esportes' ? 'selected' : ''}>Esportes</option>
+                <option value="Tecnologia e informática" ${book.category === 'Tecnologia e informática' ? 'selected' : ''}>Tecnologia e informática</option>
+                <option value="Matemática" ${book.category === 'Matemática' ? 'selected' : ''}>Matemática</option>
+                <option value="Língua portuguesa" ${book.category === 'Língua portuguesa' ? 'selected' : ''}>Língua portuguesa</option>
+                <option value="Língua inglesa" ${book.category === 'Língua inglesa' ? 'selected' : ''}>Língua inglesa</option>
+                <option value="Gramática" ${book.category === 'Gramática' ? 'selected' : ''}>Gramática</option>
+                <option value="Dicionários e enciclopédias" ${book.category === 'Dicionários e enciclopédias' ? 'selected' : ''}>Dicionários e enciclopédias</option>
+                <option value="Desenvolvimento pessoal" ${book.category === 'Desenvolvimento pessoal' ? 'selected' : ''}>Desenvolvimento pessoal</option>
+                <option value="Saúde e bem-estar" ${book.category === 'Saúde e bem-estar' ? 'selected' : ''}>Saúde e bem-estar</option>
+                <option value="Culinária" ${book.category === 'Culinária' ? 'selected' : ''}>Culinária</option>
+                <option value="Viagem e aventura real" ${book.category === 'Viagem e aventura real' ? 'selected' : ''}>Viagem e aventura real</option>
+                <option value="Cordel e cultura popular" ${book.category === 'Cordel e cultura popular' ? 'selected' : ''}>Cordel e cultura popular</option>
                 <option value="Outros" ${book.category === 'Outros' ? 'selected' : ''}>Outros</option>
               </select>
             </label>
@@ -2939,15 +3044,66 @@
           <label>Páginas <input name="pages" type="number" min="1" required placeholder="Ex.: 80" /></label>
           <label>Gênero / Categoria
             <select name="category" required>
-              <option value="Romance">Romance</option><option value="Fantasia">Fantasia</option><option value="Aventura">Aventura</option>
-              <option value="Suspense e Mistério">Suspense e Mistério</option><option value="Terror">Terror</option><option value="Ficção científica">Ficção científica</option>
-              <option value="Literatura brasileira">Literatura brasileira</option><option value="Clássicos">Clássicos</option><option value="Contos">Contos</option>
-              <option value="Crônicas">Crônicas</option><option value="Fábulas">Fábulas</option><option value="Poemas">Poemas</option><option value="Cordel">Cordel</option>
-              <option value="HQ e Mangá">HQ e Mangá</option><option value="Infantil">Infantil</option><option value="Juvenil">Juvenil</option>
-              <option value="Biografia e Memórias">Biografia e Memórias</option><option value="História">História</option><option value="Ciências">Ciências</option>
-              <option value="Meio ambiente">Meio ambiente</option><option value="Filosofia">Filosofia</option><option value="Desenvolvimento pessoal">Desenvolvimento pessoal</option>
-              <option value="Religião e Espiritualidade">Religião e Espiritualidade</option><option value="Educação">Educação</option><option value="Artes">Artes</option>
-              <option value="Folclore">Folclore</option><option value="Humor">Humor</option><option value="Outros">Outros</option>
+                <option value="Romance">Romance</option>
+                <option value="Romance clássico">Romance clássico</option>
+                <option value="Romance contemporâneo">Romance contemporâneo</option>
+                <option value="Fantasia">Fantasia</option>
+                <option value="Aventura">Aventura</option>
+                <option value="Suspense">Suspense</option>
+                <option value="Mistério e investigação">Mistério e investigação</option>
+                <option value="Terror e horror">Terror e horror</option>
+                <option value="Ficção científica">Ficção científica</option>
+                <option value="Distopia e utopia">Distopia e utopia</option>
+                <option value="Drama">Drama</option>
+                <option value="Comédia e humor">Comédia e humor</option>
+                <option value="Contos">Contos</option>
+                <option value="Crônicas">Crônicas</option>
+                <option value="Fábulas">Fábulas</option>
+                <option value="Lendas e mitos">Lendas e mitos</option>
+                <option value="Folclore brasileiro">Folclore brasileiro</option>
+                <option value="Poesia">Poesia</option>
+                <option value="Poemas">Poemas</option>
+                <option value="Cordel">Cordel</option>
+                <option value="Teatro e dramaturgia">Teatro e dramaturgia</option>
+                <option value="HQ e quadrinhos">HQ e quadrinhos</option>
+                <option value="Mangá">Mangá</option>
+                <option value="Graphic novel">Graphic novel</option>
+                <option value="Literatura infantil">Literatura infantil</option>
+                <option value="Literatura juvenil">Literatura juvenil</option>
+                <option value="Literatura brasileira">Literatura brasileira</option>
+                <option value="Literatura potiguar">Literatura potiguar</option>
+                <option value="Literatura nordestina">Literatura nordestina</option>
+                <option value="Literatura africana">Literatura africana</option>
+                <option value="Literatura indígena">Literatura indígena</option>
+                <option value="Clássicos da literatura">Clássicos da literatura</option>
+                <option value="Biografia e autobiografia">Biografia e autobiografia</option>
+                <option value="Memórias e relatos">Memórias e relatos</option>
+                <option value="História">História</option>
+                <option value="Geografia">Geografia</option>
+                <option value="Ciências">Ciências</option>
+                <option value="Meio ambiente">Meio ambiente</option>
+                <option value="Educação">Educação</option>
+                <option value="Filosofia">Filosofia</option>
+                <option value="Psicologia">Psicologia</option>
+                <option value="Sociologia">Sociologia</option>
+                <option value="Política e cidadania">Política e cidadania</option>
+                <option value="Religião e espiritualidade">Religião e espiritualidade</option>
+                <option value="Mitologia">Mitologia</option>
+                <option value="Artes">Artes</option>
+                <option value="Música">Música</option>
+                <option value="Esportes">Esportes</option>
+                <option value="Tecnologia e informática">Tecnologia e informática</option>
+                <option value="Matemática">Matemática</option>
+                <option value="Língua portuguesa">Língua portuguesa</option>
+                <option value="Língua inglesa">Língua inglesa</option>
+                <option value="Gramática">Gramática</option>
+                <option value="Dicionários e enciclopédias">Dicionários e enciclopédias</option>
+                <option value="Desenvolvimento pessoal">Desenvolvimento pessoal</option>
+                <option value="Saúde e bem-estar">Saúde e bem-estar</option>
+                <option value="Culinária">Culinária</option>
+                <option value="Viagem e aventura real">Viagem e aventura real</option>
+                <option value="Cordel e cultura popular">Cordel e cultura popular</option>
+                <option value="Outros">Outros</option>
             </select>
           </label>
           <label>🎯 Turmas Autorizadas
