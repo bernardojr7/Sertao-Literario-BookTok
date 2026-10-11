@@ -3033,18 +3033,21 @@
       loadStudentsByClass(selectedTeacherClass);
     }
 
-    function showBookModal(){
+    function showBookModal(bookToEdit=null){
       if(!currentProfile || !['teacher','professor','coordinator'].includes(currentProfile.role)){
-        return toast('Apenas professores e coordenadores podem cadastrar livros no acervo.','info');
+        return toast('Apenas professores e coordenadores podem cadastrar ou editar livros no acervo.','info');
       }
-      openModal('Cadastrar Novo Livro', `
+      const editingBook = bookToEdit && bookToEdit.id ? bookToEdit : null;
+      const field=(key)=>String(editingBook?.[key] ?? '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      const selectedClasses=Array.isArray(editingBook?.allowedClasses)?editingBook.allowedClasses:TURMAS_DISPONIVEIS;
+      openModal(editingBook?'✏️ Editar Livro do Acervo':'Cadastrar Novo Livro', `
         <form id="bookFormV14" class="form-grid">
-          <label>Título <input name="title" required placeholder="Ex.: O Leão e o Rato" /></label>
-          <label>Autor <input name="author" required placeholder="Ex.: Monteiro Lobato" /></label>
-          <label>Páginas <input name="pages" type="number" min="1" required placeholder="Ex.: 80" /></label>
+          <label>Título <input name="title" required placeholder="Ex.: O Leão e o Rato" value="${field('title')}" /></label>
+          <label>Autor <input name="author" required placeholder="Ex.: Monteiro Lobato" value="${field('author')}" /></label>
+          <label>Páginas <input name="pages" type="number" min="1" required placeholder="Ex.: 80" value="${field('pages')}" /></label>
           <label>Gênero / Categoria
             <select name="category" required>
-                <option value="Romance">Romance</option>
+<option value="Romance">Romance</option>
                 <option value="Romance clássico">Romance clássico</option>
                 <option value="Romance contemporâneo">Romance contemporâneo</option>
                 <option value="Fantasia">Fantasia</option>
@@ -3104,55 +3107,36 @@
                 <option value="Viagem e aventura real">Viagem e aventura real</option>
                 <option value="Cordel e cultura popular">Cordel e cultura popular</option>
                 <option value="Outros">Outros</option>
+            
             </select>
           </label>
           <label>🎯 Turmas Autorizadas
             <div class="checkbox-group" style="margin-top:6px">
-              ${TURMAS_DISPONIVEIS.map(t => `<label class="checkbox-item"><input type="checkbox" name="allowedClasses" value="${t}" checked /> ${t}</label>`).join('')}
+              ${TURMAS_DISPONIVEIS.map(t => `<label class="checkbox-item"><input type="checkbox" name="allowedClasses" value="${t}" ${selectedClasses.includes(t)?'checked':''} /> ${t}</label>`).join('')}
             </div>
             <span class="muted" style="font-size:11px;text-transform:none">Desmarque as turmas que não poderão acessar este livro.</span>
           </label>
-          <label>Resumo / Sinopse <textarea name="summary" placeholder="Escreva um breve resumo..."></textarea></label>
-          <label>Capa - Escolher Imagem <input type="file" id="bookCoverFileV14" accept="image/*" /></label>
-          <label>Ou Link/URL da Capa <input name="coverUrl" id="bookCoverUrlV14" placeholder="https://..." /></label>
-          <label>Link do PDF (opcional) <input name="pdfUrl" type="url" placeholder="https://..." /></label>
-          <button class="primary-btn full" type="submit">Salvar Livro</button>
+          <label>Resumo / Sinopse <textarea name="summary" placeholder="Escreva um breve resumo...">${field('summary')}</textarea></label>
+          <label>Capa - Escolher imagem <input type="file" id="bookCoverFileV14" accept="image/*" /></label>
+          <label>Ou Link/URL da Capa <input name="coverUrl" id="bookCoverUrlV14" placeholder="https://..." value="${field('coverUrl') || field('imageUrl') || field('cover')}" /></label>
+          <label>Link do PDF (opcional) <input name="pdfUrl" type="url" placeholder="https://..." value="${field('pdfUrl')}" /></label>
+          <button class="primary-btn full" type="submit">${editingBook?'Salvar alterações':'Salvar Livro'}</button>
         </form>`);
-
       const form=document.getElementById('bookFormV14');
+      if(form && editingBook) form.querySelector('[name="category"]').value=editingBook.category || 'Outros';
       if(!form) return;
       form.onsubmit=async(e)=>{
         e.preventDefault();
-        const fd=new FormData(form);
-        const file=document.getElementById('bookCoverFileV14');
+        const fd=new FormData(form), file=document.getElementById('bookCoverFileV14');
         let coverUrl=String(fd.get('coverUrl')||'').trim();
         const allowedClasses=Array.from(form.querySelectorAll('input[name="allowedClasses"]:checked')).map(cb=>cb.value);
         try{
-          if(file && file.files && file.files[0]){
-            toast('Enviando imagem da capa...','success');
-            coverUrl=await uploadToCloudinary(file.files[0]);
-          }
-          await db.collection('books').add({
-            title:String(fd.get('title')||'').trim(),
-            author:String(fd.get('author')||'').trim(),
-            pages:Number(fd.get('pages')||0),
-            category:fd.get('category'),
-            allowedClasses,
-            summary:String(fd.get('summary')||'').trim(),
-            coverUrl,
-            pdfUrl:String(fd.get('pdfUrl')||'').trim(),
-            status:'Disponível',
-            downloadsCount:0,
-            isActive:true,
-            createdAt:new Date().toISOString()
-          });
-          closeModal();
-          toast('📚 Livro cadastrado com sucesso no acervo!','success');
-          await renderLibrary();
-        }catch(error){
-          console.error('Erro ao cadastrar livro:',error);
-          toast('Não foi possível cadastrar o livro. Verifique os dados e tente novamente.','error');
-        }
+          if(file && file.files && file.files[0]){toast('Enviando imagem da capa...','success');coverUrl=await uploadToCloudinary(file.files[0]);}
+          const payload={title:String(fd.get('title')||'').trim(),author:String(fd.get('author')||'').trim(),pages:Number(fd.get('pages')||0),category:String(fd.get('category')||'Outros'),allowedClasses,summary:String(fd.get('summary')||'').trim(),coverUrl,pdfUrl:String(fd.get('pdfUrl')||'').trim(),updatedAt:new Date().toISOString()};
+          if(editingBook){await db.collection('books').doc(editingBook.id).update(payload);}
+          else {await db.collection('books').add({...payload,status:'Disponível',downloadsCount:0,isActive:true,createdAt:new Date().toISOString()});}
+          closeModal();toast(editingBook?'📚 Livro atualizado com sucesso!':'📚 Livro cadastrado com sucesso no acervo!','success');await renderLibrary();
+        }catch(error){console.error(editingBook?'Erro ao editar livro:':'Erro ao cadastrar livro:',error);toast('Não foi possível salvar o livro. Verifique os dados e as permissões.','error');}
       };
     }
     window.showBookModal=showBookModal;
@@ -3176,10 +3160,13 @@
           <div class="sl-book-detail-info"><span class="tag">${slEsc(book.category||'Literatura')}</span><h2>${slEsc(book.title||'Livro sem título')}</h2><p class="sl-book-author">por ${slEsc(book.author||'Autor não informado')}</p><p class="sl-book-summary">${slEsc(book.summary||'A sinopse deste livro ainda não foi adicionada ao acervo.')}</p><div class="sl-book-detail-meta">${book.pages?`<span>📄 ${Number(book.pages)} páginas</span>`:''}<span>❤️ <b id="slBookLikeCount">${Number(book.likesCount||likedBy.length||0)}</b> curtidas</span></div></div>
         </div>
         <div class="sl-book-detail-actions">
+          ${currentProfile && ['teacher','professor','coordinator'].includes(currentProfile.role)?`<button class="secondary-btn" id="slBookEditBtn">✏️ Editar informações</button>`:''}
           <button class="secondary-btn" id="slBookLikeBtn">${liked?'❤️ Curtido':'🤍 Curtir'}</button>
           ${book.pdfUrl?`<button class="secondary-btn" id="slBookDownloadBtn">⬇️ Baixar PDF</button>`:'<button class="secondary-btn" disabled title="PDF ainda não cadastrado">⬇️ PDF indisponível</button>'}
           <button class="primary-btn" id="slBookReadBtn">📖 Ler agora</button>
         </div>`);
+      const editBtn=document.getElementById('slBookEditBtn');
+      if(editBtn) editBtn.onclick=()=>showBookModal(book);
       const likeBtn=document.getElementById('slBookLikeBtn');
       if(likeBtn) likeBtn.onclick=async()=>{
         if(!currentUser) return toast('Entre na sua conta para curtir livros.','info');
