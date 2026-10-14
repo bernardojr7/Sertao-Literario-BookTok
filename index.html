@@ -3141,6 +3141,48 @@
     }
     window.showBookModal=showBookModal;
 
+    const SL_PRODUCTION_GENRES = ['Crônica','Poesia','Poema','Conto','Romance','Novela','História curta','História em quadrinhos (HQ)','Mangá','Cordel','Fábula','Lenda','Mito','Teatro','Roteiro','Fanfic','Memórias','Biografia','Autobiografia','Literatura infantil','Literatura juvenil','Ficção científica','Fantasia','Aventura','Mistério','Suspense','Terror','Drama','Humor','Realismo','Literatura regional','Literatura potiguar','Literatura nordestina','Relato pessoal','Texto jornalístico','Ensaio','Artigo de opinião','Texto acadêmico','Outro'];
+
+    function showProductionModal(){
+      if(!currentUser || !currentProfile) return toast('Entre na sua conta para publicar uma produção.','info');
+      const genres=SL_PRODUCTION_GENRES.map(g=>`<option value="${slEsc(g)}">${slEsc(g)}</option>`).join('');
+      openModal('✍️ Publicar minha produção literária', `
+        <p class="muted" style="margin-bottom:14px">Compartilhe sua criatividade com a comunidade. A obra aparecerá na estante <b>Produções da Comunidade</b>.</p>
+        <form id="slProductionForm" class="form-grid">
+          <label>Nome da obra <input name="title" required maxlength="180" placeholder="Título da sua produção"></label>
+          <label>Autor(a) ou autores <input name="author" required maxlength="180" value="${slEsc(currentProfile.name||'')}" placeholder="Nome de quem escreveu"></label>
+          <label>Ano de produção <input name="year" type="number" min="1900" max="2100" required value="${new Date().getFullYear()}"></label>
+          <label>Gênero literário <select name="category" required>${genres}</select></label>
+          <label>Total de páginas <input name="pages" type="number" min="1" placeholder="Opcional"></label>
+          <label>Foto da capa <input id="slProductionCoverFile" name="coverFile" type="file" accept="image/*"><span class="muted" style="font-size:12px">Escolha uma imagem do seu dispositivo.</span></label>
+          <label>Ou link da imagem da capa <input name="coverUrl" type="url" placeholder="https://..."></label>
+          <label>Link para o PDF <input name="pdfUrl" type="url" placeholder="Link público do PDF (opcional)"></label>
+          <label>Apresentação da obra <textarea name="summary" rows="3" maxlength="2000" placeholder="Conte brevemente sobre sua produção (opcional)"></textarea></label>
+          <div class="sl-book-detail-actions"><button type="button" class="secondary-btn" id="slProductionCancel">Cancelar</button><button type="submit" class="primary-btn">🌵 Publicar produção</button></div>
+        </form>`);
+      document.getElementById('slProductionCancel').onclick=closeModal;
+      document.getElementById('slProductionForm').onsubmit=async e=>{
+        e.preventDefault(); const form=e.currentTarget; const fd=new FormData(form); const file=document.getElementById('slProductionCoverFile')?.files?.[0];
+        try{
+          let coverUrl=String(fd.get('coverUrl')||'').trim();
+          if(file){toast('Enviando a capa...','info');coverUrl=await uploadToCloudinary(file);}
+          const payload={title:String(fd.get('title')||'').trim(),author:String(fd.get('author')||'').trim(),year:Number(fd.get('year')||new Date().getFullYear()),category:String(fd.get('category')||'Outro'),pages:Number(fd.get('pages')||0)||null,coverUrl,pdfUrl:String(fd.get('pdfUrl')||'').trim(),summary:String(fd.get('summary')||'').trim(),creatorUid:currentUser.uid,creatorName:currentProfile.name||'Leitor(a)',creatorRole:currentProfile.role||'student',createdAt:new Date().toISOString(),status:'published'};
+          await db.collection('productions').add(payload); closeModal(); toast('Sua produção foi publicada na biblioteca! ✍️','success'); await renderLibrary();
+        }catch(err){console.error('Erro ao publicar produção:',err);toast('Não foi possível publicar. Verifique o link da capa/PDF e as permissões do Firebase.','error');}
+      };
+    }
+    window.showProductionModal=showProductionModal;
+
+    window.openProductionDetails=async function(id){
+      let work=(window.slProductionCache||[]).find(x=>x.id===id);
+      try{const snap=await db.collection('productions').doc(id).get();if(snap.exists)work={id:snap.id,...snap.data()};}catch(e){console.warn(e)}
+      if(!work)return toast('Não foi possível abrir essa produção.','error');
+      const cover=work.coverUrl||'';
+      openModal('Produção da comunidade',`<div class="sl-book-detail"><div class="sl-book-detail-cover">${cover?`<img src="${slEsc(cover)}" alt="Capa da obra">`:'<span>✍️</span>'}</div><div class="sl-book-detail-info"><span class="tag">${slEsc(work.category||'Outro')}</span><h2>${slEsc(work.title||'Obra sem título')}</h2><p class="sl-book-author">por ${slEsc(work.author||'Autor(a) não informado')} · ${Number(work.year)||'Ano não informado'}</p><p class="sl-book-summary">${slEsc(work.summary||'O autor ainda não adicionou uma apresentação para esta obra.')}</p><div class="sl-book-detail-meta">${work.pages?`<span>📄 ${Number(work.pages)} páginas</span>`:''}<span>✍️ Publicado por ${slEsc(work.creatorName||work.author||'Leitor(a)')}</span></div></div></div><div class="sl-book-detail-actions">${work.pdfUrl?'<button class="primary-btn" id="slProductionPdf">⬇️ Abrir / baixar PDF</button>':'<button class="secondary-btn" disabled>PDF não informado</button>'}${currentUser&&work.creatorUid===currentUser.uid?'<button class="secondary-btn" id="slProductionDelete">🗑️ Remover minha produção</button>':''}</div>`);
+      const pdf=document.getElementById('slProductionPdf');if(pdf)pdf.onclick=()=>{const a=document.createElement('a');a.href=slPdfDownloadUrl(work.pdfUrl);a.target='_blank';a.rel='noopener';a.click();};
+      const del=document.getElementById('slProductionDelete');if(del)del.onclick=async()=>{if(!confirm('Deseja remover esta produção da biblioteca?'))return;try{await db.collection('productions').doc(work.id).delete();closeModal();toast('Produção removida.','success');await renderLibrary();}catch(e){console.error(e);toast('Não foi possível remover a produção.','error');}};
+    };
+
     const SL_LIBRARY_CATEGORIES = [
       'todas','Romance','Fantasia','Aventura','Suspense e Mistério','Terror','Ficção científica',
       'Literatura brasileira','Clássicos','Contos','Crônicas','Fábulas','Poemas','Cordel','HQ e Mangá',
@@ -3189,9 +3231,11 @@
     };
 
     async function renderLibrary(){
-      let books=[];
+      let books=[], productions=[];
       try{const snap=await db.collection('books').get();snap.forEach(d=>{const b={id:d.id,...d.data()};if(isBookAvailableForUser(b,currentProfile))books.push(b);});}catch(e){console.log(e)}
-      window.slLibraryBooksCache=books;
+      try{const snap=await db.collection('productions').get();snap.forEach(d=>{const w={id:d.id,...d.data()};if(w.status!=='removed')productions.push(w);});}catch(e){console.log('Produções ainda indisponíveis ou sem permissão:',e)}
+      productions.sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
+      window.slLibraryBooksCache=books; window.slProductionCache=productions;
       const recent=[...books].sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||''))).slice(0,18);
       const mostLiked=[...books].sort((a,b)=>(Number(b.likesCount)||((b.likedBy||[]).length)||0)-(Number(a.likesCount)||((a.likedBy||[]).length)||0)).filter(b=>(Number(b.likesCount)||((b.likedBy||[]).length)||0)>0).slice(0,18);
       const mostDownloaded=[...books].sort((a,b)=>(Number(b.downloadsCount)||0)-(Number(a.downloadsCount)||0)).filter(b=>(Number(b.downloadsCount)||0)>0).slice(0,18);
@@ -3213,8 +3257,9 @@
           .sl-library-shelf-wrap{position:relative;margin-bottom:22px;padding-bottom:12px}.sl-library-shelf-wrap:after{content:'';display:block;height:13px;margin:0 2px;background:linear-gradient(#b99070,#7a5138);border-radius:3px;box-shadow:0 5px 8px #0002}.sl-library-category-row{display:flex;gap:8px;overflow-x:auto;padding:2px 0 12px}.sl-library-category-row .tab-pill{white-space:nowrap}.sl-book-detail{display:grid;grid-template-columns:150px minmax(0,1fr);gap:20px;align-items:start}.sl-book-detail-cover{height:220px;border-radius:12px;background:#f0e4d8;display:grid;place-items:center;overflow:hidden;font-size:45px;box-shadow:0 5px 15px #0001}.sl-book-detail-cover img{width:100%;height:100%;object-fit:cover}.sl-book-detail-info h2{margin:9px 0 4px}.sl-book-author{color:var(--muted);margin:0 0 15px}.sl-book-summary{line-height:1.65;white-space:pre-wrap}.sl-book-detail-meta{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;margin-top:16px}.sl-book-detail-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}.sl-book-detail-actions button{flex:1;min-width:120px}
           @media(max-width:600px){.sl-library-hero{padding:20px 18px}.sl-library-hero:after{font-size:65px;right:10px}.sl-library-book{flex-basis:102px;min-height:176px}.sl-library-book-cover{height:94px}.sl-book-detail{grid-template-columns:100px minmax(0,1fr);gap:12px}.sl-book-detail-cover{height:150px}.sl-book-detail-actions button{min-width:100%;}}
         </style>
-        ${pageTitle('Biblioteca Sertaneja 📚',isStaff?'Cuide do acervo e descubra novas leituras.':'Explore as estantes, descubra livros e encontre sua próxima leitura.',isStaff?'<button class="primary-btn" id="addBookBtn">+ Cadastrar Livro</button>':'')}
-        <section class="sl-library-hero"><h2>Um mundo de histórias espera por você.</h2><p>Explore por gênero, descubra novidades e escolha uma leitura para chamar de sua. <b>Toda leitura deixa uma marca.</b></p></section>
+        ${pageTitle('Biblioteca Sertaneja 📚',isStaff?'Cuide do acervo e descubra novas leituras.':'Explore as estantes, descubra livros e encontre sua próxima leitura.',`<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="secondary-btn" id="addProductionBtn">✍️ Publicar minha produção</button>${isStaff?'<button class="primary-btn" id="addBookBtn">+ Cadastrar Livro</button>':''}</div>`)}
+        <section class="sl-library-hero"><h2>Um mundo de histórias espera por você.</h2><p>Explore por gênero, descubra novidades e escolha uma leitura para chamar de sua. <b>Toda leitura deixa uma marca.</b> Agora, suas próprias histórias também têm lugar nesta biblioteca.</p></section>
+        <section class="panel sl-library-featured" style="margin-bottom:20px"><div class="panel-header"><div><h2>✍️ Produções da Comunidade</h2><p class="muted" style="margin:4px 0 0">Crônicas, poesias, contos, romances, quadrinhos e histórias criadas por nossos leitores e educadores.</p></div><span class="muted">${productions.length} ${productions.length===1?'obra':'obras'}</span></div>${productions.length?`<div class="sl-library-shelf-wrap">${`<div class="sl-library-shelf">${productions.slice(0,30).map(w=>{const cover=w.coverUrl||'';const colors=['#9d4b3e','#c78c46','#6b8064','#6c7c9b','#a45c78','#6e5548'];const color=colors[(String(w.title||'').length+String(w.author||'').length)%colors.length];return `<button class="sl-library-book" style="--spine:${color}" onclick="openProductionDetails('${w.id}')" aria-label="Abrir ${slEsc(w.title)}"><span class="sl-library-book-cover">${cover?`<img src="${slEsc(cover)}" alt="">`:'✍️'}</span><span class="sl-library-book-title">${slEsc(w.title||'Obra sem título')}</span><span class="sl-library-book-author">${slEsc(w.author||'Autor(a)')}</span></button>`}).join('')}</div>`}</div>`:'<div class="empty-state">Esta estante está esperando pelas primeiras histórias da comunidade. Seja o primeiro a publicar! ✨</div>'}</section>
         ${recent.length?`<section class="panel sl-library-featured" style="margin-bottom:20px"><div class="panel-header"><div><h2>✨ Novos no acervo</h2><p class="muted" style="margin:4px 0 0">Acabaram de chegar à nossa biblioteca.</p></div><span class="muted">${recent.length} novidades</span></div><div class="sl-library-shelf-wrap">${shelf(recent)}</div></section>`:''}
         ${mostLiked.length?`<section class="panel sl-library-featured" style="margin-bottom:20px"><div class="panel-header"><div><h2>❤️ Os mais curtidos</h2><p class="muted" style="margin:4px 0 0">Os livros que conquistaram os leitores.</p></div><span class="muted">${mostLiked.length} livros</span></div><div class="sl-library-shelf-wrap">${shelf(mostLiked)}</div></section>`:`<section class="panel sl-library-featured" style="margin-bottom:20px"><div class="panel-header"><h2>❤️ Os mais curtidos</h2></div><p class="muted">As curtidas dos leitores vão revelar os favoritos da comunidade.</p></section>`}
         ${mostDownloaded.length?`<section class="panel sl-library-featured" style="margin-bottom:20px"><div class="panel-header"><div><h2>⬇️ Mais baixados</h2><p class="muted" style="margin:4px 0 0">Os PDFs mais procurados no acervo.</p></div><span class="muted">${mostDownloaded.length} livros</span></div><div class="sl-library-shelf-wrap">${shelf(mostDownloaded)}</div></section>`:`<section class="panel sl-library-featured" style="margin-bottom:20px"><div class="panel-header"><h2>⬇️ Mais baixados</h2></div><p class="muted">Quando os leitores começarem a baixar PDFs, os mais procurados aparecerão aqui.</p></section>`}
@@ -3230,6 +3275,7 @@
       $$('#pageContent [data-library-tab]').forEach(btn=>btn.onclick=()=>{currentLibraryTab=btn.dataset.libraryTab;$$('#pageContent [data-library-tab]').forEach(x=>x.classList.toggle('active',x===btn));drawBooks($('#searchInput')?.value||'');});
       if($('#searchInput'))$('#searchInput').oninput=e=>drawBooks(e.target.value);
       if($('#addBookBtn'))$('#addBookBtn').onclick=()=>showBookModal();
+      if($('#addProductionBtn'))$('#addProductionBtn').onclick=()=>showProductionModal();
     }
     function slPdfDownloadUrl(url){
       const raw=String(url||'').trim();
